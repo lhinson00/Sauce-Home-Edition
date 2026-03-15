@@ -279,20 +279,21 @@ async function runDemo(){
   show('screenProcessing');
   for(let i=0;i<STAGES.length;i++){setStages(i);await delay(650);}
   setStages(STAGES.length);await delay(350);
-  try{const res=await fetch('/api/demo');const data=await res.json();if(data.success){appData=data;renderResults(data);}else showError(data.error||'Demo failed');}
+  try{const res=await fetch('/api/demo');const data=await res.json();if(data.success&&data.extracted&&data.takeoff){appData=data;renderResults(data);}else showError(data.error||'Demo failed');}
   catch(e){showError('Cannot connect to server: '+e.message);}
 }
 async function uploadFile(file){
   show('screenProcessing');
   for(let i=0;i<STAGES.length;i++){setStages(i);await delay(550);}
   const fd=new FormData();fd.append('drawing',file);
-  try{const res=await fetch('/api/analyze',{method:'POST',body:fd});const data=await res.json();setStages(STAGES.length);await delay(300);if(data.success){appData=data;renderResults(data);}else showError(data.error||'Analysis failed');}
+  try{const res=await fetch('/api/analyze',{method:'POST',body:fd});const data=await res.json();setStages(STAGES.length);await delay(300);if(data.success&&data.extracted&&data.takeoff){appData=data;renderResults(data);}else showError(data.error||'Analysis failed — try a clearer image or crop the plan closer');}
   catch(e){showError('Server error: '+e.message);}
 }
-function show(id){['screenUpload','screenProcessing','screenResults','errorWrap'].forEach(s=>{const el=document.getElementById(s);if(el)el.style.display=s===id?'block':'none';});}
+function show(id){['screenUpload','screenProcessing','screenResults','errorWrap'].forEach(s=>{const el=document.getElementById(s);if(el)el.style.display=s===id?'block':'none';});const res=document.getElementById('screenResults');if(id==='screenResults'&&res)res.style.display='block';}
 function showError(msg){document.getElementById('errorMsg').textContent=msg;document.getElementById('screenProcessing').style.display='none';document.getElementById('errorWrap').style.display='';}
 function resetApp(){appData=null;if(renderer){renderer.dispose();renderer=null;}document.getElementById('fileInput').value='';show('screenUpload');}
 function renderResults(data){
+  try {
   const{extracted:e,takeoff:t,filename}=data;
   document.getElementById('projTitle').textContent=e.project_name||filename||'Takeoff Results';
   document.getElementById('projMeta').textContent=[e.sheet_info,t.summary.building_dimensions,t.summary.plate_height+' plate'].filter(Boolean).join(' · ');
@@ -313,6 +314,7 @@ function renderResults(data){
   document.getElementById('v3dDims').innerHTML=`${e.building_width_ft||56}'×${e.building_depth_ft||35}'×${e.plate_height_ft||9}'<br>Pitch ${e.structural_roof_pitch||'6:12'}`;
   document.getElementById('model3dCards').innerHTML=`<div class="ec"><div class="ec-t">Model Dimensions</div><div class="er"><span class="ek">Footprint</span><span class="ev">${e.building_width_ft||56}' × ${e.building_depth_ft||35}'</span></div><div class="er"><span class="ek">Wall height</span><span class="ev">${e.plate_height_ft||9}'-0"</span></div><div class="er"><span class="ek">Roof pitch</span><span class="ev">${e.structural_roof_pitch||'6:12'}</span></div><div class="er"><span class="ek">Porch pitch</span><span class="ev">${e.porch_pitch||'2:12'}</span></div></div><div class="ec"><div class="ec-t">Roof Geometry</div><div class="er"><span class="ek">Main sloped SF</span><span class="ev">${(s.main_sloped_sf||0).toLocaleString()} SF</span></div><div class="er"><span class="ek">Porch sloped SF</span><span class="ev">${(s.porch_sloped_sf||0).toLocaleString()} SF</span></div><div class="er"><span class="ek">Total sloped SF</span><span class="ev">${(s.total_sloped_sf||0).toLocaleString()} SF</span></div><div class="er"><span class="ek">Overhang</span><span class="ev">16" typical</span></div></div>`;
   show('screenResults');setTimeout(()=>init3D(e),400);
+  } catch(err){ showError('Error displaying results: '+err.message+'. Raw data received — check console.'); console.error(err); }
 }
 function showTab(tab,btn){['Materials','Extraction','Model3d'].forEach(t=>{document.getElementById('tab'+t).style.display=t===tab?'':'none';});document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');if(tab==='Model3d'&&renderer)renderer.render(scene,camera);}
 function exportCSV(){if(!appData)return;const rows=[['Category','Item','Description','Quantity','Unit','Confidence']];(appData.takeoff.categories||[]).forEach(cat=>{cat.items.forEach(i=>rows.push([cat.name,i.item,i.description,i.qty,i.unit,i.confidence]));});const csv=rows.map(r=>r.map(c=>'"'+(c||'').toString().replace(/"/g,'""')+'"').join(',')).join('\n');Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob([csv],{type:'text/csv'})),download:(appData.extracted?.project_name||'Takeoff')+'_SE_Home.csv'}).click();}
