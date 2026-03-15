@@ -907,13 +907,59 @@ function update3D() {
     }
   });
 
-  // Roof
-  const ridge=(W/2+.28)*pm;
-  const rs=new THREE.Shape();
-  rs.moveTo(-W/2-.28,0);rs.lineTo(0,ridge);rs.lineTo(W/2+.28,0);rs.closePath();
-  const rg=new THREE.ExtrudeGeometry(rs,{depth:D+.32,bevelEnabled:false});
-  const roof=new THREE.Mesh(rg,new THREE.MeshLambertMaterial({color:0x2a2520,side:THREE.DoubleSide}));
-  roof.rotation.y=Math.PI/2;roof.position.set(cx+W/2+.28,H,cy-(D+.32)/2);hg3.add(roof);
+  // Roof — gable, sits on top of walls centered on house
+  const ridge = (W/2) * pm;
+  const roofMat = new THREE.MeshLambertMaterial({color:0x2a2520, side:THREE.DoubleSide});
+
+  // Left roof panel
+  const lv = [
+    new THREE.Vector3(-W/2-0.25, 0, -D/2-0.25),
+    new THREE.Vector3(0, ridge, -D/2-0.25),
+    new THREE.Vector3(0, ridge,  D/2+0.25),
+    new THREE.Vector3(-W/2-0.25, 0,  D/2+0.25),
+  ];
+  const lGeo = new THREE.BufferGeometry();
+  const lVerts = new Float32Array([
+    lv[0].x,lv[0].y,lv[0].z, lv[1].x,lv[1].y,lv[1].z, lv[2].x,lv[2].y,lv[2].z,
+    lv[0].x,lv[0].y,lv[0].z, lv[2].x,lv[2].y,lv[2].z, lv[3].x,lv[3].y,lv[3].z,
+  ]);
+  lGeo.setAttribute('position', new THREE.BufferAttribute(lVerts,3));
+  lGeo.computeVertexNormals();
+  const leftPanel = new THREE.Mesh(lGeo, roofMat);
+  leftPanel.position.set(cx, H, cy);
+  hg3.add(leftPanel);
+
+  // Right roof panel
+  const rv = [
+    new THREE.Vector3(W/2+0.25, 0, -D/2-0.25),
+    new THREE.Vector3(0, ridge, -D/2-0.25),
+    new THREE.Vector3(0, ridge,  D/2+0.25),
+    new THREE.Vector3(W/2+0.25, 0,  D/2+0.25),
+  ];
+  const rGeo = new THREE.BufferGeometry();
+  const rVerts = new Float32Array([
+    rv[0].x,rv[0].y,rv[0].z, rv[2].x,rv[2].y,rv[2].z, rv[1].x,rv[1].y,rv[1].z,
+    rv[0].x,rv[0].y,rv[0].z, rv[3].x,rv[3].y,rv[3].z, rv[2].x,rv[2].y,rv[2].z,
+  ]);
+  rGeo.setAttribute('position', new THREE.BufferAttribute(rVerts,3));
+  rGeo.computeVertexNormals();
+  const rightPanel = new THREE.Mesh(rGeo, roofMat);
+  rightPanel.position.set(cx, H, cy);
+  hg3.add(rightPanel);
+
+  // Gable end triangles
+  const gMat = new THREE.MeshLambertMaterial({color:0xb0aaa0, side:THREE.DoubleSide});
+  [-D/2, D/2].forEach(z => {
+    const gGeo = new THREE.BufferGeometry();
+    const gV = new Float32Array([
+      -W/2, 0, z,   W/2, 0, z,   0, ridge, z,
+    ]);
+    gGeo.setAttribute('position', new THREE.BufferAttribute(gV,3));
+    gGeo.computeVertexNormals();
+    const gable = new THREE.Mesh(gGeo, gMat);
+    gable.position.set(cx, H, cy);
+    hg3.add(gable);
+  });
 
   sc3.add(hg3);r3.render(sc3,cam3);
 }
