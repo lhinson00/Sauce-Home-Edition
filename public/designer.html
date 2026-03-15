@@ -375,8 +375,8 @@ function render() {
     drawDimensions();
   }
   if (S.isDraw && S.drawStart && S.drawCur) drawPreview();
-  update3D();
   updateStats3D();
+  if(r3&&sc3&&cam3) update3D();
 }
 
 function drawGrid() {
@@ -593,6 +593,7 @@ function placeShell() {
   goStep(2);
   document.getElementById('calcBtn').disabled=false;
   render();
+  update3D();
 }
 
 function updateShellPreview() {
@@ -829,8 +830,9 @@ let r3,sc3,cam3,hg3,isDrag3=false,pm3={x:0,y:0},rx3=0.4,ry3=-0.5;
 function init3D() {
   const c=document.getElementById('modelCanvas');
   const p=document.getElementById('panel3d');
-  const W=p.clientWidth, H=p.clientHeight-80;
-  c.width=W;c.height=H;
+  const W=Math.max(200,p.clientWidth);
+  const H=Math.max(200,window.innerHeight-52-44-80);
+  c.width=W;c.height=H;c.style.height=H+'px';
   if(r3)r3.dispose();
   r3=new THREE.WebGLRenderer({canvas:c,antialias:true});
   r3.setSize(W,H);r3.setPixelRatio(Math.min(window.devicePixelRatio,2));
@@ -868,7 +870,6 @@ function update3D() {
   const W=sh.w*SC,D=sh.h*SC,H=pH*SC;
 
   // Slab
-  hg3.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(W,.08,D),new THREE.MeshLambertMaterial({color:0x888880})),{position:{x:cx,y:.04,z:cy,set:()=>{}}}));
   const slab=new THREE.Mesh(new THREE.BoxGeometry(W,.08,D),new THREE.MeshLambertMaterial({color:0x888880}));
   slab.position.set(cx,.04,cy);hg3.add(slab);
 
