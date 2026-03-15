@@ -382,25 +382,11 @@ app.post('/api/analyze', upload.single('drawing'), async (req, res) => {
     const mimeType = req.file.mimetype;
     const base64Data = fileBuffer.toString('base64');
 
-    // Build message for Claude
-    const messages = [{
-      role: 'user',
-      content: [
-        {
-          type: 'image',
-          source: {
-            type: 'base64',
-            media_type: mimeType === 'application/pdf' ? 'image/png' : mimeType,
-            data: base64Data
-          }
-        },
-        { type: 'text', text: EXTRACTION_PROMPT }
-      ]
-    }];
-
-    // For PDFs, use document type
+    // Build message — images go as image type, PDFs need special handling
+    let contentBlock;
     if (mimeType === 'application/pdf') {
-      messages[0].content[0] = {
+      // Send PDF as document type with beta header
+      contentBlock = {
         type: 'document',
         source: {
           type: 'base64',
@@ -408,15 +394,38 @@ app.post('/api/analyze', upload.single('drawing'), async (req, res) => {
           data: base64Data
         }
       };
+    } else {
+      // PNG, JPG, WEBP — send as image
+      const validImageType = ['image/jpeg','image/png','image/gif','image/webp'].includes(mimeType)
+        ? mimeType : 'image/jpeg';
+      contentBlock = {
+        type: 'image',
+        source: {
+          type: 'base64',
+          media_type: validImageType,
+          data: base64Data
+        }
+      };
+    }
+
+    const messages = [{
+      role: 'user',
+      content: [contentBlock, { type: 'text', text: EXTRACTION_PROMPT }]
+    }];
+
+    // PDF requires beta header
+    const headers = {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01'
+    };
+    if (mimeType === 'application/pdf') {
+      headers['anthropic-beta'] = 'pdfs-2024-09-25';
     }
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
-      },
+      headers,
       body: JSON.stringify({
         model: 'claude-opus-4-6',
         max_tokens: 4096,
