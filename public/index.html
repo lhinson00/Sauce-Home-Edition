@@ -4,7 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sauce Estimator — Home Edition</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"></noscript>
 <style>
 :root{--navy:#1a2332;--navy2:#212d3d;--navy3:#263044;--amber:#f5a623;--amber2:#f7b94a;--teal:#2dd4aa;--teal2:#25b994;--white:#ffffff;--off:#f7f8fa;--border:#e2e5ea;--border2:#d0d4da;--text:#1a2332;--muted:#6b7280;--muted2:#9ca3af;--success:#10b981;--warn:#f59e0b;--danger:#ef4444;}
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -286,9 +288,9 @@ async function uploadFile(file){
   try{const res=await fetch('/api/analyze',{method:'POST',body:fd});const data=await res.json();setStages(STAGES.length);await delay(300);if(data.success){appData=data;renderResults(data);}else showError(data.error||'Analysis failed');}
   catch(e){showError('Server error: '+e.message);}
 }
-function show(id){['screenUpload','screenProcessing','screenResults','errorWrap'].forEach(s=>{const el=document.getElementById(s);if(el)el.style.display=s===id?'':'none';});if(id==='screenResults')document.getElementById('screenResults').style.display='';}
+function show(id){['screenUpload','screenProcessing','screenResults','errorWrap'].forEach(s=>{const el=document.getElementById(s);if(el)el.style.display=s===id?'block':'none';});}
 function showError(msg){document.getElementById('errorMsg').textContent=msg;document.getElementById('screenProcessing').style.display='none';document.getElementById('errorWrap').style.display='';}
-function resetApp(){appData=null;if(renderer){renderer.dispose();renderer=null;}document.getElementById('fileInput').value='';show('screenUpload');document.getElementById('screenUpload').style.display='';}
+function resetApp(){appData=null;if(renderer){renderer.dispose();renderer=null;}document.getElementById('fileInput').value='';show('screenUpload');}
 function renderResults(data){
   const{extracted:e,takeoff:t,filename}=data;
   document.getElementById('projTitle').textContent=e.project_name||filename||'Takeoff Results';
