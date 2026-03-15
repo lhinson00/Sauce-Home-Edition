@@ -724,7 +724,32 @@ function calculate() {
   // Corner trim — 4 corners × eave height, 10' sticks
   const cornerTrimLF = Math.ceil(4 * pH * 1.1);
   const cornerTrimPcs = Math.ceil(cornerTrimLF / 10);
-  const soffitSF = Math.ceil(perim * overhangFt);
+
+  // ── SOFFIT PANELS — 3' wide, length = overhang + 1" ──
+  const soffitPanelIn = parseInt(V.overhang) + 1; // e.g. 16" OH → 17" panel
+  const soffitPanelFt = Math.floor(soffitPanelIn / 12);
+  const soffitPanelInRem = soffitPanelIn % 12;
+  const soffitPanelDisplay = soffitPanelInRem === 0
+    ? `${soffitPanelFt}'-0"`
+    : `${soffitPanelFt}'-${soffitPanelInRem}"`;
+  const soffitPanelDecimal = soffitPanelIn / 12;
+
+  // Eave soffit: (building length + overhang each end) ÷ 3, × 2 eave sides
+  const eaveSoffitCount = Math.ceil((L + overhangFt + overhangFt) / 3) * 2;
+  const eaveSoffitLF = Math.round(eaveSoffitCount * soffitPanelDecimal);
+
+  // Gable end soffit: roof panel length ÷ 3, rounded up × 4 (2 per half × 2 ends)
+  const gableSoffitPerHalf = Math.ceil(panel.decimal / 3);
+  const gableSoffitCount = gableSoffitPerHalf * 4;
+  const gableSoffitLF = Math.round(gableSoffitCount * soffitPanelDecimal);
+
+  // Porch soffit (if porch): porch panel length ÷ 3 × same count as porch panels
+  const porchSoffitCount = porchDepth > 0
+    ? Math.ceil(porchPanel.decimal / 3) * porchPanelsPerSlope
+    : 0;
+  const porchSoffitLF = porchDepth > 0
+    ? Math.round(porchSoffitCount * soffitPanelDecimal)
+    : 0;
 
   // ── INSULATION ──
   const wallFoamBF = Math.ceil(extLF * pH * 0.85 * 5.5 * 1.1);
@@ -807,7 +832,13 @@ function calculate() {
         { i:`Wainscot — stone ${wainH}'`, d:`${wainWalls.map(w=>w.name).join(' + ')} · mason scope · ${totalWainLF} LF × ${wainH}'`, q:totalWainSF, u:'SF', lf:totalWainLF },
       ] : []),
       { i:'Corner trim', d:`4 corners × ${pH}' eave height + 10%`, q:cornerTrimPcs, u:"PCS @ 10'", lf:cornerTrimPcs*10 },
-      { i:'Metal soffit', d:'Eave coverage — panel match', q:soffitSF, u:'SF', lf:null },
+      { i:`Soffit panels — ${soffitPanelDisplay} · eave walls`, d:`(${L}' + ${overhangFt.toFixed(2)}' + ${overhangFt.toFixed(2)}' OH) ÷ 3 × 2 eave sides`, q:eaveSoffitCount, u:`PCS @ ${soffitPanelDisplay}`, lf:eaveSoffitLF },
+      { i:`Soffit panels — ${soffitPanelDisplay} · gable ends`, d:`Roof panel ${panelLengthDisplay} ÷ 3 = ${gableSoffitPerHalf}/half × 4`, q:gableSoffitCount, u:`PCS @ ${soffitPanelDisplay}`, lf:gableSoffitLF },
+      ...(porchDepth > 0 ? [{
+        i:`Soffit panels — ${soffitPanelDisplay} · porch`,
+        d:`Porch panel ${porchPanelLengthDisplay} ÷ 3 × ${porchPanelsPerSlope} panels`,
+        q:porchSoffitCount, u:`PCS @ ${soffitPanelDisplay}`, lf:porchSoffitLF
+      }] : []),
     ]},
     { name: 'INSULATION — OPEN-CELL SPRAY FOAM', items: [
       { i:'Spray foam — walls', d:`Open-cell · 2×6 full cavity · R-20 · ${extLF} LF`, q:wallFoamBF.toLocaleString(), u:'BF', lf:null },
