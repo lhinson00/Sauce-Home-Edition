@@ -418,7 +418,7 @@ app.post('/api/analyze', upload.single('drawing'), async (req, res) => {
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-opus-4-6',
+        model: 'claude-opus-4-5',
         max_tokens: 4096,
         messages
       })
@@ -426,11 +426,14 @@ app.post('/api/analyze', upload.single('drawing'), async (req, res) => {
 
     if (!response.ok) {
       const err = await response.text();
+      console.error('Anthropic API error:', err);
       return res.status(500).json({ error: `API error: ${err}` });
     }
 
     const data = await response.json();
+    console.log('API response content types:', data.content?.map(b=>b.type));
     const rawText = data.content.map(b => b.text || '').join('');
+    console.log('Raw text length:', rawText.length, 'Preview:', rawText.substring(0,200));
 
     // Parse JSON from response
     let extracted;
@@ -438,7 +441,8 @@ app.post('/api/analyze', upload.single('drawing'), async (req, res) => {
       const clean = rawText.replace(/```json|```/g, '').trim();
       extracted = JSON.parse(clean);
     } catch (e) {
-      return res.status(500).json({ error: 'Could not parse drawing data', raw: rawText.substring(0, 500) });
+      console.error('JSON parse error:', e.message, 'Raw:', rawText.substring(0,300));
+      return res.status(500).json({ error: 'Could not parse drawing data — the AI response was not valid JSON. Try a clearer image.', raw: rawText.substring(0, 300) });
     }
 
     // Run rules engine
