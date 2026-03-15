@@ -547,10 +547,53 @@ function calculate() {
 
   // ── ROOF SHEATHING + COVERING ──
   const roofOSBSheets = Math.ceil(totalRoof / 32 * 1.1);
-  const panelCoverage = V.roofing === '16in panel' ? 1.333 : 3;
-  const roofPanelLF = Math.ceil(totalRoof / panelCoverage * 1.1);
-  const ridgeCapLF = Math.ceil(W * 1.1);
-  const eavesTrimLF = Math.ceil(perim * 1.1);
+
+  // ── METAL ROOF PANELS — correct formula ──
+  // W = truss span (gable width), L = ridge length (building length)
+  // Panel length = (W/2 + overhang) × pitch multiplier
+  const halfSpan = W / 2;
+  const panelRunFt = (halfSpan + overhangFt) * (PM[V.pitch] || 1.118);
+  // Express as ft-in
+  const panelFt = Math.floor(panelRunFt);
+  const panelIn = Math.round((panelRunFt - panelFt) * 12);
+  const panelLengthDisplay = panelIn === 0 ? `${panelFt}'-0"` : `${panelFt}'-${panelIn}"`;
+  const panelLengthFt = panelFt + panelIn / 12;
+
+  // Panel count per slope = (building length + overhang each end) ÷ 3, rounded up
+  const panelsPerSlope = Math.ceil((L + overhangFt + overhangFt) / 3);
+  const totalRoofPanels = panelsPerSlope * 2; // both slopes
+
+  // Porch panels — same formula, full depth instead of half width
+  // Panel length = (porch depth + overhang) × pitch multiplier
+  const porchPanelRunFt = porchDepth > 0
+    ? (porchDepth + overhangFt) * (PM[V.porchPitch] || 1.014)
+    : 0;
+  const porchPanelFt = Math.floor(porchPanelRunFt);
+  const porchPanelIn = Math.round((porchPanelRunFt - porchPanelFt) * 12);
+  const porchPanelLengthDisplay = porchDepth > 0
+    ? (porchPanelIn === 0 ? `${porchPanelFt}'-0"` : `${porchPanelFt}'-${porchPanelIn}"`)
+    : null;
+  // Porch panel count = same ridge length formula as main roof
+  const porchPanelsPerSlope = porchDepth > 0
+    ? Math.ceil((L + overhangFt + overhangFt) / 3)
+    : 0;
+
+  // Ridge cap — building length + overhang each end, 10' sticks
+  const ridgeCapRunLF = Math.ceil(L + overhangFt + overhangFt);
+  const ridgeCapPcs = Math.ceil(ridgeCapRunLF / 10 * 1.1); // 10% overlap waste
+
+  // Rake trim — both gable ends, both slopes
+  // Rake run = same as panel length (follows slope)
+  const rakeRunPerEnd = panelLengthFt * 2; // both slopes per end
+  const rakeTrimLF = Math.ceil(rakeRunPerEnd * 2 * 1.1); // both ends + 10%
+  const rakeTrimPcs = Math.ceil(rakeTrimLF / 10);
+
+  // Eave trim — building length + overhang each end × 2 slopes
+  const eaveRunLF = Math.ceil((L + overhangFt + overhangFt) * 2);
+  const eaveTrimPcs = Math.ceil(eaveRunLF / 10 * 1.05);
+
+  const ridgeCapLF = ridgeCapRunLF;
+  const eavesTrimLF = eaveRunLF;
 
   // ── SIDING ──
   const netWallSF = extLF * pH * 0.85;
@@ -607,16 +650,21 @@ function calculate() {
       { i:'Ridge nailer — 2×12 #2 SP', d:`Building width ${W}' + 10%`, q:Math.ceil(W*1.1/16)+' sticks', u:`PCS @ 16'`, lf:ridgeLF },
       { i:'Purlins — 2×4 #2 SP', d:'@ 24" OC on truss top chords', q:purlinLF.toLocaleString(), u:'LF', lf:purlinLF },
       { i:'Fascia — 2×6 #2 SP', d:'Eave perimeter + 10%', q:Math.ceil(fasciaLF/16), u:"PCS @ 16'", lf:fasciaLF },
-      ...(porchSF>0 ? [{ i:'Porch decking — 2×6 T&G', d:'Solid decking + 10% waste', q:porchDeckLF.toLocaleString(), u:'LF', lf:porchDeckLF }] : []),
     ]},
-    { name: `ROOF SHEATHING + COVERING — ${V.roofing}`, items: [
+    { name: `ROOF PANELS — ${V.roofing} · Tuff-Rib 3' Coverage`, items: [
       { i:`Roof sheathing — ${V.sheathing} 7/16" 4×8`, d:`${totalRoof.toLocaleString()} SF sloped area + 10%`, q:roofOSBSheets, u:'SHEETS', lf:null },
       ...(V.sheathing==='ZIP'
         ? [{ i:'ZIP tape — roof', d:'Seam sealing', q:Math.ceil(totalRoof/100), u:'ROLLS', lf:null }]
         : [{ i:'Underlayment — synthetic', d:'Full sloped area', q:totalRoof.toLocaleString(), u:'SF', lf:null }]),
-      { i:`Metal roofing — ${V.roofing}`, d:`${panelCoverage===3?"3'":"16\""} panels · ${totalRoof.toLocaleString()} SF sloped + 10%`, q:roofPanelLF.toLocaleString(), u:'LF', lf:roofPanelLF },
-      { i:'Ridge cap', d:'Main ridge + 10%', q:Math.ceil(ridgeCapLF/10), u:"PCS @ 10'", lf:ridgeCapLF },
-      { i:'Eave trim / drip edge', d:'Eave perimeter + 10%', q:Math.ceil(eavesTrimLF/10), u:"PCS @ 10'", lf:eavesTrimLF },
+      { i:`Main roof panels — ${panelLengthDisplay} each`, d:`(${W/2}' half-span + ${overhangFt.toFixed(2)}' OH) × ${V.pitch} = ${panelLengthDisplay} · (${L}' + ${overhangFt.toFixed(2)}' + ${overhangFt.toFixed(2)}' OH) ÷ 3 = ${panelsPerSlope}/slope`, q:totalRoofPanels, u:`PCS @ ${panelLengthDisplay}`, lf:null },
+      ...(porchDepth > 0 ? [{
+        i:`Porch panels — ${porchPanelLengthDisplay} each`,
+        d:`(${porchDepth}' depth + ${overhangFt.toFixed(2)}' OH) × ${V.porchPitch} + 10" underlap under main roof = ${porchPanelLengthDisplay} · ${porchPanelsPerSlope} panels`,
+        q:porchPanelsPerSlope, u:`PCS @ ${porchPanelLengthDisplay}`, lf:null
+      }] : []),
+      { i:'Ridge cap — 10\' sticks', d:`${ridgeCapRunLF}' run (${L}' + OH each end) · 10% overlap`, q:ridgeCapPcs, u:"PCS @ 10'", lf:ridgeCapRunLF },
+      { i:'Rake trim — both gable ends', d:`${panelLengthDisplay} × 2 slopes × 2 ends + 10%`, q:rakeTrimPcs, u:"PCS @ 10'", lf:rakeTrimLF },
+      { i:'Eave trim / drip edge', d:`(${L}' + OH each end) × 2 slopes`, q:eaveTrimPcs, u:"PCS @ 10'", lf:eaveRunLF },
     ]},
     { name: 'EXTERIOR SIDING + FINISHES', items: [
       { i:`Metal siding — ${V.roofing}`, d:`3' panels · ${Math.round(netWallSF)} SF net wall area + 10%`, q:sidingLF.toLocaleString(), u:'LF', lf:sidingLF },
