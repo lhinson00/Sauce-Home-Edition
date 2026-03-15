@@ -522,7 +522,15 @@ app.get('/api/demo', (req, res) => {
 });
 
 // Health check
-app.get('/api/health', (req, res) => res.json({ status: 'ok', version: '1.0.0' }));
+app.get('/api/health', (req, res) => {
+  const key = process.env.ANTHROPIC_API_KEY;
+  res.json({
+    status: 'ok',
+    version: '1.0.0',
+    hasApiKey: !!key,
+    keyPrefix: key ? key.substring(0, 10) + '...' : 'NOT SET'
+  });
+});
 
 // Serve frontend for all other routes
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
