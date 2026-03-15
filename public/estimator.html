@@ -6,12 +6,19 @@
 <title>Sauce Estimator — Quick Estimate</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
-:root{--navy:#1a2332;--navy2:#212d3d;--navy3:#263044;--amber:#f5a623;--amber2:#f7b94a;--teal:#2dd4aa;--white:#fff;--off:#f7f8fa;--border:#e2e5ea;--border2:#d0d4da;--text:#1a2332;--muted:#6b7280;--muted2:#9ca3af;--success:#10b981;--warn:#f59e0b;--danger:#ef4444;}
+:root{--navy:#1a2332;--navy2:#212d3d;--navy3:#263044;--amber:#f5a623;--amber2:#f7b94a;--teal:#2dd4aa;--white:#fff;--off:#f0f2f5;--card:#fff;--border:#e2e5ea;--border2:#d0d4da;--text:#1a2332;--muted:#6b7280;--muted2:#9ca3af;--success:#10b981;--warn:#f59e0b;--danger:#ef4444;
+  --sec-building:#eef3ff;--sec-building-b:#c7d7f7;--sec-building-icon:#3b6fd4;
+  --sec-roof:#fff8ee;--sec-roof-b:#f5dba0;--sec-roof-icon:#c47d0e;
+  --sec-porch:#f0faf5;--sec-porch-b:#a8dfc2;--sec-porch-icon:#1a8a56;
+  --sec-walls:#f7f0ff;--sec-walls-b:#d4b8f5;--sec-walls-icon:#7c3aed;
+  --sec-openings:#fff0f3;--sec-openings-b:#f5b8c8;--sec-openings-icon:#c4234a;
+  --sec-wainscot:#f0f8ff;--sec-wainscot-b:#b0d4f5;--sec-wainscot-icon:#0e6fb5;
+}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Inter',sans-serif;background:var(--off);color:var(--text);min-height:100vh;font-size:14px;}
 
 /* NAV */
-.nav{background:var(--navy);height:52px;display:flex;align-items:center;padding:0 20px;position:sticky;top:0;z-index:100;}
+.nav{background:var(--navy);height:52px;display:flex;align-items:center;padding:0 16px;position:sticky;top:0;z-index:100;}
 .nav-mark{width:32px;height:32px;background:var(--amber);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--navy);margin-right:10px;flex-shrink:0;}
 .nav-name{font-size:13px;font-weight:700;color:#fff;}
 .nav-sub{font-size:10px;font-weight:600;color:var(--amber);letter-spacing:.5px;text-transform:uppercase;}
@@ -23,55 +30,95 @@ body{font-family:'Inter',sans-serif;background:var(--off);color:var(--text);min-
 .nav-btn:hover{background:rgba(255,255,255,.08);color:#fff;}
 .nav-btn.amber{background:var(--amber);border-color:var(--amber);color:var(--navy);font-weight:700;}
 .nav-btn.amber:hover{background:var(--amber2);}
+@media(max-width:600px){.nav-div,.nav-mod{display:none;}.nav-btn:not(.amber){display:none;}}
 
 /* LAYOUT */
-.wrap{max-width:1280px;margin:0 auto;padding:24px 20px;display:grid;grid-template-columns:480px 1fr;gap:24px;align-items:start;}
-@media(max-width:900px){.wrap{grid-template-columns:1fr;}}
+.wrap{max-width:1280px;margin:0 auto;padding:20px 16px;display:grid;grid-template-columns:480px 1fr;gap:20px;align-items:start;}
+@media(max-width:900px){.wrap{grid-template-columns:1fr;padding:12px 12px;gap:14px;}}
 
 /* INPUT PANEL */
-.input-panel{display:flex;flex-direction:column;gap:16px;}
-.section{background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;}
-.sec-head{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;background:var(--off);}
-.sec-icon{width:28px;height:28px;background:var(--navy);border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.sec-title{font-size:12px;font-weight:700;color:var(--navy);letter-spacing:.3px;}
-.sec-body{padding:16px 18px;display:flex;flex-direction:column;gap:12px;}
+.input-panel{display:flex;flex-direction:column;gap:12px;}
+
+/* SECTION CARDS — colored by type */
+.section{background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.05);}
+.sec-head{padding:11px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.sec-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sec-title{font-size:12px;font-weight:700;color:var(--navy);letter-spacing:.3px;text-transform:uppercase;}
+
+/* Per-section color theming */
+.section.s-building{border-color:var(--sec-building-b);}
+.section.s-building .sec-head{background:var(--sec-building);}
+.section.s-building .sec-icon{background:var(--sec-building-icon);}
+.section.s-roof{border-color:var(--sec-roof-b);}
+.section.s-roof .sec-head{background:var(--sec-roof);}
+.section.s-roof .sec-icon{background:var(--sec-roof-icon);}
+.section.s-porch{border-color:var(--sec-porch-b);}
+.section.s-porch .sec-head{background:var(--sec-porch);}
+.section.s-porch .sec-icon{background:var(--sec-porch-icon);}
+.section.s-walls{border-color:var(--sec-walls-b);}
+.section.s-walls .sec-head{background:var(--sec-walls);}
+.section.s-walls .sec-icon{background:var(--sec-walls-icon);}
+.section.s-openings{border-color:var(--sec-openings-b);}
+.section.s-openings .sec-head{background:var(--sec-openings);}
+.section.s-openings .sec-icon{background:var(--sec-openings-icon);}
+.section.s-wainscot{border-color:var(--sec-wainscot-b);}
+.section.s-wainscot .sec-head{background:var(--sec-wainscot);}
+.section.s-wainscot .sec-icon{background:var(--sec-wainscot-icon);}
+
+.sec-body{padding:14px 16px;display:flex;flex-direction:column;gap:11px;}
 
 /* FIELD ROWS */
 .field-row{display:flex;align-items:center;gap:10px;}
-.field-label{font-size:12px;font-weight:500;color:var(--muted);width:140px;flex-shrink:0;}
-.field-inputs{display:flex;align-items:center;gap:6px;flex:1;}
+.field-label{font-size:12px;font-weight:500;color:var(--muted);width:130px;flex-shrink:0;}
+.field-inputs{display:flex;align-items:center;gap:6px;flex:1;min-width:0;}
 .field-unit{font-size:11px;color:var(--muted2);white-space:nowrap;}
-input[type=number]{width:72px;padding:6px 10px;border:1px solid var(--border2);border-radius:5px;font-size:13px;font-family:inherit;color:var(--navy);text-align:center;transition:border .15s;}
-input[type=number]:focus{outline:none;border-color:var(--amber);}
+input[type=number]{width:72px;padding:6px 10px;border:1px solid var(--border2);border-radius:6px;font-size:13px;font-family:inherit;color:var(--navy);text-align:center;transition:border .15s;background:#fff;}
+input[type=number]:focus{outline:none;border-color:var(--amber);box-shadow:0 0 0 3px rgba(245,166,35,.12);}
 input[type=number].wide{width:96px;}
-.seg{display:flex;background:var(--off);border-radius:5px;padding:2px;border:1px solid var(--border);}
-.seg-btn{flex:1;text-align:center;padding:5px 8px;border-radius:3px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted);font-family:inherit;transition:all .15s;white-space:nowrap;}
-.seg-btn.on{background:#fff;color:var(--navy);box-shadow:0 1px 3px rgba(0,0,0,.08);}
+
+/* SEG BUTTONS — with color depth */
+.seg{display:flex;background:#e8eaed;border-radius:7px;padding:3px;border:1px solid #d0d4da;gap:2px;}
+.seg-btn{flex:1;text-align:center;padding:6px 8px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted);font-family:inherit;transition:all .15s;white-space:nowrap;line-height:1.2;}
+.seg-btn.on{background:#fff;color:var(--navy);box-shadow:0 1px 4px rgba(0,0,0,.12),0 0 0 1px rgba(0,0,0,.06);font-weight:700;}
+.seg-btn:not(.on):hover{background:rgba(255,255,255,.6);color:var(--text);}
+
+/* Mobile: stack field rows */
+@media(max-width:600px){
+  .field-row{flex-direction:column;align-items:flex-start;gap:6px;}
+  .field-label{width:auto;font-size:11px;}
+  .field-inputs{width:100%;}
+  .seg{width:100%;}
+  .seg-btn{white-space:normal;padding:7px 6px;font-size:11px;}
+  .sec-body{padding:12px 12px;gap:10px;}
+  .sec-head{padding:10px 12px;}
+}
 
 /* DOOR/WINDOW ROWS */
 .opening-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.opening-item{background:var(--off);border:1px solid var(--border);border-radius:6px;padding:10px 12px;}
+.opening-item{background:var(--off);border:1px solid var(--border);border-radius:8px;padding:10px 12px;}
 .opening-label{font-size:11px;font-weight:600;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;}
 .count-ctrl{display:flex;align-items:center;gap:6px;}
-.count-btn{width:26px;height:26px;border-radius:4px;border:1px solid var(--border2);background:#fff;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--navy);transition:all .15s;}
+.count-btn{width:28px;height:28px;border-radius:5px;border:1px solid var(--border2);background:#fff;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--navy);transition:all .15s;}
 .count-btn:hover{background:var(--amber);border-color:var(--amber);color:var(--navy);}
 .count-val{font-size:16px;font-weight:700;color:var(--navy);min-width:28px;text-align:center;}
 
 /* CALC BTN */
-.calc-bar{background:var(--navy);border-radius:10px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.calc-bar{background:var(--navy);border-radius:12px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
 .calc-bar-text{font-size:13px;color:rgba(255,255,255,.6);}
 .calc-bar-text strong{color:#fff;display:block;font-size:15px;}
-.btn-calc{background:var(--amber);border:none;color:var(--navy);padding:10px 28px;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;letter-spacing:.3px;}
+.btn-calc{background:var(--amber);border:none;color:var(--navy);padding:11px 28px;border-radius:7px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;letter-spacing:.3px;white-space:nowrap;}
 .btn-calc:hover{background:var(--amber2);}
+@media(max-width:600px){.calc-bar{flex-direction:column;align-items:stretch;text-align:center;gap:10px;}.btn-calc{width:100%;padding:13px;font-size:15px;}}
 
 /* RESULTS PANEL */
-.results-panel{position:sticky;top:76px;}
-.results-empty{background:#fff;border:1px solid var(--border);border-radius:10px;padding:48px 24px;text-align:center;}
+.results-panel{position:sticky;top:72px;}
+@media(max-width:900px){.results-panel{position:static;}}
+.results-empty{background:#fff;border:1px solid var(--border);border-radius:12px;padding:48px 24px;text-align:center;}
 .empty-icon{width:48px;height:48px;background:var(--off);border-radius:10px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;}
 .empty-title{font-size:15px;font-weight:600;color:var(--navy);margin-bottom:6px;}
 .empty-sub{font-size:13px;color:var(--muted);}
 
-.results-card{background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;display:none;}
+.results-card{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:hidden;display:none;}
 .results-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--navy);}
 .results-title{font-size:14px;font-weight:700;color:#fff;}
 .results-meta{font-size:11px;color:rgba(255,255,255,.5);}
@@ -88,6 +135,7 @@ input[type=number].wide{width:96px;}
 .strip-lbl{font-size:9px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--muted2);margin-bottom:3px;}
 .strip-val{font-size:17px;font-weight:700;color:var(--navy);}
 .strip-unit{font-size:10px;color:var(--muted);}
+@media(max-width:500px){.stats-strip{grid-template-columns:repeat(2,1fr);}.strip-val{font-size:15px;}}
 
 /* MATERIAL TABLE */
 .mat-table{width:100%;max-height:calc(100vh - 280px);overflow-y:auto;}
@@ -100,6 +148,7 @@ tr:hover td{background:#fafbfc;}
 .qv{font-weight:700;color:var(--navy);font-size:13px;}
 .lf-val{font-size:11px;color:var(--muted);}
 .ut{font-size:10px;color:var(--muted2);}
+@media(max-width:600px){th:nth-child(2),td:nth-child(2){display:none;}th:nth-child(5),td:nth-child(5){display:none;}.mat-table{max-height:none;}}
 
 @media print{.nav,.input-panel,.results-empty{display:none!important;}.results-card{display:block!important;border:none;}.mat-table{max-height:none;}}
 </style>
@@ -123,7 +172,7 @@ tr:hover td{background:#fafbfc;}
   <div class="input-panel">
 
     <!-- Building -->
-    <div class="section">
+    <div class="section s-building">
       <div class="sec-head">
         <div class="sec-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="4" width="12" height="9" rx="1" stroke="white" stroke-width="1.5"/><path d="M1 7l6-5 6 5" stroke="#f5a623" stroke-width="1.5" stroke-linecap="round"/></svg></div>
         <span class="sec-title">Building Dimensions</span>
@@ -156,7 +205,7 @@ tr:hover td{background:#fafbfc;}
     </div>
 
     <!-- Roof -->
-    <div class="section">
+    <div class="section s-roof">
       <div class="sec-head">
         <div class="sec-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 8l6-6 6 6" stroke="white" stroke-width="1.5" stroke-linecap="round"/><path d="M3 8v4h8V8" stroke="#f5a623" stroke-width="1.5" stroke-linecap="round"/></svg></div>
         <span class="sec-title">Roof</span>
@@ -205,7 +254,7 @@ tr:hover td{background:#fafbfc;}
     </div>
 
     <!-- Porch -->
-    <div class="section">
+    <div class="section s-porch">
       <div class="sec-head">
         <div class="sec-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="6" width="12" height="7" rx="1" stroke="white" stroke-width="1.5"/><path d="M3 6V4M11 6V4" stroke="#f5a623" stroke-width="1.5" stroke-linecap="round"/></svg></div>
         <span class="sec-title">Porch — Rough Timber System</span>
@@ -297,7 +346,7 @@ tr:hover td{background:#fafbfc;}
     </div>
 
     <!-- Walls -->
-    <div class="section">
+    <div class="section s-walls">
       <div class="sec-head">
         <div class="sec-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="12" rx="1" stroke="white" stroke-width="1.5"/><path d="M5 1v12M1 5h4M1 9h4" stroke="#f5a623" stroke-width="1.5" stroke-linecap="round"/></svg></div>
         <span class="sec-title">Walls</span>
@@ -328,7 +377,7 @@ tr:hover td{background:#fafbfc;}
     </div>
 
     <!-- Doors & Windows -->
-    <div class="section">
+    <div class="section s-openings">
       <div class="sec-head">
         <div class="sec-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="1" width="10" height="12" rx="1" stroke="white" stroke-width="1.5"/><circle cx="10" cy="7" r="1" fill="#f5a623"/></svg></div>
         <span class="sec-title">Doors &amp; Windows</span>
@@ -364,7 +413,7 @@ tr:hover td{background:#fafbfc;}
     </div>
 
     <!-- Wainscot -->
-    <div class="section">
+    <div class="section s-wainscot">
       <div class="sec-head">
         <div class="sec-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="7" width="12" height="6" rx="1" stroke="white" stroke-width="1.5"/><rect x="1" y="1" width="12" height="6" rx="1" stroke="#f5a623" stroke-width="1.5"/></svg></div>
         <span class="sec-title">Wainscot</span>
@@ -597,9 +646,10 @@ function calculate() {
   const rafterLengthFt = porchDepth > 0 ? Math.ceil(porchDepth / Math.cos(pitchAngle) + overhangFt + 0.5) : 0;
   const rafterStockLen = [8,10,12,14,16].find(l => l >= rafterLengthFt) || 16;
 
-  // Header beam — runs the width of the porch at wall connection
-  const headerBeamSize = postSpacingFt <= 8 ? '4×8' : postSpacingFt <= 10 ? '4×10' : '4×12';
-  const headerBeamPcs = porchDepth > 0 ? Math.ceil(porchWidth / 16) + 1 : 0;
+  // Header beam — matches post size, each piece spans one bay (post spacing)
+  const headerBeamSize = postSize.replace('x','×'); // matches post: 6×6, 8×8, 10×10
+  const headerBeamStockLen = postSpacingFt; // one piece per bay
+  const headerBeamPcs = porchDepth > 0 ? Math.ceil(porchWidth / postSpacingFt) + 1 : 0;
   const headerBeamLF = porchDepth > 0 ? Math.ceil(porchWidth * 1.05) : 0;
 
   // Ridge beam — 2×12 per schedule
@@ -891,7 +941,7 @@ function calculate() {
     ...(porchDepth > 0 ? [{ name: `PORCH FRAMING — ${isCypress ? 'CYPRESS TIMBER' : 'STD TIMBER'} · ${postLabel} POSTS`, items: [
       { i:`Posts — ${postLabel}`, d:`${postCount} posts @ ${postSpacingFt}' OC · ${postHeightFt}' height`, q:postCount, u:'EA', lf:postLF },
       { i:`Rafters — ${rafterSize} ${isCypress ? 'Cypress' : '#2 SYP'}`, d:`${rafterCount} rafters @ ${rafterSpacingFt*12}" OC · ${rafterLengthFt}' length · order ${rafterStockLen}' stock`, q:rafterCount, u:`EA @ ${rafterStockLen}'`, lf:rafterCount*rafterStockLen },
-      { i:`Header beam — ${headerBeamSize} ${isCypress ? 'Cypress' : 'SYP'}`, d:`Runs ${porchWidth}' at wall · ${postSpacingFt}' post spacing · order 16' stock`, q:headerBeamPcs, u:"PCS @ 16'", lf:headerBeamLF },
+      { i:`Header beam — ${headerBeamSize} ${isCypress ? 'Cypress' : 'SYP'}`, d:`${headerBeamPcs} pcs · one per bay · ${postSpacingFt}' post spacing · order ${headerBeamStockLen}' stock`, q:headerBeamPcs, u:`EA @ ${headerBeamStockLen}'`, lf:headerBeamLF },
       { i:'Ridge beam — 2×12 #2 SP', d:`Porch ridge · ${porchWidth}' + 10% waste`, q:porchRidgePcs, u:"PCS @ 16'", lf:porchRidgeLF },
       { i:'Fly rafters — 2×6 #2 SP', d:`Gable ends · ${flyRafterLen}' stock`, q:flyRafterPcs, u:`EA @ ${flyRafterLen}'`, lf:flyRafterPcs*flyRafterLen },
       { i:"Porch decking — 2×6 T&G #2 SP", d:`${porchDeckBoards} boards × ${porchDeckBoardLen}' stock · sloped depth ${porchDeckSlopedDepth.toFixed(2)}' · 5.5" true width · ${porchWidth}' wide + 10% waste`, q:porchDeckBoards, u:`EA @ ${porchDeckBoardLen}'`, lf:porchDeckLF },
