@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sauce Estimator — Quick Estimate</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<style>
+:root{--navy:#1a2332;--navy2:#212d3d;--navy3:#263044;--amber:#f5a623;--amber2:#f7b94a;--teal:#2dd4aa;--white:#fff;--off:#f7f8fa;--border:#e2e5ea;--border2:#d0d4da;--text:#1a2332;--muted:#6b7280;--muted2:#9ca3af;--success:#10b981;--warn:#f59e0b;--danger:#ef4444;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:var(--off);color:var(--text);min-height:100vh;font-size:14px;}
+
+/* NAV */
+.nav{background:var(--navy);height:52px;display:flex;align-items:center;padding:0 20px;position:sticky;top:0;z-index:100;}
+.nav-mark{width:32px;height:32px;background:var(--amber);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--navy);margin-right:10px;flex-shrink:0;}
+.nav-name{font-size:13px;font-weight:700;color:#fff;}
+.nav-sub{font-size:10px;font-weight:600;color:var(--amber);letter-spacing:.5px;text-transform:uppercase;}
+.nav-div{width:1px;height:28px;background:rgba(255,255,255,.12);margin:0 16px;}
+.nav-mod{font-size:12px;font-weight:600;color:rgba(255,255,255,.5);letter-spacing:.3px;text-transform:uppercase;}
+.nav-mod span{color:rgba(255,255,255,.9);}
+.nav-sp{flex:1;}
+.nav-btn{background:transparent;border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.7);padding:5px 14px;border-radius:5px;font-size:12px;font-weight:500;cursor:pointer;margin-left:8px;transition:all .15s;font-family:inherit;}
+.nav-btn:hover{background:rgba(255,255,255,.08);color:#fff;}
+.nav-btn.amber{background:var(--amber);border-color:var(--amber);color:var(--navy);font-weight:700;}
+.nav-btn.amber:hover{background:var(--amber2);}
+
+/* LAYOUT */
+.wrap{max-width:1280px;margin:0 auto;padding:24px 20px;display:grid;grid-template-columns:480px 1fr;gap:24px;align-items:start;}
+@media(max-width:900px){.wrap{grid-template-columns:1fr;}}
+
+/* INPUT PANEL */
+.input-panel{display:flex;flex-direction:column;gap:16px;}
+.section{background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;}
+.sec-head{padding:12px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;background:var(--off);}
+.sec-icon{width:28px;height:28px;background:var(--navy);border-radius:5px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.sec-title{font-size:12px;font-weight:700;color:var(--navy);letter-spacing:.3px;}
+.sec-body{padding:16px 18px;display:flex;flex-direction:column;gap:12px;}
+
+/* FIELD ROWS */
+.field-row{display:flex;align-items:center;gap:10px;}
+.field-label{font-size:12px;font-weight:500;color:var(--muted);width:140px;flex-shrink:0;}
+.field-inputs{display:flex;align-items:center;gap:6px;flex:1;}
+.field-unit{font-size:11px;color:var(--muted2);white-space:nowrap;}
+input[type=number]{width:72px;padding:6px 10px;border:1px solid var(--border2);border-radius:5px;font-size:13px;font-family:inherit;color:var(--navy);text-align:center;transition:border .15s;}
+input[type=number]:focus{outline:none;border-color:var(--amber);}
+input[type=number].wide{width:96px;}
+.seg{display:flex;background:var(--off);border-radius:5px;padding:2px;border:1px solid var(--border);}
+.seg-btn{flex:1;text-align:center;padding:5px 8px;border-radius:3px;font-size:11px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--muted);font-family:inherit;transition:all .15s;white-space:nowrap;}
+.seg-btn.on{background:#fff;color:var(--navy);box-shadow:0 1px 3px rgba(0,0,0,.08);}
+
+/* DOOR/WINDOW ROWS */
+.opening-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.opening-item{background:var(--off);border:1px solid var(--border);border-radius:6px;padding:10px 12px;}
+.opening-label{font-size:11px;font-weight:600;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;}
+.count-ctrl{display:flex;align-items:center;gap:6px;}
+.count-btn{width:26px;height:26px;border-radius:4px;border:1px solid var(--border2);background:#fff;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--navy);transition:all .15s;}
+.count-btn:hover{background:var(--amber);border-color:var(--amber);color:var(--navy);}
+.count-val{font-size:16px;font-weight:700;color:var(--navy);min-width:28px;text-align:center;}
+
+/* CALC BTN */
+.calc-bar{background:var(--navy);border-radius:10px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.calc-bar-text{font-size:13px;color:rgba(255,255,255,.6);}
+.calc-bar-text strong{color:#fff;display:block;font-size:15px;}
+.btn-calc{background:var(--amber);border:none;color:var(--navy);padding:10px 28px;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .15s;letter-spacing:.3px;}
+.btn-calc:hover{background:var(--amber2);}
+
+/* RESULTS PANEL */
+.results-panel{position:sticky;top:76px;}
+.results-empty{background:#fff;border:1px solid var(--border);border-radius:10px;padding:48px 24px;text-align:center;}
+.empty-icon{width:48px;height:48px;background:var(--off);border-radius:10px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;}
+.empty-title{font-size:15px;font-weight:600;color:var(--navy);margin-bottom:6px;}
+.empty-sub{font-size:13px;color:var(--muted);}
+
+.results-card{background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden;display:none;}
+.results-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--navy);}
+.results-title{font-size:14px;font-weight:700;color:#fff;}
+.results-meta{font-size:11px;color:rgba(255,255,255,.5);}
+.results-actions{display:flex;gap:8px;}
+.btn-sm{padding:5px 12px;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:all .15s;}
+.btn-export{background:rgba(255,255,255,.1);color:rgba(255,255,255,.8);border:1px solid rgba(255,255,255,.2);}
+.btn-export:hover{background:rgba(255,255,255,.2);color:#fff;}
+.btn-print{background:var(--amber);color:var(--navy);}
+.btn-print:hover{background:var(--amber2);}
+
+/* STATS STRIP */
+.stats-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border-bottom:1px solid var(--border);}
+.strip-stat{background:#fff;padding:10px 14px;}
+.strip-lbl{font-size:9px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--muted2);margin-bottom:3px;}
+.strip-val{font-size:17px;font-weight:700;color:var(--navy);}
+.strip-unit{font-size:10px;color:var(--muted);}
+
+/* MATERIAL TABLE */
+.mat-table{width:100%;max-height:calc(100vh - 280px);overflow-y:auto;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th{text-align:left;padding:8px 14px;font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);background:var(--off);border-bottom:1px solid var(--border);position:sticky;top:0;}
+td{padding:8px 14px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr.cat td{background:var(--navy2);color:rgba(255,255,255,.65);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:6px 14px;border-bottom:none;}
+tr:hover td{background:#fafbfc;}
+.qv{font-weight:700;color:var(--navy);font-size:13px;}
+.lf-val{font-size:11px;color:var(--muted);}
+.ut{font-size:10px;color:var(--muted2);}
+
+@media print{.nav,.input-panel,.results-empty{display:none!important;}.results-card{display:block!important;border:none;}.mat-table{max-height:none;}}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-mark">SE</div>
+  <div style="margin-right:16px"><div class="nav-name">Sauce Estimator</div><div class="nav-sub">Home Edition</div></div>
+  <div class="nav-div"></div>
+  <div class="nav-mod"><span>Quick Estimate</span></div>
+  <div class="nav-sp"></div>
+  <button class="nav-btn" onclick="location.href='/'">Upload Plan</button>
+  <button class="nav-btn" onclick="location.href='/designer.html'">Draw a Plan</button>
+  <button class="nav-btn amber" onclick="calculate()">Calculate</button>
+</nav>
+
+<div class="wrap">
+
+  <!-- INPUT PANEL -->
+  <div class="input-panel">
+
+    <!-- Building -->
+    <div class="section">
+      <div class="sec-head">
+        <div class="sec-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="4" width="12" height="9" rx="1" stroke="white" stroke-width="1.5"/><path d="M1 7l6-5 6 5" stroke="#f5a623" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <span class="sec-title">Building Dimensions</span>
+      </div>
+      <div class="sec-body">
+        <div class="field-row">
+          <span class="field-label">Width</span>
+          <div class="field-inputs"><input type="number" id="bWidth" value="56" min="16" max="120" oninput="liveUpdate()"><span class="field-unit">ft</span></div>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Length</span>
+          <div class="field-inputs"><input type="number" id="bLength" value="35" min="16" max="120" oninput="liveUpdate()"><span class="field-unit">ft</span></div>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Plate height</span>
+          <div class="field-inputs">
+            <div class="seg" style="width:220px">
+              <button class="seg-btn" onclick="setSeg(this,'plateH','8')">8'</button>
+              <button class="seg-btn on" onclick="setSeg(this,'plateH','9')">9'</button>
+              <button class="seg-btn" onclick="setSeg(this,'plateH','10')">10'</button>
+              <button class="seg-btn" onclick="setSeg(this,'plateH','12')">12'</button>
+            </div>
+          </div>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Living area</span>
+          <div class="field-inputs"><input type="number" id="livingSF" value="1680" min="400" max="10000" oninput="liveUpdate()"><span class="field-unit">SF</span><span class="field-unit" style="color:var(--teal);font-size:10px;font-weight:600" id="sfHint"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Roof -->
+    <div class="section">
+      <div class="sec-head">
+        <div class="sec-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 8l6-6 6 6" stroke="white" stroke-width="1.5" stroke-linecap="round"/><path d="M3 8v4h8V8" stroke="#f5a623" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <span class="sec-title">Roof</span>
+      </div>
+      <div class="sec-body">
+        <div class="field-row">
+          <span class="field-label">Pitch</span>
+          <div class="field-inputs">
+            <div class="seg" style="width:220px">
+              <button class="seg-btn" onclick="setSeg(this,'pitch','4:12')">4:12</button>
+              <button class="seg-btn on" onclick="setSeg(this,'pitch','6:12')">6:12</button>
+              <button class="seg-btn" onclick="setSeg(this,'pitch','8:12')">8:12</button>
+              <button class="seg-btn" onclick="setSeg(this,'pitch','10:12')">10:12</button>
+            </div>
+          </div>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Overhang</span>
+          <div class="field-inputs">
+            <div class="seg" style="width:180px">
+              <button class="seg-btn" onclick="setSeg(this,'overhang','12')">12"</button>
+              <button class="seg-btn on" onclick="setSeg(this,'overhang','16')">16"</button>
+              <button class="seg-btn" onclick="setSeg(this,'overhang','24')">24"</button>
+            </div>
+          </div>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Sheathing</span>
+          <div class="field-inputs">
+            <div class="seg" style="width:140px">
+              <button class="seg-btn on" onclick="setSeg(this,'sheathing','OSB')">OSB</button>
+              <button class="seg-btn" onclick="setSeg(this,'sheathing','ZIP')">ZIP</button>
+            </div>
+          </div>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Roofing</span>
+          <div class="field-inputs">
+            <div class="seg" style="width:220px">
+              <button class="seg-btn on" onclick="setSeg(this,'roofing','Tuff-Rib 29ga')">Tuff-Rib 29ga</button>
+              <button class="seg-btn" onclick="setSeg(this,'roofing','16in panel')">16" Panel</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Porch -->
+    <div class="section">
+      <div class="sec-head">
+        <div class="sec-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="6" width="12" height="7" rx="1" stroke="white" stroke-width="1.5"/><path d="M3 6V4M11 6V4" stroke="#f5a623" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <span class="sec-title">Porches</span>
+      </div>
+      <div class="sec-body">
+        <div class="field-row">
+          <span class="field-label">Porch SF</span>
+          <div class="field-inputs"><input type="number" id="porchSF" value="0" min="0" max="2000" oninput="liveUpdate()"><span class="field-unit">SF</span><span class="field-unit" style="font-size:11px;color:var(--muted)">(enter 0 if none)</span></div>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Porch pitch</span>
+          <div class="field-inputs">
+            <div class="seg" style="width:180px">
+              <button class="seg-btn on" onclick="setSeg(this,'porchPitch','2:12')">2:12</button>
+              <button class="seg-btn" onclick="setSeg(this,'porchPitch','3:12')">3:12</button>
+              <button class="seg-btn" onclick="setSeg(this,'porchPitch','4:12')">4:12</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Walls -->
+    <div class="section">
+      <div class="sec-head">
+        <div class="sec-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="12" rx="1" stroke="white" stroke-width="1.5"/><path d="M5 1v12M1 5h4M1 9h4" stroke="#f5a623" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <span class="sec-title">Walls</span>
+      </div>
+      <div class="sec-body">
+        <div class="field-row">
+          <span class="field-label">Ext. wall LF</span>
+          <div class="field-inputs"><input type="number" id="extWallLF" value="" placeholder="auto" min="0" max="500" oninput="liveUpdate()" class="wide"><span class="field-unit">LF <span style="color:var(--teal);font-size:10px" id="extWallHint"></span></span></div>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Int. wall LF</span>
+          <div class="field-inputs"><input type="number" id="intWallLF" value="" placeholder="estimate" min="0" max="800" oninput="liveUpdate()" class="wide"><span class="field-unit">LF</span></div>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Plumbing walls</span>
+          <div class="field-inputs"><input type="number" id="plumbWallLF" value="0" min="0" max="100" oninput="liveUpdate()" class="wide"><span class="field-unit">LF <span style="font-size:10px;color:var(--muted)">(2×6 wet walls)</span></span></div>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Wall sheathing</span>
+          <div class="field-inputs">
+            <div class="seg" style="width:140px">
+              <button class="seg-btn on" onclick="setSeg(this,'wallSheathing','OSB')">OSB</button>
+              <button class="seg-btn" onclick="setSeg(this,'wallSheathing','ZIP')">ZIP</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Doors & Windows -->
+    <div class="section">
+      <div class="sec-head">
+        <div class="sec-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2" y="1" width="10" height="12" rx="1" stroke="white" stroke-width="1.5"/><circle cx="10" cy="7" r="1" fill="#f5a623"/></svg></div>
+        <span class="sec-title">Doors &amp; Windows</span>
+      </div>
+      <div class="sec-body">
+        <div class="opening-grid">
+          <div class="opening-item">
+            <div class="opening-label">Ext. doors (3/0)</div>
+            <div class="count-ctrl"><button class="count-btn" onclick="adj('dExt',-1)">−</button><div class="count-val" id="dExt">2</div><button class="count-btn" onclick="adj('dExt',1)">+</button></div>
+          </div>
+          <div class="opening-item">
+            <div class="opening-label">Int. doors (2/8)</div>
+            <div class="count-ctrl"><button class="count-btn" onclick="adj('dInt',-1)">−</button><div class="count-val" id="dInt">8</div><button class="count-btn" onclick="adj('dInt',1)">+</button></div>
+          </div>
+          <div class="opening-item">
+            <div class="opening-label">Double doors (5/0)</div>
+            <div class="count-ctrl"><button class="count-btn" onclick="adj('dDbl',-1)">−</button><div class="count-val" id="dDbl">0</div><button class="count-btn" onclick="adj('dDbl',1)">+</button></div>
+          </div>
+          <div class="opening-item">
+            <div class="opening-label">Windows 3×5</div>
+            <div class="count-ctrl"><button class="count-btn" onclick="adj('wStd',-1)">−</button><div class="count-val" id="wStd">6</div><button class="count-btn" onclick="adj('wStd',1)">+</button></div>
+          </div>
+          <div class="opening-item">
+            <div class="opening-label">Windows 6×5 twin</div>
+            <div class="count-ctrl"><button class="count-btn" onclick="adj('wTwin',-1)">−</button><div class="count-val" id="wTwin">2</div><button class="count-btn" onclick="adj('wTwin',1)">+</button></div>
+          </div>
+          <div class="opening-item">
+            <div class="opening-label">Windows small 3×3</div>
+            <div class="count-ctrl"><button class="count-btn" onclick="adj('wSm',-1)">−</button><div class="count-val" id="wSm">2</div><button class="count-btn" onclick="adj('wSm',1)">+</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Foundation -->
+    <div class="section">
+      <div class="sec-head">
+        <div class="sec-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="9" width="12" height="4" rx="1" stroke="white" stroke-width="1.5"/><path d="M4 9V5M7 9V3M10 9V6" stroke="#f5a623" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+        <span class="sec-title">Foundation</span>
+      </div>
+      <div class="sec-body">
+        <div class="field-row">
+          <span class="field-label">Slab thickness</span>
+          <div class="field-inputs">
+            <div class="seg" style="width:160px">
+              <button class="seg-btn on" onclick="setSeg(this,'slabThk','4')">4"</button>
+              <button class="seg-btn" onclick="setSeg(this,'slabThk','5')">5"</button>
+              <button class="seg-btn" onclick="setSeg(this,'slabThk','6')">6"</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Calculate -->
+    <div class="calc-bar">
+      <div class="calc-bar-text">
+        <strong id="calcSummary">Ready to calculate</strong>
+        Fill in the details above and hit Calculate
+      </div>
+      <button class="btn-calc" onclick="calculate()">Calculate Takeoff →</button>
+    </div>
+
+  </div>
+
+  <!-- RESULTS PANEL -->
+  <div class="results-panel">
+    <div class="results-empty" id="emptyState">
+      <div class="empty-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><rect x="2" y="6" width="18" height="14" rx="2" stroke="#9ca3af" stroke-width="1.5"/><path d="M2 11l9-7 9 7" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round"/><path d="M9 20v-6h4v6" stroke="#9ca3af" stroke-width="1.5" stroke-linecap="round"/></svg></div>
+      <div class="empty-title">Your material list will appear here</div>
+      <div class="empty-sub">Fill in the building details on the left and hit Calculate</div>
+    </div>
+    <div class="results-card" id="resultsCard">
+      <div class="results-head">
+        <div>
+          <div class="results-title" id="resTitle">Material Takeoff</div>
+          <div class="results-meta" id="resMeta"></div>
+        </div>
+        <div class="results-actions">
+          <button class="btn-sm btn-export" onclick="exportCSV()">Export CSV</button>
+          <button class="btn-sm btn-print" onclick="window.print()">Print</button>
+        </div>
+      </div>
+      <div class="stats-strip" id="statsStrip"></div>
+      <div class="mat-table">
+        <table>
+          <thead><tr>
+            <th>Item</th>
+            <th>Description</th>
+            <th style="text-align:right">Pieces</th>
+            <th>Unit</th>
+            <th style="text-align:right">Lin Ft</th>
+          </tr></thead>
+          <tbody id="matBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── STATE ──
+const V = {
+  plateH: '9', pitch: '6:12', overhang: '16', sheathing: 'OSB',
+  roofing: 'Tuff-Rib 29ga', porchPitch: '2:12', wallSheathing: 'OSB', slabThk: '4'
+};
+let lastResult = null;
+
+function setSeg(btn, key, val) {
+  V[key] = val;
+  btn.closest('.seg').querySelectorAll('.seg-btn').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  liveUpdate();
+}
+
+function adj(id, delta) {
+  const el = document.getElementById(id);
+  const v = Math.max(0, parseInt(el.textContent) + delta);
+  el.textContent = v;
+  liveUpdate();
+}
+
+function g(id) { return parseFloat(document.getElementById(id).value) || 0; }
+function gi(id) { return parseInt(document.getElementById(id).textContent) || 0; }
+
+function liveUpdate() {
+  const W = g('bWidth') || 56, L = g('bLength') || 35;
+  const autoPerim = (W + L) * 2;
+  document.getElementById('extWallHint').textContent = `(auto: ${autoPerim} LF)`;
+  const livSF = g('livingSF') || W * L;
+  const autoSF = W * L;
+  document.getElementById('sfHint').textContent = livSF !== autoSF ? '' : `(${W}×${L}=${autoSF})`;
+  document.getElementById('calcSummary').textContent =
+    `${W}' × ${L}' · ${(g('livingSF')||W*L).toLocaleString()} SF · ${V.pitch} roof`;
+}
+
+// ── PITCH MULTIPLIERS ──
+const PM = {'2:12':1.014,'3:12':1.031,'4:12':1.054,'5:12':1.083,'6:12':1.118,'7:12':1.158,'8:12':1.202,'10:12':1.302,'12:12':1.414};
+
+// ── PIECE COUNT HELPERS ──
+function plates16(lf) { return Math.ceil(lf / 16); }
+function bestLen(span) { return [8,10,12,14,16,18,20].find(l => l >= span + 0.5) || 20; }
+
+// ── CALCULATE ──
+function calculate() {
+  const W = g('bWidth') || 56;
+  const L = g('bLength') || 35;
+  const pH = parseInt(V.plateH) || 9;
+  const livSF = g('livingSF') || W * L;
+  const porchSF = g('porchSF') || 0;
+  const totalSF = livSF + porchSF;
+  const perim = (W + L) * 2;
+  const extLF = g('extWallLF') || perim;
+  const intLF = g('intWallLF') || Math.round(livSF * 0.18);
+  const plumbLF = g('plumbWallLF') || 0;
+  const overhangFt = parseInt(V.overhang) / 12;
+  const slabThk = parseInt(V.slabThk) || 4;
+
+  // Roof areas
+  const mainFlat = (W + overhangFt*2) * (L + overhangFt*2);
+  const mainSloped = Math.round(mainFlat * (PM[V.pitch] || 1.118));
+  const porchFlat = porchSF > 0 ? porchSF + (W * overhangFt) : 0;
+  const porchSloped = Math.round(porchFlat * (PM[V.porchPitch] || 1.014));
+  const totalRoof = mainSloped + porchSloped;
+
+  // Door/window counts
+  const dExt = gi('dExt'), dInt = gi('dInt'), dDbl = gi('dDbl');
+  const wStd = gi('wStd'), wTwin = gi('wTwin'), wSm = gi('wSm');
+  const totalDoors = dExt + dInt + dDbl;
+  const totalWindows = wStd + wTwin + wSm;
+
+  // ── FOUNDATION ──
+  const slabThkFt = slabThk / 12;
+  const concSlab = Math.ceil(totalSF * slabThkFt / 27 * 1.1);
+  const concBeam = Math.ceil(perim * 1.0 * 1.5 / 27 * 1.1);
+  const totalConc = concSlab + concBeam;
+  const rebarSlab = Math.ceil(totalSF / 1.5 * 2 * 1.1);
+  const rebarBeam = Math.ceil(perim * 3 * 1.1);
+  const vaporSF = Math.ceil(totalSF * 1.15);
+  const gravelCY = Math.ceil(totalSF * (4/12) / 27);
+
+  // ── EXTERIOR FRAMING ──
+  const extStuds = Math.ceil(extLF / 1.333 + 16); // field studs + corners
+  const extTopSticks = Math.ceil(plates16(extLF * 2) * 1.05);
+  const extBotSticks = Math.ceil(plates16(extLF) * 1.05);
+  const wallOSBSheets = Math.ceil(extLF * pH / 32 * 1.1);
+  const houseWrapSF = Math.ceil(extLF * pH * 1.15);
+
+  // Headers — ext doors
+  const extDoorHdrLen = dExt * 3.5 + dDbl * 5.5; // RO + bearing
+  const extDoorHdrStk = bestLen(3.5);
+  const extDoorHdrPcs = Math.ceil(extDoorHdrLen * 2 / extDoorHdrStk * 1.1);
+  // Window headers
+  const winHdrLen = (wStd + wSm) * 3.5 + wTwin * 6.5;
+  const winHdrStk = 10;
+  const winHdrPcs = Math.ceil(winHdrLen * 2 / winHdrStk * 1.1);
+
+  // ── INTERIOR FRAMING ──
+  const intStuds = Math.ceil(intLF / 1.333);
+  const plumbStuds = Math.ceil(plumbLF / 1.333);
+  const int2x4TopStks = Math.ceil(plates16(intLF * 2) * 1.05);
+  const int2x4BotStks = Math.ceil(plates16(intLF) * 1.05);
+  const int2x6TopStks = Math.ceil(plates16(plumbLF * 2) * 1.05);
+  const int2x6BotStks = Math.ceil(plates16(plumbLF) * 1.05);
+  const intDoorHdrPcs = Math.ceil(dInt * 2 / Math.floor(8 / 2.84) * 1.05); // (2) 2x6 headers cut from 8' stock
+
+  // ── ROOF FRAMING ──
+  const trusses = Math.ceil(L / 2) + 1;
+  const ridgeLF = Math.ceil(W * 1.1);
+  const purlinLF = Math.ceil(totalRoof / 2 * 1.1);
+  const fasciaLF = Math.ceil(perim * 1.1);
+  const porchDeckLF = porchSF > 0 ? Math.ceil(porchSF / 0.833 * 1.1) : 0;
+
+  // ── ROOF SHEATHING + COVERING ──
+  const roofOSBSheets = Math.ceil(totalRoof / 32 * 1.1);
+  const panelCoverage = V.roofing === '16in panel' ? 1.333 : 3;
+  const roofPanelLF = Math.ceil(totalRoof / panelCoverage * 1.1);
+  const ridgeCapLF = Math.ceil(W * 1.1);
+  const eavesTrimLF = Math.ceil(perim * 1.1);
+
+  // ── SIDING ──
+  const netWallSF = extLF * pH * 0.85;
+  const sidingLF = Math.ceil(netWallSF / 3 * 1.1);
+  const soffitSF = Math.ceil(perim * overhangFt);
+  const cornerTrimLF = Math.ceil(4 * pH * 1.1);
+
+  // ── INSULATION ──
+  const wallFoamBF = Math.ceil(extLF * pH * 0.85 * 5.5 * 1.1);
+  const roofFoamBF = Math.ceil(totalRoof * 13.2 * 1.1);
+
+  // ── BUILD OUTPUT ──
+  const categories = [
+    { name: 'FOUNDATION', items: [
+      { i:'Concrete — slab + edge beam', d:`${slabThk}" monolithic slab + thickened edge · ${totalSF.toLocaleString()} SF`, q:totalConc, u:'CY', lf:null },
+      { i:'Rebar — slab #4 @ 18" OC', d:'Both directions', q:rebarSlab.toLocaleString(), u:'LF', lf:null },
+      { i:'Rebar — edge beam (3) #5', d:'Continuous', q:rebarBeam, u:'LF', lf:null },
+      { i:'Vapor barrier — 6 mil poly', d:'Under slab', q:vaporSF.toLocaleString(), u:'SF', lf:null },
+      { i:'Gravel base', d:'4" compacted sub-base', q:gravelCY, u:'CY', lf:null },
+    ]},
+    { name: 'EXTERIOR WALL FRAMING — 2×6 @ 16" OC', items: [
+      { i:'Studs — 2×6 precut 104-5/8"', d:`${extLF} LF of exterior wall @ 16" OC`, q:extStuds, u:'EA', lf:null },
+      { i:"Top plate — 2×6 × 16'", d:`Double top plate · ${extTopSticks*16} LF total · always 16' sticks`, q:extTopSticks, u:"PCS @ 16'", lf:extTopSticks*16 },
+      { i:"Bottom plate — 2×6 PT × 16'", d:`Single PT sill · ${extBotSticks*16} LF total · always 16' sticks`, q:extBotSticks, u:"PCS @ 16'", lf:extBotSticks*16 },
+      { i:`Headers — (2) 2×12 ext. doors`, d:`${dExt} ext. door(s) · doubled · ${extDoorHdrStk}' stock`, q:extDoorHdrPcs, u:`PCS @ ${extDoorHdrStk}'`, lf:Math.ceil(extDoorHdrLen*2) },
+      { i:`Headers — (2) 2×10 windows`, d:`${totalWindows} window(s) · doubled · ${winHdrStk}' stock`, q:winHdrPcs, u:`PCS @ ${winHdrStk}'`, lf:Math.ceil(winHdrLen*2) },
+      { i:`Wall sheathing — ${V.wallSheathing} 7/16" 4×8`, d:`${extLF} LF × ${pH}' plate height + 10% waste`, q:wallOSBSheets, u:'SHEETS', lf:null },
+      ...(V.wallSheathing==='ZIP'
+        ? [{ i:'ZIP tape', d:'1 roll per 100 LF seams', q:Math.ceil(extLF/100), u:'ROLLS', lf:null }]
+        : [{ i:'House wrap', d:'Per wall SF + 15% overlap', q:houseWrapSF.toLocaleString(), u:'SF', lf:null }]),
+    ]},
+    { name: 'INTERIOR WALL FRAMING', items: [
+      { i:'Studs — 2×4 precut 92-5/8"', d:`${intLF} LF of interior wall @ 16" OC`, q:intStuds, u:'EA', lf:null },
+      { i:"Top plate — 2×4 × 16'", d:`Double top plate · ${int2x4TopStks*16} LF · always 16' sticks`, q:int2x4TopStks, u:"PCS @ 16'", lf:int2x4TopStks*16 },
+      { i:"Bottom plate — 2×4 × 16'", d:`Single bottom plate · ${int2x4BotStks*16} LF · always 16' sticks`, q:int2x4BotStks, u:"PCS @ 16'", lf:int2x4BotStks*16 },
+      { i:'Headers — (2) 2×6 int. doors', d:`${dInt} interior door(s) · cut from 8' stock`, q:intDoorHdrPcs, u:"PCS @ 8'", lf:Math.ceil(dInt*2.84*2) },
+      { i:'Ladder blocking — 2×4', d:'T-intersections throughout', q:Math.ceil(intLF*0.15), u:'LF', lf:Math.ceil(intLF*0.15) },
+      ...(plumbLF > 0 ? [
+        { i:'Studs — 2×6 plumbing walls', d:`${plumbLF} LF of wet walls @ 16" OC`, q:plumbStuds, u:'EA', lf:null },
+        { i:"Top plate — 2×6 plumbing × 16'", d:`Double top plate · ${int2x6TopStks*16} LF · 16' sticks`, q:int2x6TopStks, u:"PCS @ 16'", lf:int2x6TopStks*16 },
+        { i:"Bottom plate — 2×6 plumbing × 16'", d:`Single bottom plate · ${int2x6BotStks*16} LF · 16' sticks`, q:int2x6BotStks, u:"PCS @ 16'", lf:int2x6BotStks*16 },
+      ] : []),
+    ]},
+    { name: `ROOF FRAMING — ${V.pitch} PITCH`, items: [
+      { i:'Trusses', d:`24" OC · ${L}' building length — confirm type with engineer`, q:trusses, u:'EA', lf:null },
+      { i:'Ridge nailer — 2×12 #2 SP', d:`Building width ${W}' + 10%`, q:Math.ceil(W*1.1/16)+' sticks', u:`PCS @ 16'`, lf:ridgeLF },
+      { i:'Purlins — 2×4 #2 SP', d:'@ 24" OC on truss top chords', q:purlinLF.toLocaleString(), u:'LF', lf:purlinLF },
+      { i:'Fascia — 2×6 #2 SP', d:'Eave perimeter + 10%', q:Math.ceil(fasciaLF/16), u:"PCS @ 16'", lf:fasciaLF },
+      ...(porchSF>0 ? [{ i:'Porch decking — 2×6 T&G', d:'Solid decking + 10% waste', q:porchDeckLF.toLocaleString(), u:'LF', lf:porchDeckLF }] : []),
+    ]},
+    { name: `ROOF SHEATHING + COVERING — ${V.roofing}`, items: [
+      { i:`Roof sheathing — ${V.sheathing} 7/16" 4×8`, d:`${totalRoof.toLocaleString()} SF sloped area + 10%`, q:roofOSBSheets, u:'SHEETS', lf:null },
+      ...(V.sheathing==='ZIP'
+        ? [{ i:'ZIP tape — roof', d:'Seam sealing', q:Math.ceil(totalRoof/100), u:'ROLLS', lf:null }]
+        : [{ i:'Underlayment — synthetic', d:'Full sloped area', q:totalRoof.toLocaleString(), u:'SF', lf:null }]),
+      { i:`Metal roofing — ${V.roofing}`, d:`${panelCoverage===3?"3'":"16\""} panels · ${totalRoof.toLocaleString()} SF sloped + 10%`, q:roofPanelLF.toLocaleString(), u:'LF', lf:roofPanelLF },
+      { i:'Ridge cap', d:'Main ridge + 10%', q:Math.ceil(ridgeCapLF/10), u:"PCS @ 10'", lf:ridgeCapLF },
+      { i:'Eave trim / drip edge', d:'Eave perimeter + 10%', q:Math.ceil(eavesTrimLF/10), u:"PCS @ 10'", lf:eavesTrimLF },
+    ]},
+    { name: 'EXTERIOR SIDING + FINISHES', items: [
+      { i:`Metal siding — ${V.roofing}`, d:`3' panels · ${Math.round(netWallSF)} SF net wall area + 10%`, q:sidingLF.toLocaleString(), u:'LF', lf:sidingLF },
+      { i:'Metal soffit', d:'Eave coverage — panel match', q:soffitSF, u:'SF', lf:null },
+      { i:'Corner trim', d:'All exterior corners', q:cornerTrimLF, u:'LF', lf:cornerTrimLF },
+    ]},
+    { name: 'INSULATION — OPEN-CELL SPRAY FOAM', items: [
+      { i:'Spray foam — walls', d:`Open-cell · 2×6 full cavity · R-20 · ${extLF} LF`, q:wallFoamBF.toLocaleString(), u:'BF', lf:null },
+      { i:'Spray foam — roof', d:`Open-cell · R-49 @ 13.2" depth · ${totalRoof.toLocaleString()} SF sloped`, q:roofFoamBF.toLocaleString(), u:'BF', lf:null },
+    ]},
+  ];
+
+  // Stats
+  document.getElementById('statsStrip').innerHTML = [
+    ['Living SF', livSF.toLocaleString(), ''],
+    ['Roof SF', totalRoof.toLocaleString(), 'sloped'],
+    ['Ext Wall', extLF, 'lin ft'],
+    ['Trusses', trusses, 'EA'],
+  ].map(([l,v,u])=>`<div class="strip-stat"><div class="strip-lbl">${l}</div><div class="strip-val">${v}</div><div class="strip-unit">${u}</div></div>`).join('');
+
+  document.getElementById('resTitle').textContent = `${W}' × ${L}' · ${livSF.toLocaleString()} SF`;
+  document.getElementById('resMeta').textContent = `${V.pitch} roof · ${V.roofing} · ${totalDoors} doors · ${totalWindows} windows`;
+
+  document.getElementById('matBody').innerHTML = categories.map(cat =>
+    `<tr class="cat"><td colspan="5">${cat.name}</td></tr>` +
+    cat.items.map(i =>
+      `<tr>
+        <td>${i.i}</td>
+        <td style="color:var(--muted);font-size:11px">${i.d}</td>
+        <td style="text-align:right"><span class="qv">${i.q}</span></td>
+        <td><span class="ut">${i.u}</span></td>
+        <td style="text-align:right"><span class="lf-val">${i.lf!=null?i.lf.toLocaleString()+' LF':''}</span></td>
+      </tr>`
+    ).join('')
+  ).join('');
+
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('resultsCard').style.display = 'block';
+  lastResult = { categories, W, L, livSF };
+}
+
+function exportCSV() {
+  if (!lastResult) return;
+  const rows = [['Category','Item','Description','Quantity','Unit','Linear Ft']];
+  lastResult.categories.forEach(c => c.items.forEach(i =>
+    rows.push([c.name, i.i, i.d, i.q, i.u, i.lf||''])
+  ));
+  const csv = rows.map(r=>r.map(c=>'"'+(c||'').toString().replace(/"/g,'""')+'"').join(',')).join('\n');
+  Object.assign(document.createElement('a'),{
+    href: URL.createObjectURL(new Blob([csv],{type:'text/csv'})),
+    download: `SE_Quick_Estimate_${lastResult.W}x${lastResult.L}.csv`
+  }).click();
+}
+
+// Live hints on load
+liveUpdate();
+</script>
+</body>
+</html>
