@@ -1,457 +1,631 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sauce Estimator — Home Edition</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"></noscript>
-<style>
-:root{--navy:#1a2332;--navy2:#212d3d;--navy3:#263044;--amber:#f5a623;--amber2:#f7b94a;--teal:#2dd4aa;--teal2:#25b994;--white:#ffffff;--off:#f7f8fa;--border:#e2e5ea;--border2:#d0d4da;--text:#1a2332;--muted:#6b7280;--muted2:#9ca3af;--success:#10b981;--warn:#f59e0b;--danger:#ef4444;}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Inter',sans-serif;background:var(--off);color:var(--text);min-height:100vh;font-size:14px;}
-.nav{background:var(--navy);height:52px;display:flex;align-items:center;padding:0 20px;position:sticky;top:0;z-index:200;}
-.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;margin-right:24px;}
-.nav-mark{width:32px;height:32px;background:var(--amber);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--navy);flex-shrink:0;}
-.nav-name{font-size:13px;font-weight:700;color:#fff;display:block;}
-.nav-sub{font-size:10px;font-weight:600;color:var(--amber);letter-spacing:.5px;text-transform:uppercase;display:block;}
-.nav-div{width:1px;height:28px;background:rgba(255,255,255,.12);margin:0 20px;}
-.nav-mod{font-size:12px;font-weight:600;color:rgba(255,255,255,.5);letter-spacing:.3px;text-transform:uppercase;}
-.nav-mod span{color:rgba(255,255,255,.9);}
-.nav-sp{flex:1;}
-.nav-ready{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--teal);letter-spacing:.5px;}
-.nav-ready-dot{width:7px;height:7px;border-radius:50%;background:var(--teal);}
-.nav-btn{background:transparent;border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.7);padding:5px 14px;border-radius:5px;font-size:12px;font-weight:500;cursor:pointer;margin-left:10px;transition:all .15s;font-family:inherit;}
-.nav-btn:hover{background:rgba(255,255,255,.08);color:#fff;}
-.page{max-width:1200px;margin:0 auto;padding:0 0 48px;}
-.crumb{padding:16px 32px 0;display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--muted2);}
-.crumb-dot{width:6px;height:6px;border-radius:50%;background:var(--amber);margin-right:2px;}
-.ph{padding:12px 32px 24px;}
-.ph-title{font-size:28px;font-weight:700;color:var(--navy);letter-spacing:-.5px;margin-bottom:4px;}
-.ph-sub{font-size:14px;color:var(--muted);}
-.uw{padding:0 32px;}
-.ug{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;}
-@media(max-width:720px){.ug{grid-template-columns:1fr;}}
-.card{background:#fff;border:1px solid var(--border);border-radius:8px;padding:20px 24px;}
-.ct{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:6px;}
-.dz{border:2px dashed var(--border2);border-radius:6px;padding:40px 24px;text-align:center;cursor:pointer;transition:all .15s;position:relative;background:var(--off);}
-.dz:hover,.dz.over{border-color:var(--amber);background:#fffbf2;}
-.dz input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
-.dz-icon{width:42px;height:42px;background:var(--navy);border-radius:8px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;}
-.dz h3{font-size:14px;font-weight:600;color:var(--navy);margin-bottom:4px;}
-.dz p{font-size:12px;color:var(--muted);}
-.fmts{display:flex;gap:6px;justify-content:center;margin-top:12px;flex-wrap:wrap;}
-.fmt{font-size:10px;font-weight:600;letter-spacing:.5px;padding:2px 8px;border-radius:3px;background:#eef0f3;color:var(--muted);text-transform:uppercase;}
-.dc{background:var(--navy);border:1px solid var(--navy3);border-radius:8px;padding:20px 24px;display:flex;flex-direction:column;justify-content:space-between;}
-.dc-lbl{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--amber);margin-bottom:10px;}
-.dc-title{font-size:18px;font-weight:700;color:#fff;margin-bottom:6px;}
-.dc-sub{font-size:12px;color:rgba(255,255,255,.5);line-height:1.5;margin-bottom:16px;}
-.dc-specs{display:flex;flex-direction:column;gap:0;margin-bottom:20px;}
-.dc-row{display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.07);}
-.dc-row:last-child{border-bottom:none;}
-.dc-k{color:rgba(255,255,255,.45);}
-.dc-v{color:rgba(255,255,255,.85);font-weight:500;}
-.info-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:4px;}
-.info-card{background:#fff;border:1px solid var(--border);border-radius:6px;padding:12px 16px;flex:1;min-width:200px;}
-.info-title{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
-.info-body{font-size:12px;color:var(--muted);line-height:1.7;}
-.btn{padding:8px 18px;border-radius:5px;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;border:none;font-family:inherit;display:inline-flex;align-items:center;gap:6px;letter-spacing:.1px;}
-.btn-amber{background:var(--amber);color:var(--navy);}
-.btn-amber:hover{background:var(--amber2);}
-.btn-navy{background:var(--navy);color:#fff;}
-.btn-navy:hover{background:var(--navy2);}
-.btn-outline{background:transparent;color:var(--navy);border:1px solid var(--border2);}
-.btn-outline:hover{background:var(--off);}
-.btn-sm{padding:5px 12px;font-size:12px;}
-.btn-full{width:100%;justify-content:center;}
-.proc{display:none;padding:64px 32px;text-align:center;max-width:520px;margin:0 auto;}
-.spin{width:48px;height:48px;border:3px solid var(--border);border-top-color:var(--amber);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 20px;}
-@keyframes spin{to{transform:rotate(360deg)}}
-.proc-t{font-size:20px;font-weight:700;color:var(--navy);margin-bottom:6px;}
-.proc-s{font-size:13px;color:var(--muted);margin-bottom:28px;}
-.stages{text-align:left;max-width:360px;margin:0 auto;}
-.stage{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--muted);}
-.stage:last-child{border-bottom:none;}
-.s-dot{width:20px;height:20px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;}
-.s-dot.done{background:var(--teal);color:#fff;}
-.s-dot.active{background:var(--amber);color:var(--navy);animation:pulse .9s ease-in-out infinite;}
-.s-dot.pending{background:var(--border);color:var(--muted2);}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
-.err-wrap{display:none;padding:24px 32px;max-width:560px;}
-.err-card{background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:20px 24px;}
-.err-card h3{font-size:15px;font-weight:700;color:var(--danger);margin-bottom:6px;}
-.err-card p{font-size:13px;color:#991b1b;}
-.results{display:none;}
-.res-bar{background:#fff;border-bottom:1px solid var(--border);padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:52px;gap:12px;flex-wrap:wrap;}
-.res-bar-l{display:flex;align-items:center;gap:10px;}
-.res-proj{font-size:15px;font-weight:700;color:var(--navy);}
-.res-tag{font-size:11px;font-weight:500;color:var(--muted);background:var(--off);border:1px solid var(--border);border-radius:4px;padding:2px 8px;}
-.pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;letter-spacing:.3px;}
-.pill-ok{background:#d1fae5;color:#065f46;}
-.pill-w{background:#fef3c7;color:#92400e;}
-.res-bar-r{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
-.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--border);border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:24px;}
-.stat{background:#fff;padding:14px 20px;}
-.s-lbl{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--muted2);margin-bottom:5px;}
-.s-val{font-size:22px;font-weight:700;color:var(--navy);line-height:1;}
-.s-unit{font-size:11px;color:var(--muted);margin-top:2px;}
-.alerts{padding:0 32px;margin-bottom:16px;}
-.alert{border-radius:6px;padding:10px 14px;margin-bottom:8px;font-size:13px;display:flex;gap:8px;align-items:flex-start;}
-.a-warn{background:#fffbeb;border:1px solid #fde68a;color:#78350f;}
-.a-info{background:#eff6ff;border:1px solid #bfdbfe;color:#1e3a8a;}
-.a-icon{flex-shrink:0;font-size:14px;}
-.tabs-w{padding:0 32px;margin-bottom:20px;}
-.tab-bar{display:flex;border-bottom:2px solid var(--border);}
-.tab{padding:10px 20px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border:none;background:transparent;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;font-family:inherit;letter-spacing:.2px;}
-.tab:hover{color:var(--navy);}
-.tab.active{color:var(--navy);border-bottom-color:var(--amber);}
-.tc{padding:0 32px;}
-.tcard{background:#fff;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px;}
-table{width:100%;border-collapse:collapse;font-size:13px;}
-th{text-align:left;padding:10px 16px;font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);background:var(--off);border-bottom:1px solid var(--border);}
-td{padding:10px 16px;border-bottom:1px solid var(--border);vertical-align:middle;}
-tr:last-child td{border-bottom:none;}
-tr.dr:hover td{background:#fafbfc;}
-tr.cr td{background:var(--navy);color:rgba(255,255,255,.6);font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:7px 16px;border-bottom:none;}
-.qv{font-weight:700;color:var(--navy);font-size:14px;}
-.ut{font-size:11px;color:var(--muted);}
-.cb{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;letter-spacing:.3px;}
-.ch{background:#d1fae5;color:#065f46;}
-.cm{background:#fef3c7;color:#92400e;}
-.cl{background:#fee2e2;color:#991b1b;}
-.eg{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-@media(max-width:640px){.eg{grid-template-columns:1fr;}}
-.ec{background:#fff;border:1px solid var(--border);border-radius:8px;padding:16px 20px;}
-.ec-t{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);}
-.er{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f3f4f6;font-size:12px;}
-.er:last-child{border-bottom:none;}
-.ek{color:var(--muted);}
-.ev{font-weight:600;color:var(--navy);text-align:right;}
-.ef{font-size:10px;color:var(--warn);font-weight:600;margin-left:4px;}
-.v3d{background:var(--navy);border-radius:8px;height:420px;position:relative;overflow:hidden;border:1px solid var(--navy3);}
-#houseCanvas{position:absolute;inset:0;width:100%!important;height:100%!important;}
-.v3d-ov{position:absolute;bottom:14px;right:14px;display:flex;gap:6px;z-index:2;}
-.v3d-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);padding:5px 12px;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;letter-spacing:.3px;}
-.v3d-btn:hover{background:rgba(255,255,255,.15);color:#fff;}
-.v3d-hint{position:absolute;top:12px;left:14px;font-size:10px;color:rgba(255,255,255,.3);font-weight:500;letter-spacing:.5px;text-transform:uppercase;}
-.v3d-dims{position:absolute;top:12px;right:14px;font-size:11px;color:var(--amber);font-weight:600;text-align:right;line-height:1.7;}
-.v3d-live{position:absolute;bottom:14px;left:14px;display:flex;align-items:center;gap:5px;font-size:10px;color:var(--teal);font-weight:700;letter-spacing:.5px;}
-.v3d-live-dot{width:6px;height:6px;border-radius:50%;background:var(--teal);}
-@media print{nav,.crumb,.res-bar,.tabs-w,.v3d-ov,.v3d-hint{display:none!important;}.results{display:block!important;}.tc>div{display:block!important;}}
-</style>
-</head>
-<body>
-<nav class="nav">
-  <a class="nav-logo" href="#">
-    <div class="nav-mark">SE</div>
-    <div><span class="nav-name">Sauce Estimator</span><span class="nav-sub">Home Edition</span></div>
-  </a>
-  <div class="nav-div"></div>
-  <div class="nav-mod"><span>Plan Takeoff</span></div>
-  <div class="nav-sp"></div>
-  <div class="nav-ready"><div class="nav-ready-dot"></div>READY</div>
-  <button class="nav-btn" onclick="window.location='/designer.html'">Floor Plan Designer</button>
-  <button class="nav-btn" onclick="resetApp()">New Analysis</button>
-</nav>
+require(‘dotenv’).config();
+const express = require(‘express’);
+const multer = require(‘multer’);
+const fetch = require(‘node-fetch’);
+const cors = require(‘cors’);
+const fs = require(‘fs’);
+const path = require(‘path’);
 
-<div class="page">
-  <!-- UPLOAD -->
-  <div id="screenUpload">
-    <div class="crumb"><div class="crumb-dot"></div><span style="color:var(--muted)">Dashboard</span><span style="color:var(--muted2)"> / </span><span>Plan Takeoff</span></div>
-    <div class="ph"><div class="ph-title">Upload a Plan</div><div class="ph-sub">Upload an engineered floor plan to generate an accurate material takeoff</div></div>
-    <div class="uw">
-      <div class="ug">
-        <div class="card">
-          <div class="ct">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect width="16" height="16" rx="3" fill="#1a2332"/><path d="M8 3v8M8 3L5 6M8 3l3 3" stroke="#f5a623" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 12v.5a.5.5 0 00.5.5h9a.5.5 0 00.5-.5V12" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
-            Upload Drawing
-          </div>
-          <div class="dz" id="dropZone">
-            <input type="file" id="fileInput" accept=".pdf,.png,.jpg,.jpeg,.webp">
-            <div class="dz-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2v12M10 2L6 6M10 2l4 4" stroke="#f5a623" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 15v1a1 1 0 001 1h14a1 1 0 001-1v-1" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></div>
-            <h3>Drop your floor plan here</h3>
-            <p>or click to browse — PDF, PNG, or JPG</p>
-            <div class="fmts"><span class="fmt">PDF</span><span class="fmt">PNG</span><span class="fmt">JPG</span><span class="fmt">WebP</span></div>
-          </div>
-        </div>
-        <div class="dc">
-          <div>
-            <div class="dc-lbl">Demo Project</div>
-            <div class="dc-title">Sample Home — 3/2 Ranch</div>
-            <div class="dc-sub">Run a live demo using a sample residential plan set to see the full takeoff in action.</div>
-            <div class="dc-specs">
-              <div class="dc-row"><span class="dc-k">Living area</span><span class="dc-v">1,680 SF</span></div>
-              <div class="dc-row"><span class="dc-k">Porch</span><span class="dc-v">448 SF</span></div>
-              <div class="dc-row"><span class="dc-k">Dimensions</span><span class="dc-v">56' × 35'</span></div>
-              <div class="dc-row"><span class="dc-k">Roof</span><span class="dc-v">6:12 gable · Tuff-Rib</span></div>
-              <div class="dc-row"><span class="dc-k">Foundation</span><span class="dc-v">Monolithic slab · 4"</span></div>
-            </div>
-          </div>
-          <button class="btn btn-amber btn-full" onclick="runDemo()">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 1.5l8 4.5-8 4.5V1.5z" fill="currentColor"/></svg>
-            Run Demo
-          </button>
-        </div>
-      </div>
-      <div class="info-row">
-        <div class="info-card"><div class="info-title">What gets extracted</div><div class="info-body">Dimensions · Door &amp; window schedules · Roof pitch &amp; area · Wall linear footage · Truss schedule · Foundation spec</div></div>
-        <div class="info-card"><div class="info-title">What gets calculated</div><div class="info-body">Framing lumber · Sheathing · Trusses · Metal roofing &amp; siding · Spray foam insulation · Concrete &amp; rebar</div></div>
-        <div class="info-card"><div class="info-title">Assembly rules</div><div class="info-body">2×6 ext walls · 2×4/2×6 int walls · Tuff-Rib 29ga · Open-cell spray foam · Monolithic slab · OSB or ZIP</div></div>
-      </div>
-    </div>
-  </div>
+const app = express();
+const PORT = process.env.PORT || 3000;
 
-  <!-- PROCESSING -->
-  <div class="proc" id="screenProcessing">
-    <div class="spin"></div>
-    <div class="proc-t">Analyzing Drawing</div>
-    <div class="proc-s">AI is reading your plan set</div>
-    <div class="stages" id="stageList"></div>
-  </div>
+app.use(cors());
+app.use(express.json());
+app.use(express.static(path.join(__dirname, ‘public’)));
 
-  <!-- ERROR -->
-  <div class="err-wrap" id="errorWrap">
-    <div class="err-card">
-      <h3>Analysis Failed</h3>
-      <p id="errorMsg">Something went wrong. Please try again.</p>
-      <button class="btn btn-navy btn-sm" style="margin-top:12px" onclick="resetApp()">Try Again</button>
-    </div>
-  </div>
-
-  <!-- RESULTS -->
-  <div class="results" id="screenResults">
-    <div class="res-bar">
-      <div class="res-bar-l">
-        <div class="res-proj" id="projTitle">Results</div>
-        <span class="res-tag" id="projMeta"></span>
-        <span class="pill pill-ok">● COMPLETE</span>
-      </div>
-      <div class="res-bar-r">
-        <button class="btn btn-outline btn-sm" onclick="exportCSV()">Export CSV</button>
-        <button class="btn btn-outline btn-sm" onclick="window.print()">Print</button>
-        <button class="btn btn-amber btn-sm" onclick="resetApp()">New Analysis</button>
-      </div>
-    </div>
-    <div class="stats-row" id="statsRow"></div>
-    <div class="alerts" id="alertsWrap"></div>
-    <div class="tabs-w">
-      <div class="tab-bar">
-        <button class="tab active" onclick="showTab('Materials',this)">Material List</button>
-        <button class="tab" onclick="showTab('Extraction',this)">Extracted Data</button>
-        <button class="tab" onclick="showTab('Model3d',this)">3D Model</button>
-      </div>
-    </div>
-    <div class="tc">
-      <div id="tabMaterials">
-        <div class="tcard">
-          <table>
-            <thead><tr>
-              <th>Item</th>
-              <th>Description</th>
-              <th style="text-align:right">Pieces / Qty</th>
-              <th>Unit</th>
-              <th style="text-align:right">Linear Ft</th>
-              <th>Confidence</th>
-            </tr></thead>
-            <tbody id="materialBody"></tbody>
-          </table>
-        </div>
-      </div>
-      <div id="tabExtraction" style="display:none"><div class="eg" id="extractionGrid"></div></div>
-      <div id="tabModel3d" style="display:none">
-        <div class="v3d">
-          <canvas id="houseCanvas"></canvas>
-          <div class="v3d-hint">Drag to rotate · Scroll to zoom</div>
-          <div class="v3d-dims" id="v3dDims"></div>
-          <div class="v3d-live"><div class="v3d-live-dot"></div>LIVE 3D</div>
-          <div class="v3d-ov">
-            <button class="v3d-btn" onclick="toggleRoof()">Hide Roof</button>
-            <button class="v3d-btn" onclick="toggleWalls()">Hide Walls</button>
-            <button class="v3d-btn" onclick="resetCam()">Reset</button>
-          </div>
-        </div>
-        <div class="eg" style="margin-top:16px" id="model3dCards"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script>
-let appData=null,renderer,scene,camera,roofGroup,wallGroup;
-let isDrag=false,prevMouse={x:0,y:0},rotX=0.38,rotY=-0.52,showRoof=true,showWalls=true;
-const STAGES=['Reading drawing — walls and dimensions','Extracting door and window schedules','Identifying roof system and pitch','Running assembly rules engine','Generating material quantities'];
-function setStages(a){document.getElementById('stageList').innerHTML=STAGES.map((s,i)=>{const c=i<a?'done':i===a?'active':'pending',ic=i<a?'✓':(i+1);return`<div class="stage"><div class="s-dot ${c}">${ic}</div><span>${s}</span></div>`;}).join('');}
-function delay(ms){return new Promise(r=>setTimeout(r,ms));}
-async function runDemo(){
-  show('screenProcessing');
-  for(let i=0;i<STAGES.length;i++){setStages(i);await delay(650);}
-  setStages(STAGES.length);await delay(350);
-  try{const res=await fetch('/api/demo');const data=await res.json();if(data.success&&data.extracted&&data.takeoff){appData=data;renderResults(data);}else showError(data.error||'Demo failed');}
-  catch(e){showError('Cannot connect to server: '+e.message);}
+// File upload — store in memory, max 20MB
+const upload = multer({
+storage: multer.memoryStorage(),
+limits: { fileSize: 20 * 1024 * 1024 },
+fileFilter: (req, file, cb) => {
+const allowed = [‘image/jpeg’, ‘image/png’, ‘image/gif’, ‘image/webp’, ‘application/pdf’];
+cb(null, allowed.includes(file.mimetype));
 }
-async function uploadFile(file){
-  show('screenProcessing');
-  for(let i=0;i<STAGES.length;i++){setStages(i);await delay(550);}
-  const fd=new FormData();fd.append('drawing',file);
-  try{
-    const res=await fetch('/api/analyze',{method:'POST',body:fd});
-    const text=await res.text();
-    let data;
-    try{ data=JSON.parse(text); }
-    catch(e){ showError('Server returned invalid response: '+text.substring(0,200)); return; }
-    setStages(STAGES.length);await delay(300);
-    if(data.success&&data.extracted&&data.takeoff){
-      appData=data;renderResults(data);
-    } else {
-      showError((data.error||'Analysis failed')+' — '+JSON.stringify(data).substring(0,150));
+});
+
+// ─────────────────────────────────────────────
+// ASSEMBLY RULES ENGINE
+// ─────────────────────────────────────────────
+
+function runRulesEngine(extracted) {
+const results = { categories: [], flags: [], summary: {} };
+
+const {
+living_sf = 0,
+porch_sf = 0,
+building_width_ft = 0,
+building_depth_ft = 0,
+plate_height_ft = 9,
+structural_roof_pitch = ‘6:12’,
+ceiling_pitch = null,
+porch_pitch = ‘2:12’,
+ext_wall_linear_ft = 0,
+int_wall_linear_ft = 0,
+plumbing_wall_linear_ft = 0,
+exterior_corners = 4,
+int_t_intersections = 0,
+doors = [],
+windows = [],
+trusses = [],
+rough_timber = [],
+sheathing_type = ‘OSB’,
+roofing_type = ‘Tuff-Rib 29ga’,
+eave_overhang_in = 16,
+roof_area_main_sf = 0,
+roof_area_porch_sf = 0,
+foundation_type = ‘monolithic_slab’,
+slab_thickness_in = 4
+} = extracted;
+
+// Flag if ceiling pitch differs from structural pitch
+if (ceiling_pitch && ceiling_pitch !== structural_roof_pitch) {
+results.flags.push({
+level: ‘warning’,
+message: `Floor plan shows ${ceiling_pitch} ceiling pitch (interior vault). Structural roof pitch from elevation is ${structural_roof_pitch}. All sheathing and roofing quantities calculated at ${structural_roof_pitch}. Confirm with engineer before ordering.`
+});
+}
+
+// Pitch multiplier table
+const pitchMultipliers = {
+‘2:12’: 1.014, ‘3:12’: 1.031, ‘4:12’: 1.054, ‘5:12’: 1.083,
+‘6:12’: 1.118, ‘7:12’: 1.158, ‘8:12’: 1.202, ‘10:12’: 1.302, ‘12:12’: 1.414
+};
+
+const mainMult = pitchMultipliers[structural_roof_pitch] || 1.118;
+const porchMult = pitchMultipliers[porch_pitch] || 1.014;
+const overhangFt = eave_overhang_in / 12;
+
+// Calculate actual sloped roof areas
+const mainFootprint = building_width_ft * building_depth_ft;
+const mainWithOverhang = mainFootprint + (building_width_ft * overhangFt * 2) + (building_depth_ft * overhangFt * 2);
+const mainSlopedSF = Math.round(mainWithOverhang * mainMult);
+const porchWithOverhang = porch_sf + (building_width_ft * overhangFt);
+const porchSlopedSF = Math.round(porchWithOverhang * porchMult);
+const totalSlopedSF = mainSlopedSF + porchSlopedSF;
+
+const totalSlabSF = living_sf + porch_sf;
+const perimeterLF = (building_width_ft + building_depth_ft) * 2;
+const netWallSF = (ext_wall_linear_ft * plate_height_ft) * 0.85; // ~15% deducted for openings
+
+// ─── FOUNDATION ───
+const slabThicknessFt = slab_thickness_in / 12;
+const slabCY = Math.ceil((totalSlabSF * slabThicknessFt / 27) * 1.1);
+const edgeBeamCY = Math.ceil((perimeterLF * 1.0 * 1.5 / 27) * 1.1);
+const totalConcreteCY = slabCY + edgeBeamCY;
+const rebarSlabLF = Math.ceil((totalSlabSF / 1.5) * 2 * 1.1);
+const rebarBeamLF = Math.ceil(perimeterLF * 3 * 1.1);
+const vaporBarrierSF = Math.ceil(totalSlabSF * 1.15);
+const gravelCY = Math.ceil(totalSlabSF * (4/12) / 27);
+
+results.categories.push({
+name: ‘Foundation’,
+color: ‘#2E4057’,
+items: [
+{ item: ‘Concrete — slab + edge beam’, description: `Monolithic ${slab_thickness_in}" slab + thickened edge`, qty: totalConcreteCY, unit: ‘CY’, confidence: ‘high’ },
+{ item: ‘Rebar — slab field’, description: ‘#4 @ 18” OC both directions’, qty: rebarSlabLF.toLocaleString(), unit: ‘LF’, confidence: ‘high’ },
+{ item: ‘Rebar — edge beam’, description: ‘(3) #5 continuous’, qty: rebarBeamLF, unit: ‘LF’, confidence: ‘high’ },
+{ item: ‘Vapor barrier’, description: ‘6 mil poly under slab’, qty: vaporBarrierSF.toLocaleString(), unit: ‘SF’, confidence: ‘high’ },
+{ item: ‘Gravel base’, description: ‘4” compacted sub-base’, qty: gravelCY, unit: ‘CY’, confidence: ‘high’ },
+]
+});
+
+// ─── PIECE COUNT HELPERS ───
+// Plates are always 16’ lumber — how many 16’ sticks to cover a linear footage
+function plates16(lf) { return Math.ceil(lf / 16); }
+// How many pieces of a given standard length cover a linear footage
+function pieces(lf, stdLen) { return Math.ceil(lf / stdLen); }
+// Best standard length for a given span (round up to next standard: 8,10,12,14,16,18,20)
+function bestLength(spanFt) {
+const stds = [8,10,12,14,16,18,20];
+return stds.find(l => l >= spanFt + 0.5) || 20;
+}
+// Header piece count — headers are doubled, cut from stock
+function headerPieces(roWidthFt, stockLen) {
+const headerLen = roWidthFt + 0.5; // 6” bearing total
+const perStick = Math.floor(stockLen / headerLen);
+return Math.ceil(2 / perStick); // doubled header = 2 pieces
+}
+
+// ─── EXTERIOR WALL FRAMING ───
+const extWallLF = ext_wall_linear_ft || perimeterLF;
+const extStudCount = Math.ceil((extWallLF / 1.333) + exterior_corners * 3);
+
+// Plates — always 16’ lumber
+const extTopPlateSticks = Math.ceil(plates16(extWallLF * 2) * 1.05); // double top plate, 5% lap waste
+const extBotPlateSticks = Math.ceil(plates16(extWallLF) * 1.05);     // single bottom plate
+const extTopPlateLF = extTopPlateSticks * 16;
+const extBotPlateLF = extBotPlateSticks * 16;
+
+// OSB sheathing — 4x8 sheets
+const wallSheathingSheets = Math.ceil((extWallLF * plate_height_ft / 32) * 1.1);
+
+const houseWrapSF = Math.ceil(extWallLF * plate_height_ft * 1.15);
+
+// Headers — calculate piece counts by size
+const headerItems = {};
+const headerPieceCounts = {};
+;[…doors, …windows].forEach(item => {
+const hdr = item.header || ‘(2) 2x6’;
+const roW = item.rough_opening_width_ft || 3;
+const len = roW + 0.5;
+if (!headerItems[hdr]) { headerItems[hdr] = 0; headerPieceCounts[hdr] = { lf:0, pcs:0, size:’’, stockLen:0 }; }
+headerItems[hdr] += len;
+// Determine stock length and piece count
+const sizeMatch = hdr.match(/2x(\d+)/);
+const nomDepth = sizeMatch ? parseInt(sizeMatch[1]) : 6;
+const stockLen = bestLength(len * 2); // order stock that cuts two headers
+headerPieceCounts[hdr].lf += len * 2; // doubled header
+headerPieceCounts[hdr].pcs += Math.ceil((len * 2) / stockLen);
+headerPieceCounts[hdr].size = `2×${nomDepth}`;
+headerPieceCounts[hdr].stockLen = stockLen;
+});
+
+const extFramingItems = [
+{
+item: ‘Studs — 2×6 exterior’,
+description: `104-5/8" precut sticks @ 16" OC · ${extWallLF} LF of wall`,
+qty: extStudCount,
+unit: ‘EA’,
+lf: null,
+confidence: ‘high’
+},
+{
+item: ‘Top plate — 2×6 × 16'’,
+description: `Double top plate · ${extTopPlateLF} LF total · always order 16' sticks`,
+qty: extTopPlateSticks,
+unit: ‘PCS @ 16'’,
+lf: extTopPlateLF,
+confidence: ‘high’
+},
+{
+item: ‘Bottom plate — 2×6 PT × 16'’,
+description: `Single PT sill · ${extBotPlateLF} LF total · always order 16' sticks`,
+qty: extBotPlateSticks,
+unit: ‘PCS @ 16'’,
+lf: extBotPlateLF,
+confidence: ‘high’
+},
+];
+
+Object.entries(headerPieceCounts).forEach(([hdr, data]) => {
+extFramingItems.push({
+item: `Headers — ${hdr}`,
+description: `Doubled · cut from ${data.stockLen}' stock · ${Math.ceil(data.lf)} LF total`,
+qty: Math.ceil(data.pcs * 1.1),
+unit: `PCS @ ${data.stockLen}'`,
+lf: Math.ceil(data.lf),
+confidence: ‘high’
+});
+});
+
+if (sheathing_type === ‘ZIP’) {
+extFramingItems.push({ item: ‘Wall sheathing — ZIP System 4×8’, description: `${extWallLF} LF wall × ${plate_height_ft}' ht + 10% waste`, qty: wallSheathingSheets, unit: ‘SHEETS’, lf: null, confidence: ‘high’ });
+extFramingItems.push({ item: ‘ZIP tape’, description: ‘1 roll per 100 LF of seams’, qty: Math.ceil(extWallLF / 100), unit: ‘ROLLS’, lf: null, confidence: ‘high’ });
+} else {
+extFramingItems.push({ item: ‘Wall sheathing — OSB 7/16” 4×8’, description: `${extWallLF} LF wall × ${plate_height_ft}' ht + 10% waste`, qty: wallSheathingSheets, unit: ‘SHEETS’, lf: null, confidence: ‘high’ });
+extFramingItems.push({ item: ‘House wrap’, description: ‘Per wall SF + 15% overlap’, qty: houseWrapSF.toLocaleString(), unit: ‘SF’, lf: null, confidence: ‘high’ });
+}
+
+results.categories.push({ name: ‘Exterior Wall Framing — 2×6 @ 16” OC’, color: ‘#1F4E79’, items: extFramingItems });
+
+// ─── INTERIOR WALL FRAMING ───
+const intWallLF = int_wall_linear_ft || 0;
+const plumbWallLF = plumbing_wall_linear_ft || 0;
+const intStudCount = Math.ceil(intWallLF / 1.333);
+const plumbStudCount = Math.ceil(plumbWallLF / 1.333);
+
+// Interior plates — always 16’ lumber
+const int2x4TopSticks = Math.ceil(plates16(intWallLF * 2) * 1.05);
+const int2x4BotSticks = Math.ceil(plates16(intWallLF) * 1.05);
+const int2x6TopSticks = Math.ceil(plates16(plumbWallLF * 2) * 1.05);
+const int2x6BotSticks = Math.ceil(plates16(plumbWallLF) * 1.05);
+const int2x4PlateLF = (int2x4TopSticks + int2x4BotSticks) * 16;
+const int2x6PlateLF = (int2x6TopSticks + int2x6BotSticks) * 16;
+const ladderBlockingLF = Math.ceil(int_t_intersections * 3.5) || Math.ceil(intWallLF * 0.15);
+
+if (plumbWallLF > 0) {
+results.flags.push({
+level: ‘info’,
+message: `${plumbWallLF} LF of plumbing walls detected. Framed as 2×6 @ 16" OC. Confirm all wet wall locations before ordering.`
+});
+}
+
+results.categories.push({
+name: ‘Interior Wall Framing’,
+color: ‘#2E5984’,
+items: [
+{ item: ‘Studs — 2×4 standard’, description: `92-5/8" precut @ 16" OC · ${intWallLF} LF of wall`, qty: intStudCount, unit: ‘EA’, lf: null, confidence: ‘high’ },
+{ item: ‘Studs — 2×6 plumbing walls’, description: `92-5/8" precut @ 16" OC · ${plumbWallLF} LF of wet walls`, qty: plumbStudCount, unit: ‘EA’, lf: null, confidence: ‘medium’ },
+{ item: ‘Top plate — 2×4 × 16'’, description: `Double top plate · ${int2x4TopSticks*16} LF · always 16' sticks`, qty: int2x4TopSticks, unit: ‘PCS @ 16'’, lf: int2x4TopSticks*16, confidence: ‘high’ },
+{ item: ‘Bottom plate — 2×4 × 16'’, description: `Single bottom plate · ${int2x4BotSticks*16} LF · always 16' sticks`, qty: int2x4BotSticks, unit: ‘PCS @ 16'’, lf: int2x4BotSticks*16, confidence: ‘high’ },
+…(plumbWallLF > 0 ? [
+{ item: ‘Top plate — 2×6 plumbing × 16'’, description: `Double top plate · ${int2x6TopSticks*16} LF · always 16' sticks`, qty: int2x6TopSticks, unit: ‘PCS @ 16'’, lf: int2x6TopSticks*16, confidence: ‘medium’ },
+{ item: ‘Bottom plate — 2×6 plumbing × 16'’, description: `Single bottom plate · ${int2x6BotSticks*16} LF · always 16' sticks`, qty: int2x6BotSticks, unit: ‘PCS @ 16'’, lf: int2x6BotSticks*16, confidence: ‘medium’ },
+] : []),
+{ item: ‘Ladder blocking — 2×4’, description: ‘Flat at T-intersections’, qty: ladderBlockingLF, unit: ‘LF’, lf: ladderBlockingLF, confidence: ‘medium’ },
+]
+});
+
+// ─── ROOF FRAMING ───
+const roofFramingItems = [];
+const buildingLen = building_depth_ft || building_width_ft || 40;
+const buildingSpan = building_width_ft || building_depth_ft || 56;
+
+if (trusses && trusses.length > 0) {
+trusses.forEach(t => {
+const qty = t.count || Math.ceil(buildingLen / 2) + 1;
+roofFramingItems.push({ item: `${t.type} (${t.mark})`, description: t.description || ‘24” OC spacing’, qty, unit: ‘EA’, confidence: ‘high’ });
+});
+} else {
+// Calculate from building length — one truss every 2ft at 24” OC
+const totalTrusses = Math.ceil(buildingLen / 2) + 1;
+roofFramingItems.push({ item: ‘Trusses’, description: `24" OC · ${buildingLen}' building length · confirm type`, qty: totalTrusses, unit: ‘EA’, confidence: ‘medium’ });
+}
+
+if (rough_timber.length > 0) {
+rough_timber.forEach(r => {
+roofFramingItems.push({ item: `Rough timber ${r.size} (${r.mark})`, description: r.description || ‘Per framing schedule’, qty: r.count, unit: ‘EA’, confidence: ‘high’ });
+});
+}
+
+const ridgeNailerLF = Math.ceil(building_width_ft * 1.1);
+const purlinLF = Math.ceil((mainSlopedSF / 2) * 1.1);
+const porchDeckLF = Math.ceil((porch_sf / 0.833) * 1.1);
+const fasciaLF = Math.ceil(perimeterLF * 1.1);
+
+roofFramingItems.push(
+{ item: ‘Ridge nailer — 2×12 #2 SP’, description: ‘Building length + 10% waste’, qty: ridgeNailerLF, unit: ‘LF’, confidence: ‘high’ },
+{ item: ‘Purlins — 2×4 #2 SP’, description: ‘@ 24” OC on truss top chords’, qty: purlinLF.toLocaleString(), unit: ‘LF’, confidence: ‘high’ },
+{ item: ‘Porch decking — 2×6 T&G’, description: ‘Solid decking + 10% waste’, qty: porchDeckLF, unit: ‘LF’, confidence: ‘high’ },
+{ item: ‘Fascia — 2×6 #2 SP’, description: ‘Eave perimeter + 10%’, qty: fasciaLF, unit: ‘LF’, confidence: ‘high’ }
+);
+
+results.categories.push({ name: ‘Roof Framing’, color: ‘#4A2040’, items: roofFramingItems });
+
+// ─── ROOF SHEATHING + COVERING ───
+const roofSheathSheets = Math.ceil((totalSlopedSF / 32) * 1.1);
+const metalRoofingLF = Math.ceil((totalSlopedSF / 3) * 1.1);
+const ridgeCapLF = Math.ceil(building_width_ft * 1.1);
+const eavesTrimLF = Math.ceil(perimeterLF * 1.1);
+
+const roofCoverItems = [
+{ item: `Roof sheathing — ${sheathing_type === 'ZIP' ? 'ZIP System' : 'OSB 7/16"'}`, description: `${totalSlopedSF.toLocaleString()} SF sloped + 10% waste`, qty: roofSheathSheets, unit: ‘SHEETS’, confidence: ‘high’ },
+];
+
+if (sheathing_type !== ‘ZIP’) {
+roofCoverItems.push({ item: ‘Underlayment — synthetic’, description: ‘Full roof area’, qty: totalSlopedSF.toLocaleString(), unit: ‘SF’, confidence: ‘high’ });
+} else {
+roofCoverItems.push({ item: ‘ZIP tape — roof’, description: ‘Seam sealing’, qty: Math.ceil(totalSlopedSF / 100), unit: ‘ROLLS’, confidence: ‘high’ });
+}
+
+roofCoverItems.push(
+{ item: `Metal roofing — ${roofing_type}`, description: ‘3' coverage panels + 10% waste’, qty: metalRoofingLF.toLocaleString(), unit: ‘LF’, confidence: ‘high’ },
+{ item: ‘Ridge cap — metal’, description: ‘Main ridge + 10%’, qty: ridgeCapLF, unit: ‘LF’, confidence: ‘high’ },
+{ item: ‘Eave trim / drip edge’, description: ‘Eave perimeter + 10%’, qty: eavesTrimLF, unit: ‘LF’, confidence: ‘high’ }
+);
+
+results.categories.push({ name: ‘Roof Sheathing + Covering’, color: ‘#3A2010’, items: roofCoverItems });
+
+// ─── EXTERIOR SIDING + FINISHES ───
+const sidingLF = Math.ceil((netWallSF / 3) * 1.1);
+const soffitSF = Math.ceil(perimeterLF * overhangFt);
+const cornerTrimLF = Math.ceil(exterior_corners * plate_height_ft * 1.1);
+const openingTrimLF = Math.ceil([…doors, …windows].reduce((acc, o) => {
+const w = o.rough_opening_width_ft || 3;
+const h = o.rough_opening_height_ft || 6.67;
+return acc + (w + h) * 2;
+}, 0) * 1.1);
+
+results.categories.push({
+name: ‘Exterior Siding + Finishes’,
+color: ‘#1A4030’,
+items: [
+{ item: ‘Metal siding — Tuff-Rib 29ga’, description: ‘3' panels, net wall area + 10%’, qty: sidingLF.toLocaleString(), unit: ‘LF’, confidence: ‘high’ },
+{ item: ‘Metal soffit’, description: ‘Panel match — eave coverage’, qty: soffitSF, unit: ‘SF’, confidence: ‘medium’ },
+{ item: ‘Corner trim’, description: ‘All exterior corners’, qty: cornerTrimLF, unit: ‘LF’, confidence: ‘high’ },
+{ item: ‘Window / door trim’, description: ‘All opening perimeters’, qty: openingTrimLF || ‘Per schedule’, unit: ‘LF’, confidence: ‘high’ },
+]
+});
+
+// ─── INSULATION ───
+const wallFoamBF = Math.ceil(netWallSF * 5.5 * 1.1);
+const roofFoamBF = Math.ceil(totalSlopedSF * 13.2 * 1.1);
+
+results.categories.push({
+name: ‘Insulation — Open-Cell Spray Foam’,
+color: ‘#1A3A2A’,
+items: [
+{ item: ‘Spray foam — walls’, description: ‘Open-cell, 2×6 full cavity, R-20’, qty: wallFoamBF.toLocaleString(), unit: ‘BF’, confidence: ‘high’ },
+{ item: ‘Spray foam — roof’, description: ‘Open-cell, R-49 @ 13.2” depth’, qty: roofFoamBF.toLocaleString(), unit: ‘BF’, confidence: ‘high’ },
+]
+});
+
+// SUMMARY
+results.summary = {
+living_sf,
+porch_sf,
+total_slab_sf: totalSlabSF,
+main_sloped_sf: mainSlopedSF,
+porch_sloped_sf: porchSlopedSF,
+total_sloped_sf: totalSlopedSF,
+building_dimensions: `${building_width_ft}' × ${building_depth_ft}'`,
+plate_height: `${plate_height_ft}'-0"`,
+structural_roof_pitch,
+porch_pitch,
+total_doors: doors.length,
+total_windows: windows.length,
+total_glazing_sf: windows.reduce((a, w) => a + (w.area_sf || 0), 0),
+sheathing_type,
+foundation_type
+};
+
+return results;
+}
+
+// ─────────────────────────────────────────────
+// EXTRACTION PROMPT
+// ─────────────────────────────────────────────
+
+const EXTRACTION_PROMPT = `You are an expert at reading architectural and structural drawings for residential construction. Analyze this floor plan and return ONLY a valid JSON object with no other text, markdown, or explanation.
+
+Extract every value you can find. Use null for fields you cannot read. Be precise with numbers.
+
+Return this exact JSON structure:
+{
+“project_name”: “string or null”,
+“sheet_info”: “string or null”,
+“living_sf”: number,
+“porch_sf”: number,
+“building_width_ft”: number,
+“building_depth_ft”: number,
+“plate_height_ft”: number,
+“structural_roof_pitch”: “X:12 string”,
+“ceiling_pitch”: “X:12 string or null if same as structural”,
+“porch_pitch”: “X:12 string or null”,
+“ext_wall_linear_ft”: number,
+“int_wall_linear_ft”: number,
+“plumbing_wall_linear_ft”: number,
+“exterior_corners”: number,
+“int_t_intersections”: number,
+“doors”: [
+{
+“mark”: “D01”,
+“count”: 1,
+“width_ft”: 3.0,
+“height_ft”: 6.67,
+“rough_opening_width_ft”: 3.0,
+“rough_opening_height_ft”: 6.67,
+“description”: “Ext door”,
+“header”: “(2) 2x12”,
+“is_exterior”: true
+}
+],
+“windows”: [
+{
+“mark”: “W01”,
+“count”: 1,
+“width_ft”: 3.0,
+“height_ft”: 5.5,
+“rough_opening_width_ft”: 3.0,
+“rough_opening_height_ft”: 5.5,
+“description”: “Single hung”,
+“header”: “(2) 2x10”,
+“area_sf”: 16.5
+}
+],
+“trusses”: [
+{
+“mark”: “T1”,
+“type”: “Flat bottom truss”,
+“count”: 12,
+“description”: “24 OC”
+}
+],
+“rough_timber”: [
+{
+“mark”: “R1”,
+“size”: “4x6”,
+“count”: 10,
+“description”: “Porch rafters”
+}
+],
+“sheathing_type”: “OSB or ZIP”,
+“roofing_type”: “Tuff-Rib 29ga or other”,
+“eave_overhang_in”: 16,
+“roof_area_main_sf”: number,
+“roof_area_porch_sf”: number,
+“foundation_type”: “monolithic_slab or stem_wall or pier_beam”,
+“slab_thickness_in”: 4,
+“notes”: [“any important notes or flags as strings”]
+}
+
+Important rules:
+
+- structural_roof_pitch is from the roof framing plan or elevation — NOT the ceiling vault note on the floor plan
+- If ceiling pitch differs from structural pitch, set ceiling_pitch to the floor plan vault pitch
+- For ext_wall_linear_ft: sum all exterior wall dimension strings if no net wall area is given
+- For plumbing walls: any wall adjacent to bathroom fixtures, laundry, or kitchen wet wall
+- If a truss or door schedule is shown, read every line exactly
+- Expand door/window marks by count — if D03 has count 8, create 8 separate door entries or note count in the object`;
+
+// ─────────────────────────────────────────────
+// API ROUTES
+// ─────────────────────────────────────────────
+
+// Analyze drawing
+app.post(’/api/analyze’, upload.single(‘drawing’), async (req, res) => {
+try {
+if (!req.file) return res.status(400).json({ error: ‘No file uploaded’ });
+
+```
+const apiKey = process.env.ANTHROPIC_API_KEY;
+if (!apiKey) return res.status(500).json({ error: 'API key not configured' });
+
+const fileBuffer = req.file.buffer;
+const mimeType = req.file.mimetype;
+const base64Data = fileBuffer.toString('base64');
+
+// Build message — images go as image type, PDFs need special handling
+let contentBlock;
+if (mimeType === 'application/pdf') {
+  // Send PDF as document type with beta header
+  contentBlock = {
+    type: 'document',
+    source: {
+      type: 'base64',
+      media_type: 'application/pdf',
+      data: base64Data
     }
-  }
-  catch(e){showError('Network error: '+e.message);}
+  };
+} else {
+  // PNG, JPG, WEBP — send as image
+  const validImageType = ['image/jpeg','image/png','image/gif','image/webp'].includes(mimeType)
+    ? mimeType : 'image/jpeg';
+  contentBlock = {
+    type: 'image',
+    source: {
+      type: 'base64',
+      media_type: validImageType,
+      data: base64Data
+    }
+  };
 }
-function show(id){['screenUpload','screenProcessing','screenResults','errorWrap'].forEach(s=>{const el=document.getElementById(s);if(el)el.style.display=s===id?'block':'none';});const res=document.getElementById('screenResults');if(id==='screenResults'&&res)res.style.display='block';}
-function showError(msg){
-  ['screenUpload','screenProcessing','screenResults'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
-  const eb=document.getElementById('errorWrap');
-  if(eb){eb.style.display='block';document.getElementById('errorMsg').textContent=msg;}
-}
-function resetApp(){appData=null;if(renderer){renderer.dispose();renderer=null;}document.getElementById('fileInput').value='';show('screenUpload');}
-function renderResults(data){
-  try {
-  const{extracted:e,takeoff:t,filename}=data;
-  document.getElementById('projTitle').textContent=e.project_name||filename||'Takeoff Results';
-  document.getElementById('projMeta').textContent=[e.sheet_info,t.summary.building_dimensions,t.summary.plate_height+' plate'].filter(Boolean).join(' · ');
-  document.getElementById('alertsWrap').innerHTML=(t.flags||[]).map(f=>`<div class="alert ${f.level==='warning'?'a-warn':'a-info'}"><span class="a-icon">${f.level==='warning'?'⚠':'ℹ'}</span><div>${f.message}</div></div>`).join('');
-  const s=t.summary;
-  document.getElementById('statsRow').innerHTML=[['Living Area',(s.living_sf||0).toLocaleString(),'sq ft'],['Porch',(s.porch_sf||0).toLocaleString(),'sq ft'],['Sloped Roof',(s.total_sloped_sf||0).toLocaleString(),'sq ft'],['Doors',s.total_doors||0,'total'],['Windows',s.total_windows||0,(s.total_glazing_sf||0)+' SF'],['Concrete',t.categories?.find(c=>c.name==='Foundation')?.items?.[0]?.qty||'—','cubic yards']].map(([l,v,u])=>`<div class="stat"><div class="s-lbl">${l}</div><div class="s-val">${v}</div><div class="s-unit">${u}</div></div>`).join('');
-  document.getElementById('materialBody').innerHTML=(t.categories||[]).map(cat=>`<tr class="cr"><td colspan="6">${cat.name}</td></tr>${cat.items.map(i=>`<tr class="dr"><td>${i.item}</td><td style="color:var(--muted);font-size:12px">${i.description}</td><td style="text-align:right"><span class="qv">${i.qty}</span></td><td><span class="ut">${i.unit}</span></td><td style="text-align:right;font-size:12px;color:var(--muted)">${i.lf!=null?i.lf.toLocaleString()+' LF':''}</td><td><span class="cb ${i.confidence==='high'?'ch':i.confidence==='medium'?'cm':'cl'}">${i.confidence==='high'?'✓ High':i.confidence==='medium'?'~ Med':'! Low'}</span></td></tr>`).join('')}`).join('');
-  document.getElementById('extractionGrid').innerHTML=[
-    {t:'Square Footage',r:[['Living area',(e.living_sf||0).toLocaleString()+' SF'],['Porch',(e.porch_sf||0).toLocaleString()+' SF'],['Total slab',((e.living_sf||0)+(e.porch_sf||0)).toLocaleString()+' SF']]},
-    {t:'Building Dimensions',r:[['Width',(e.building_width_ft||'—')+"'-0\""],['Depth',(e.building_depth_ft||'—')+"'-0\""],['Plate height',(e.plate_height_ft||9)+"'-0\""]]},
-    {t:'Roof Data',r:[['Structural pitch',e.structural_roof_pitch||'—'],e.ceiling_pitch&&e.ceiling_pitch!==e.structural_roof_pitch?['Ceiling pitch',e.ceiling_pitch+' <span class="ef">⚠ differs</span>']:null,['Porch pitch',e.porch_pitch||'—'],['Sheathing',e.sheathing_type||'OSB'],['Roofing',e.roofing_type||'Tuff-Rib 29ga']].filter(Boolean)},
-    {t:'Door Schedule',r:[...(e.doors||[]).reduce((acc,d)=>{if(!acc.find(r=>r[0].startsWith(d.mark)))acc.push([`${d.mark} — ${d.description||''} ×${d.count}`,`${d.rough_opening_width_ft||'?'}' × ${d.rough_opening_height_ft||'?'}'`]);return acc;},[]),['Total',(e.doors||[]).reduce((a,d)=>a+d.count,0)+' doors']]},
-    {t:'Window Schedule',r:[...(e.windows||[]).map(w=>[`${w.mark} ×${w.count}`,`${w.rough_opening_width_ft||'?'}' × ${w.rough_opening_height_ft||'?'}'`]),['Total glazing',(s.total_glazing_sf||0)+' SF']]},
-    {t:'Framing Spec',r:[['Ext. walls','2×6 @ 16" OC'],['Int. walls','2×4 @ 16" OC'],['Plumbing walls','2×6 @ 16" OC'],['Foundation',(e.foundation_type||'monolithic slab').replace(/_/g,' ')],['Slab',(e.slab_thickness_in||4)+'" thick']]},
-    e.trusses?.length?{t:'Truss Schedule',r:[...(e.trusses||[]).map(t=>[`${t.mark} — ${t.type}`,t.count+' EA']),['Total',(e.trusses||[]).reduce((a,t)=>a+t.count,0)+' EA']]}:null,
-    e.rough_timber?.length?{t:'Rough Timber',r:(e.rough_timber||[]).map(r=>[`${r.mark} — ${r.size}`,r.count+' EA'])}:null
-  ].filter(Boolean).map(card=>`<div class="ec"><div class="ec-t">${card.t}</div>${card.r.map(([k,v])=>`<div class="er"><span class="ek">${k}</span><span class="ev">${v}</span></div>`).join('')}</div>`).join('');
-  document.getElementById('v3dDims').innerHTML=`${e.building_width_ft||56}'×${e.building_depth_ft||35}'×${e.plate_height_ft||9}'<br>Pitch ${e.structural_roof_pitch||'6:12'}`;
-  document.getElementById('model3dCards').innerHTML=`<div class="ec"><div class="ec-t">Model Dimensions</div><div class="er"><span class="ek">Footprint</span><span class="ev">${e.building_width_ft||56}' × ${e.building_depth_ft||35}'</span></div><div class="er"><span class="ek">Wall height</span><span class="ev">${e.plate_height_ft||9}'-0"</span></div><div class="er"><span class="ek">Roof pitch</span><span class="ev">${e.structural_roof_pitch||'6:12'}</span></div><div class="er"><span class="ek">Porch pitch</span><span class="ev">${e.porch_pitch||'2:12'}</span></div></div><div class="ec"><div class="ec-t">Roof Geometry</div><div class="er"><span class="ek">Main sloped SF</span><span class="ev">${(s.main_sloped_sf||0).toLocaleString()} SF</span></div><div class="er"><span class="ek">Porch sloped SF</span><span class="ev">${(s.porch_sloped_sf||0).toLocaleString()} SF</span></div><div class="er"><span class="ek">Total sloped SF</span><span class="ev">${(s.total_sloped_sf||0).toLocaleString()} SF</span></div><div class="er"><span class="ek">Overhang</span><span class="ev">16" typical</span></div></div>`;
-  show('screenResults');setTimeout(()=>init3D(e),400);
-  } catch(err){ showError('Error displaying results: '+err.message+'. Raw data received — check console.'); console.error(err); }
-}
-function showTab(tab,btn){
-  ['Materials','Extraction','Model3d'].forEach(t=>{document.getElementById('tab'+t).style.display=t===tab?'':'none';});
-  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  if(tab==='Model3d'){
-    setTimeout(()=>{
-      const canvas=document.getElementById('houseCanvas');
-      const cont=canvas.parentElement;
-      const W=cont.clientWidth,H=cont.clientHeight;
-      if(renderer&&W>0&&H>0){renderer.setSize(W,H);camera.aspect=W/H;camera.updateProjectionMatrix();}
-      if(renderer&&scene&&camera)renderer.render(scene,camera);
-      else if(appData)init3D(appData.extracted);
-    },50);
-  }
-}
-function exportCSV(){if(!appData)return;const rows=[['Category','Item','Description','Quantity','Unit','Confidence']];(appData.takeoff.categories||[]).forEach(cat=>{cat.items.forEach(i=>rows.push([cat.name,i.item,i.description,i.qty,i.unit,i.confidence]));});const csv=rows.map(r=>r.map(c=>'"'+(c||'').toString().replace(/"/g,'""')+'"').join(',')).join('\n');Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob([csv],{type:'text/csv'})),download:(appData.extracted?.project_name||'Takeoff')+'_SE_Home.csv'}).click();}
-document.getElementById('fileInput').addEventListener('change',e=>{if(e.target.files[0])uploadFile(e.target.files[0]);});
-const dz=document.getElementById('dropZone');
-dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over');});
-dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
-dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');if(e.dataTransfer.files[0])uploadFile(e.dataTransfer.files[0]);});
-function init3D(e){
-  const canvas=document.getElementById('houseCanvas');
-  const cont=canvas.parentElement;
-  // Use fallback dimensions if container is hidden (tab not active)
-  const W=Math.max(cont.clientWidth,600);
-  const H=Math.max(cont.clientHeight,400);
-  if(renderer)renderer.dispose();
-  renderer=new THREE.WebGLRenderer({canvas,antialias:true});
-  renderer.setSize(W,H);renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
-  renderer.setClearColor(0x1a2332);renderer.shadowMap.enabled=true;
-  scene=new THREE.Scene();
-  camera=new THREE.PerspectiveCamera(45,W/H,0.1,1000);
-  camera.position.set(20,13,24);camera.lookAt(0,3,0);
-  scene.add(new THREE.AmbientLight(0xffffff,0.4));
-  const sun=new THREE.DirectionalLight(0xfff8e8,1.2);sun.position.set(12,22,12);sun.castShadow=true;scene.add(sun);
-  const fill=new THREE.DirectionalLight(0xd0e8ff,0.3);fill.position.set(-10,6,-6);scene.add(fill);
-  const grid=new THREE.GridHelper(80,40,0x263044,0x263044);grid.position.y=-0.01;scene.add(grid);
-  const ground=new THREE.Mesh(new THREE.PlaneGeometry(80,80),new THREE.MeshLambertMaterial({color:0x1e3a1e}));
-  ground.rotation.x=-Math.PI/2;ground.position.y=-0.05;scene.add(ground);
-  buildHouse(e);
-  canvas.addEventListener('mousedown',ev=>{isDrag=true;prevMouse={x:ev.clientX,y:ev.clientY};});
-  canvas.addEventListener('touchstart',ev=>{isDrag=true;prevMouse={x:ev.touches[0].clientX,y:ev.touches[0].clientY};},{passive:true});
-  window.addEventListener('mouseup',()=>isDrag=false);
-  window.addEventListener('touchend',()=>isDrag=false);
-  window.addEventListener('mousemove',onDrag);
-  window.addEventListener('touchmove',ev=>onDrag(ev.touches[0]),{passive:true});
-  canvas.addEventListener('wheel',ev=>{camera.position.multiplyScalar(ev.deltaY>0?1.1:0.91);renderer.render(scene,camera);},{passive:true});
-  renderer.render(scene,camera);
-}
-function onDrag(ev){if(!isDrag||!renderer)return;rotY+=(ev.clientX-prevMouse.x)*0.007;rotX+=(ev.clientY-prevMouse.y)*0.007;rotX=Math.max(-0.85,Math.min(1.2,rotX));prevMouse={x:ev.clientX,y:ev.clientY};const r=34;camera.position.set(r*Math.sin(rotY)*Math.cos(rotX),r*Math.sin(rotX)+5,r*Math.cos(rotY)*Math.cos(rotX));camera.lookAt(0,3,0);renderer.render(scene,camera);}
-function buildHouse(e){
-  const W=(e.building_width_ft||56)/4,D=(e.building_depth_ft||35)/4,H=(e.plate_height_ft||9)/4;
-  const PD=(e.porch_sf||448)/(e.building_width_ft||56)/4;
-  const pm={'6:12':0.5,'2:12':0.167,'4:12':0.333,'5:12':0.417,'8:12':0.667,'12:12':1.0};
-  const mp=pm[e.structural_roof_pitch||'6:12']||0.5,pp=pm[e.porch_pitch||'2:12']||0.167;
-  const slab=new THREE.Mesh(new THREE.BoxGeometry(W,0.1,D),new THREE.MeshLambertMaterial({color:0x888880}));
-  slab.position.y=-0.05;scene.add(slab);
-  wallGroup=new THREE.Group();
-  const wm=new THREE.MeshLambertMaterial({color:0xb0aaa0});
-  [[W,H,0.16,0,H/2,-D/2],[W,H,0.16,0,H/2,D/2],[0.16,H,D,-W/2,H/2,0],[0.16,H,D,W/2,H/2,0]].forEach(([w,h,d,x,y,z])=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),wm);m.position.set(x,y,z);wallGroup.add(m);});
-  const winm=new THREE.MeshLambertMaterial({color:0x6a9cb8,transparent:true,opacity:0.6});
-  [[-W*0.32,H*0.62,-D/2+0.04],[0,H*0.62,-D/2+0.04],[W*0.32,H*0.62,-D/2+0.04],[-W*0.32,H*0.62,D/2-0.04],[W*0.32,H*0.62,D/2-0.04]].forEach(([x,y,z])=>{const w=new THREE.Mesh(new THREE.BoxGeometry(0.65,0.8,0.06),winm);w.position.set(x,y,z);wallGroup.add(w);});
-  const door=new THREE.Mesh(new THREE.BoxGeometry(0.5,1.05,0.08),new THREE.MeshLambertMaterial({color:0x7a5230}));
-  door.position.set(0,0.6,-D/2+0.04);wallGroup.add(door);
-  const stone=new THREE.Mesh(new THREE.BoxGeometry(W+0.02,0.65,0.2),new THREE.MeshLambertMaterial({color:0x807060}));
-  stone.position.set(0,0.32,-D/2-0.01);wallGroup.add(stone);
-  scene.add(wallGroup);
-  roofGroup=new THREE.Group();
-  const roofMat=new THREE.MeshLambertMaterial({color:0x2a2520,side:THREE.DoubleSide});
-  const ridge=W/2*mp;
 
-  // Left panel
-  const lGeo=new THREE.BufferGeometry();
-  lGeo.setAttribute('position',new THREE.BufferAttribute(new Float32Array([
-    -W/2-0.3,0,-D/2-0.3, 0,ridge,-D/2-0.3, 0,ridge,D/2+0.3,
-    -W/2-0.3,0,-D/2-0.3, 0,ridge,D/2+0.3, -W/2-0.3,0,D/2+0.3
-  ]),3));lGeo.computeVertexNormals();
-  const lPanel=new THREE.Mesh(lGeo,roofMat);lPanel.position.set(0,H,0);roofGroup.add(lPanel);
+const messages = [{
+  role: 'user',
+  content: [contentBlock, { type: 'text', text: EXTRACTION_PROMPT }]
+}];
 
-  // Right panel
-  const rGeo=new THREE.BufferGeometry();
-  rGeo.setAttribute('position',new THREE.BufferAttribute(new Float32Array([
-    W/2+0.3,0,-D/2-0.3, 0,ridge,D/2+0.3, 0,ridge,-D/2-0.3,
-    W/2+0.3,0,-D/2-0.3, W/2+0.3,0,D/2+0.3, 0,ridge,D/2+0.3
-  ]),3));rGeo.computeVertexNormals();
-  const rPanel=new THREE.Mesh(rGeo,roofMat);rPanel.position.set(0,H,0);roofGroup.add(rPanel);
-
-  // Gable ends
-  const gMat=new THREE.MeshLambertMaterial({color:0xb0aaa0,side:THREE.DoubleSide});
-  [-D/2,D/2].forEach(z=>{
-    const gGeo=new THREE.BufferGeometry();
-    gGeo.setAttribute('position',new THREE.BufferAttribute(new Float32Array([-W/2,0,z, W/2,0,z, 0,ridge,z]),3));
-    gGeo.computeVertexNormals();
-    roofGroup.add(new THREE.Mesh(gGeo,gMat));
-  });
-  roofGroup.position.set(0,0,0);
-
-  // Porch roof
-  const pr=W/2*pp;
-  const ps=new THREE.Shape();ps.moveTo(-W/2-0.3,0);ps.lineTo(-W/2-0.3,pr*0.25);ps.lineTo(W/2+0.3,pr);ps.lineTo(W/2+0.3,0);ps.closePath();
-  const pg=new THREE.ExtrudeGeometry(ps,{depth:PD+0.25,bevelEnabled:false});
-  const pmesh=new THREE.Mesh(pg,new THREE.MeshLambertMaterial({color:0x2a2520,side:THREE.DoubleSide}));
-  pmesh.position.set(0,H,-D/2-PD+0.05);roofGroup.add(pmesh);
-  const postm=new THREE.MeshLambertMaterial({color:0xa07840});
-  [-W*0.38,-W*0.14,W*0.14,W*0.38].forEach(x=>{const p=new THREE.Mesh(new THREE.BoxGeometry(0.11,H,0.11),postm);p.position.set(x,H/2,-D/2-PD+0.1);roofGroup.add(p);});
-  scene.add(roofGroup);
+// PDF requires beta header
+const headers = {
+  'Content-Type': 'application/json',
+  'x-api-key': apiKey,
+  'anthropic-version': '2023-06-01'
+};
+if (mimeType === 'application/pdf') {
+  headers['anthropic-beta'] = 'pdfs-2024-09-25';
 }
-function toggleRoof(){if(roofGroup){showRoof=!showRoof;roofGroup.visible=showRoof;if(renderer)renderer.render(scene,camera);}}
-function toggleWalls(){if(wallGroup){showWalls=!showWalls;wallGroup.visible=showWalls;if(renderer)renderer.render(scene,camera);}}
-function resetCam(){rotX=0.38;rotY=-0.52;camera.position.set(20,13,24);camera.lookAt(0,3,0);if(renderer)renderer.render(scene,camera);}
-</script>
-</body>
-</html>
+
+const response = await fetch('https://api.anthropic.com/v1/messages', {
+  method: 'POST',
+  headers,
+  body: JSON.stringify({
+    model: 'claude-opus-4-6',
+    max_tokens: 4096,
+    messages
+  })
+});
+
+if (!response.ok) {
+  const err = await response.text();
+  console.error('Anthropic API error:', err);
+  return res.status(500).json({ error: `API error: ${err}` });
+}
+
+const data = await response.json();
+console.log('API response content types:', data.content?.map(b=>b.type));
+const rawText = data.content.map(b => b.text || '').join('');
+console.log('Raw text length:', rawText.length, 'Preview:', rawText.substring(0,200));
+if (!rawText || rawText.length < 10) {
+  return res.status(500).json({ error: 'AI returned empty response. Try a higher resolution image.' });
+}
+
+// Parse JSON from response
+let extracted;
+try {
+  const clean = rawText.replace(/```json|```/g, '').trim();
+  extracted = JSON.parse(clean);
+} catch (e) {
+  console.error('JSON parse error:', e.message, 'Raw:', rawText.substring(0,300));
+  return res.status(500).json({ error: 'Could not parse drawing data — the AI response was not valid JSON. Try a clearer image.', raw: rawText.substring(0, 300) });
+}
+
+// Run rules engine
+const takeoff = runRulesEngine(extracted);
+
+res.json({
+  success: true,
+  extracted,
+  takeoff,
+  filename: req.file.originalname
+});
+```
+
+} catch (err) {
+console.error(‘Analysis error:’, err);
+res.status(500).json({ error: err.message });
+}
+});
+
+// Demo endpoint — uses sample plan data
+app.get(’/api/demo’, (req, res) => {
+const samplePlan = {
+project_name: ‘Sample Home’,
+sheet_info: ‘1st Floor Layout — 3 Bed / 2 Bath Ranch’,
+living_sf: 1680,
+porch_sf: 448,
+building_width_ft: 56,
+building_depth_ft: 35,
+plate_height_ft: 9,
+structural_roof_pitch: ‘6:12’,
+ceiling_pitch: ‘3:12’,
+porch_pitch: ‘2:12’,
+ext_wall_linear_ft: 182,
+int_wall_linear_ft: 320,
+plumbing_wall_linear_ft: 48,
+exterior_corners: 4,
+int_t_intersections: 18,
+doors: [
+{ mark: ‘D01’, count: 1, rough_opening_width_ft: 3, rough_opening_height_ft: 6.67, description: ‘Ext. door w/ sidelites’, header: ‘(2) 2x12’, is_exterior: true },
+{ mark: ‘D02’, count: 1, rough_opening_width_ft: 3, rough_opening_height_ft: 6.67, description: ‘Ext. door RH’, header: ‘(2) 2x10’, is_exterior: true },
+{ mark: ‘D03’, count: 8, rough_opening_width_ft: 2.67, rough_opening_height_ft: 6.67, description: ‘Int. walk door’, header: ‘(2) 2x6’, is_exterior: false },
+{ mark: ‘D04’, count: 3, rough_opening_width_ft: 5, rough_opening_height_ft: 6.67, description: ‘Int. swing door’, header: ‘(2) 2x6’, is_exterior: false },
+{ mark: ‘D05’, count: 1, rough_opening_width_ft: 2, rough_opening_height_ft: 6.67, description: ‘Int. door’, header: ‘(2) 2x6’, is_exterior: false }
+],
+windows: [
+{ mark: ‘W01’, count: 6, rough_opening_width_ft: 3, rough_opening_height_ft: 5.5, description: ‘Single hung’, header: ‘(2) 2x10’, area_sf: 16.5 },
+{ mark: ‘W02’, count: 2, rough_opening_width_ft: 6, rough_opening_height_ft: 5.5, description: ‘3x5 Twin SH’, header: ‘(2) 2x12’, area_sf: 33 },
+{ mark: ‘W03’, count: 2, rough_opening_width_ft: 3, rough_opening_height_ft: 3, description: ‘Small SH’, header: ‘(2) 2x10’, area_sf: 9 }
+],
+trusses: [
+{ mark: ‘G1’, type: ‘Gable truss’, count: 4, description: ‘2 per gable end’ },
+{ mark: ‘T1’, type: ‘Flat bottom truss’, count: 12, description: ‘24” OC’ },
+{ mark: ‘T2’, type: ‘Scissor truss’, count: 15, description: ‘Vaulted sections 24” OC’ }
+],
+rough_timber: [
+{ mark: ‘R1’, size: ‘4x6’, count: 10, description: ‘Porch rafters’ },
+{ mark: ‘R2’, size: ‘4x6’, count: 3, description: ‘Transition members’ },
+{ mark: ‘R3’, size: ‘6x6’, count: 1, description: ‘Porch post’ },
+{ mark: ‘R4’, size: ‘2x6’, count: 2, description: ‘Transition framing’ },
+{ mark: ‘R5’, size: ‘2x10’, count: 2, description: ‘Beam member’ },
+{ mark: ‘R6’, size: ‘2x12’, count: 2, description: ‘Beam member’ }
+],
+sheathing_type: ‘OSB’,
+roofing_type: ‘Tuff-Rib 29ga’,
+eave_overhang_in: 16,
+roof_area_main_sf: 1949,
+roof_area_porch_sf: 701,
+foundation_type: ‘monolithic_slab’,
+slab_thickness_in: 4,
+notes: [‘Exterior wall net area from schedule: 1,612 SF’, ‘Stone wainscoting front wall only — 3ft height’]
+};
+
+const takeoff = runRulesEngine(samplePlan);
+res.json({ success: true, extracted: samplePlan, takeoff, filename: ‘Sample_Home_Demo.pdf’ });
+});
+
+// Health check
+app.get(’/api/health’, (req, res) => {
+const key = process.env.ANTHROPIC_API_KEY;
+res.json({
+status: ‘ok’,
+version: ‘1.0.0’,
+hasApiKey: !!key,
+keyPrefix: key ? key.substring(0, 10) + ‘…’ : ‘NOT SET’
+});
+});
+
+// Serve frontend for all other routes
+app.get(’*’, (req, res) => res.sendFile(path.join(__dirname, ‘public’, ‘index.html’)));
+
+app.listen(PORT, () => console.log(`HomeBuild AI running on port ${PORT}`));
