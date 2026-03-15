@@ -249,8 +249,49 @@ tr:hover td{background:#fafbfc;}
           </div>
         </div>
         <div class="field-row">
-          <span class="field-label">Posts</span>
-          <div class="field-inputs"><span style="font-size:12px;font-weight:600;color:var(--navy)">8×8 Cypress — both specs</span></div>
+          <span class="field-label">Post size</span>
+          <div class="field-inputs">
+            <div class="seg" style="width:220px">
+              <button class="seg-btn" onclick="setSeg(this,'postSize','6x6')">6×6</button>
+              <button class="seg-btn on" onclick="setSeg(this,'postSize','8x8')">8×8</button>
+              <button class="seg-btn" onclick="setSeg(this,'postSize','10x10')">10×10</button>
+            </div>
+            <span class="field-unit">Cypress</span>
+          </div>
+        </div>
+        <div class="field-row" style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+          <span class="field-label">Gable pop-out</span>
+          <div class="field-inputs">
+            <div class="seg" style="width:140px">
+              <button class="seg-btn on" onclick="setSeg(this,'gableMode','none');toggleGableOptions()">None</button>
+              <button class="seg-btn" onclick="setSeg(this,'gableMode','yes');toggleGableOptions()">Yes</button>
+            </div>
+          </div>
+        </div>
+        <div id="gableOptions" style="display:none">
+          <div class="field-row" style="margin-top:4px">
+            <span class="field-label">Gable width</span>
+            <div class="field-inputs"><input type="number" id="gableWidth" value="10" min="6" max="40" oninput="liveUpdate()"><span class="field-unit">ft (centered)</span></div>
+          </div>
+          <div class="field-row">
+            <span class="field-label">Gable pitch</span>
+            <div class="field-inputs">
+              <div class="seg" style="width:200px">
+                <button class="seg-btn on" onclick="setSeg(this,'gablePitch','8:12')">8:12</button>
+                <button class="seg-btn" onclick="setSeg(this,'gablePitch','10:12')">10:12</button>
+                <button class="seg-btn" onclick="setSeg(this,'gablePitch','12:12')">12:12</button>
+              </div>
+            </div>
+          </div>
+          <div class="field-row">
+            <span class="field-label">Gable framing</span>
+            <div class="field-inputs">
+              <div class="seg" style="width:260px">
+                <button class="seg-btn on" onclick="setSeg(this,'gableFraming','timber')">Timber (4×6 cypress)</button>
+                <button class="seg-btn" onclick="setSeg(this,'gableFraming','standard')">Standard (2×8 / 2×12)</button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -423,8 +464,14 @@ const V = {
   plateH: '9', pitch: '6:12', overhang: '16', sheathing: 'OSB',
   roofing: 'Tuff-Rib 29ga', porchPitch: '2:12', wallSheathing: 'OSB', slabThk: '4',
   postSpacing: '10', timberSpec: 'STD', rafterSpacing: '24',
-  wainType: 'none', wainHeight: '3'
+  wainType: 'none', wainHeight: '3',
+  postSize: '8x8',
+  gableMode: 'none', gablePitch: '8:12', gableFraming: 'timber'
 };
+
+function toggleGableOptions() {
+  document.getElementById('gableOptions').style.display = V.gableMode === 'yes' ? '' : 'none';
+}
 
 function toggleWainscot() {
   document.getElementById('wainscotOptions').style.display = V.wainType === 'none' ? 'none' : '';
@@ -534,12 +581,12 @@ function calculate() {
   // ── ROUGH TIMBER PORCH FRAMING ──
   const postSpacingFt = parseInt(V.postSpacing) || 10;
   const isCypress = V.timberSpec === 'CYP';
-  // STD = 2×6 rafters @ 2' OC | CYP = 4×6 rafters @ 4' OC | Posts always 8×8 cypress
   const rafterSize = isCypress ? '4×6' : '2×6';
   const rafterSpacingFt = isCypress ? 4 : 2;
-  const timberLabel = isCypress ? 'Cypress' : 'STD';
+  const postSize = V.postSize || '8x8'; // e.g. '6x6', '8x8', '10x10'
+  const postLabel = postSize.replace('x','×') + ' Cypress';
 
-  // Posts — 8×8 cypress always, spaced along porch width
+  // Posts — cypress, size per selector, spaced along porch width
   const postCount = porchDepth > 0 ? Math.ceil(porchWidth / postSpacingFt) + 1 : 0;
   const postHeightFt = pH;
   const postLF = postCount * postHeightFt;
@@ -551,7 +598,6 @@ function calculate() {
   const rafterStockLen = [8,10,12,14,16].find(l => l >= rafterLengthFt) || 16;
 
   // Header beam — runs the width of the porch at wall connection
-  // Size depends on span between posts
   const headerBeamSize = postSpacingFt <= 8 ? '4×8' : postSpacingFt <= 10 ? '4×10' : '4×12';
   const headerBeamPcs = porchDepth > 0 ? Math.ceil(porchWidth / 16) + 1 : 0;
   const headerBeamLF = porchDepth > 0 ? Math.ceil(porchWidth * 1.05) : 0;
@@ -561,12 +607,75 @@ function calculate() {
   const porchRidgePcs = Math.ceil(porchRidgeLF / 16);
 
   // Fly rafters — 2×6 per elevation notes
-  const flyRafterPcs = porchDepth > 0 ? 4 : 0; // 2 per gable end × 2 ends
+  const flyRafterPcs = porchDepth > 0 ? 4 : 0;
   const flyRafterLen = [8,10,12].find(l => l >= rafterLengthFt) || 12;
 
-  // Porch decking — 2×6 T&G
-  const porchDeckLF = porchSF > 0 ? Math.ceil(porchSF / 0.833 * 1.1) : 0;
-  const porchDeckPcs = porchDeckLF > 0 ? Math.ceil(porchDeckLF / porchWidth) : 0; // pieces spanning the depth
+  // Porch decking — 2×6 T&G, boards run porch width, length follows slope
+  const porchDeckSlopedDepth = porchDepth > 0 ? porchDepth / Math.cos(pitchAngle) : 0;
+  const porchDeckSlopedSF = porchDeckSlopedDepth * porchWidth;
+  const porchDeckLF = porchSF > 0 ? Math.ceil(porchDeckSlopedSF / (5.5/12) * 1.1) : 0;
+  const porchDeckBoardLen = [8,10,12,14,16].find(l => l >= Math.ceil(porchDeckSlopedDepth + 0.5)) || 16;
+  const porchDeckBoards = porchSF > 0 ? Math.ceil((porchWidth / (5.5/12)) * 1.1) : 0;
+
+  // ── GABLE POP-OUT ──
+  const hasGable = V.gableMode === 'yes' && porchDepth > 0;
+  const gableWidth = hasGable ? (g('gableWidth') || 10) : 0;
+  const isTimberGable = V.gableFraming === 'timber';
+  const gablePitchNum = parseInt(V.gablePitch) || 8;
+  const gablePitchAngle = Math.atan(gablePitchNum / 12);
+  const gablePM = PM[V.gablePitch] || 1.202;
+
+  // Gable rafters — run from ridge down to porch header, sloped length = (gableWidth/2) / cos(angle)
+  const gableRafterSlopedLen = hasGable ? (gableWidth / 2) / Math.cos(gablePitchAngle) : 0;
+  const gableRafterStockLen = [8,10,12,14,16].find(l => l >= Math.ceil(gableRafterSlopedLen + 0.5)) || 16;
+  // Rafters @ same OC as porch spec, both sides of ridge
+  const gableRafterCount = hasGable ? (Math.ceil(porchDepth / rafterSpacingFt) + 1) * 2 : 0;
+  const gableRafterSize = isTimberGable ? '4×6 Cypress' : '2×8 #2 SYP';
+
+  // Ridge beam — spans gable depth (porch depth), 1 stick
+  const gableRidgeLen = hasGable ? porchDepth : 0;
+  const gableRidgeStockLen = [8,10,12,14,16].find(l => l >= Math.ceil(gableRidgeLen + 0.5)) || 16;
+  const gableRidgeLabel = isTimberGable ? '4×6 Cypress ridge' : '2×12 #2 SYP ridge';
+
+  // King post — vertical, height = rise of gable = (gableWidth/2) × (gablePitchNum/12)
+  const gableKingPostHt = hasGable ? (gableWidth / 2) * (gablePitchNum / 12) : 0;
+  const gableKingPostStock = [4,6,8,10,12].find(l => l >= Math.ceil(gableKingPostHt + 0.5)) || 12;
+  const gableKingPostLabel = isTimberGable ? `4×6 Cypress king post` : `2×8 king post`;
+
+  // Struts — diagonal from king post to rafter, 2 EA
+  // Strut length ≈ sqrt((gableWidth/4)² + (gableKingPostHt/2)²)
+  const gableStrutLen = hasGable ? Math.sqrt(Math.pow(gableWidth/4, 2) + Math.pow(gableKingPostHt/2, 2)) : 0;
+  const gableStrutStock = [6,8,10,12].find(l => l >= Math.ceil(gableStrutLen + 0.5)) || 10;
+  const gableStrutLabel = isTimberGable ? '4×6 Cypress struts' : '2×8 struts';
+
+  // Valley rafters — ALWAYS 2×12 × 20' stock, 2 EA regardless of framing mode
+  const valleyCount = hasGable ? 2 : 0;
+
+  // Fly rafters for gable pop-out — 2×6, 4 EA (2 per gable end × 2 sides)
+  const gableFlyRafterStock = [8,10,12].find(l => l >= Math.ceil(gableRafterSlopedLen + 0.5)) || 12;
+  const gableFlyRafterCount = hasGable ? 4 : 0;
+
+  // ── GABLE POP-OUT ROOF PANELS ──
+  // Gable pop-out panels: run from porch ridge down to shed roof intersection
+  // Panel run = porch depth (full depth of pop-out) + overhang at eave
+  // These panels sit on the gable slopes (perpendicular to shed panels)
+  // Count per slope = ceil(gableWidth / 3)
+  const gablePanelRunFt = hasGable ? (porchDepth + overhangFt) * gablePM : 0;
+  const gablePopPanel = hasGable ? panelLength(gablePanelRunFt) : null;
+  const gablePopPanelsPerSlope = hasGable ? Math.ceil(gableWidth / 3) : 0;
+  const gablePopTotalPanels = gablePopPanelsPerSlope * 2;
+
+  // Shed panels interrupted by gable pop-out
+  // Panels in the gable zone are shorter — run from eave to gable sidewall only
+  // Full shed panel run vs interrupted run (eave to gable intersection point)
+  // The interrupted panels stop where gable sidewall meets shed roof
+  const gableInterruptedCount = hasGable ? Math.ceil(gableWidth / 3) : 0; // panels per slope replaced
+  // Interrupted panel length: run from eave up to where gable wall sits on shed
+  // That height on the shed slope = gableKingPostHt (rise of gable at its base)
+  const shedInterruptedRunFt = hasGable
+    ? (overhangFt + (gableKingPostHt / (PM[V.porchPitch] || 1.014))) * (PM[V.porchPitch] || 1.014)
+    : 0;
+  const shedInterruptedPanel = hasGable ? panelLength(shedInterruptedRunFt) : null;
 
   // ── ROOF FRAMING ──
   const trusses = Math.ceil(L / 2) + 1;
@@ -768,19 +877,28 @@ function calculate() {
         { i:"Bottom plate — 2×6 plumbing × 16'", d:`Single bottom plate · ${int2x6BotStks*16} LF · 16' sticks`, q:int2x6BotStks, u:"PCS @ 16'", lf:int2x6BotStks*16 },
       ] : []),
     ]},
-    ...(porchDepth > 0 ? [{ name: `PORCH — ROUGH TIMBER SYSTEM · ${isCypress ? 'Full Cypress' : 'STD'}`, items: [
-      { i:`Posts — 8×8 Cypress`, d:`${postCount} posts @ ${postSpacingFt}' OC · ${postHeightFt}' height`, q:postCount, u:'EA', lf:postLF },
+    ...(porchDepth > 0 ? [{ name: `PORCH — ${isCypress ? 'CYPRESS TIMBER' : 'STD TIMBER'} · ${postLabel} POSTS`, items: [
+      { i:`Posts — ${postLabel}`, d:`${postCount} posts @ ${postSpacingFt}' OC · ${postHeightFt}' height`, q:postCount, u:'EA', lf:postLF },
       { i:`Rafters — ${rafterSize} ${isCypress ? 'Cypress' : '#2 SYP'}`, d:`${rafterCount} rafters @ ${rafterSpacingFt*12}" OC · ${rafterLengthFt}' length · order ${rafterStockLen}' stock`, q:rafterCount, u:`EA @ ${rafterStockLen}'`, lf:rafterCount*rafterStockLen },
-      { i:`Header beam — ${headerBeamSize} ${timberLabel}`, d:`Runs ${porchWidth}' at wall · ${postSpacingFt}' post spacing · order 16' stock`, q:headerBeamPcs, u:"PCS @ 16'", lf:headerBeamLF },
+      { i:`Header beam — ${headerBeamSize} ${isCypress ? 'Cypress' : 'SYP'}`, d:`Runs ${porchWidth}' at wall · ${postSpacingFt}' post spacing · order 16' stock`, q:headerBeamPcs, u:"PCS @ 16'", lf:headerBeamLF },
       { i:'Ridge beam — 2×12 #2 SP', d:`Porch ridge · ${porchWidth}' + 10% waste`, q:porchRidgePcs, u:"PCS @ 16'", lf:porchRidgeLF },
       { i:'Fly rafters — 2×6 #2 SP', d:`Gable ends · ${flyRafterLen}' stock`, q:flyRafterPcs, u:`EA @ ${flyRafterLen}'`, lf:flyRafterPcs*flyRafterLen },
-      { i:"Porch decking — 2×6 T&G #2 SP", d:`Solid tongue & groove · ${porchSF} SF + 10% waste`, q:porchDeckLF.toLocaleString(), u:'LF', lf:porchDeckLF },
-      ...(purlin12Porch > 0 ? [
-        { i:"Purlins — 2×4 × 12' #2 SP · porch", d:`Gable-end rows · 2 per row · ${purlinRowsPorch} rows`, q:purlin12Porch, u:"PCS @ 12'", lf:purlin12Porch*12 },
-      ] : []),
-      ...(purlin16Porch > 0 ? [
-        { i:"Purlins — 2×4 × 16' #2 SP · porch", d:`Fill rows · ${purlinRowsPorch} rows`, q:purlin16Porch, u:"PCS @ 16'", lf:purlin16Porch*16 },
-      ] : []),
+      { i:"Porch decking — 2×6 T&G #2 SP", d:`${porchDeckBoards} boards × ${porchDeckBoardLen}' stock · sloped depth ${porchDeckSlopedDepth.toFixed(2)}' · 5.5" true width · ${porchWidth}' wide + 10% waste`, q:porchDeckBoards, u:`EA @ ${porchDeckBoardLen}'`, lf:porchDeckLF },
+      ...(purlin12Porch > 0 ? [{ i:"Purlins — 2×4 × 12' #2 SP · porch", d:`Gable-end rows · 2 per row · ${purlinRowsPorch} rows`, q:purlin12Porch, u:"PCS @ 12'", lf:purlin12Porch*12 }] : []),
+      ...(purlin16Porch > 0 ? [{ i:"Purlins — 2×4 × 16' #2 SP · porch", d:`Fill rows · ${purlinRowsPorch} rows`, q:purlin16Porch, u:"PCS @ 16'", lf:purlin16Porch*16 }] : []),
+    ]}] : []),
+    ...(hasGable ? [{ name: `PORCH GABLE POP-OUT — ${V.gablePitch} · ${isTimberGable ? 'TIMBER CYPRESS' : 'STANDARD FRAME'}`, items: [
+      { i:`Gable rafters — ${gableRafterSize}`, d:`${gableRafterCount} rafters @ ${rafterSpacingFt*12}" OC · ${gableRafterSlopedLen.toFixed(2)}' sloped · order ${gableRafterStockLen}' stock · both slopes`, q:gableRafterCount, u:`EA @ ${gableRafterStockLen}'`, lf:gableRafterCount*gableRafterStockLen },
+      { i:`Ridge beam — ${gableRidgeLabel}`, d:`Spans ${gableRidgeLen}' porch depth · order ${gableRidgeStockLen}' stock`, q:1, u:`EA @ ${gableRidgeStockLen}'`, lf:gableRidgeStockLen },
+      { i:`King post — ${gableKingPostLabel}`, d:`Vertical · ${gableKingPostHt.toFixed(2)}' rise · order ${gableKingPostStock}' stock`, q:1, u:`EA @ ${gableKingPostStock}'`, lf:gableKingPostStock },
+      { i:`Struts — ${gableStrutLabel}`, d:`Diagonal bracing · ${gableStrutLen.toFixed(2)}' each · order ${gableStrutStock}' stock`, q:2, u:`EA @ ${gableStrutStock}'`, lf:2*gableStrutStock },
+      { i:'Valley rafters — 2×12 #2 SYP', d:'2 valleys · always 20\' stock · field cut to fit', q:2, u:"EA @ 20'", lf:40 },
+      { i:'Fly rafters — 2×6 #2 SP · gable pop-out', d:`2 per gable face × 2 sides · ${gableFlyRafterStock}' stock`, q:gableFlyRafterCount, u:`EA @ ${gableFlyRafterStock}'`, lf:gableFlyRafterCount*gableFlyRafterStock },
+    ]}] : []),
+    ...(hasGable ? [{ name: `PORCH GABLE PANELS — ${V.gablePitch} · Tuff-Rib 3' Coverage`, items: [
+      { i:`Gable pop-out panels — ${gablePopPanel.display} each`, d:`(${porchDepth}' porch depth + ${overhangFt.toFixed(2)}' OH) × ${V.gablePitch} · ${gablePopPanelsPerSlope}/slope × 2 slopes · gable face is open — no panels`, q:gablePopTotalPanels, u:`PCS @ ${gablePopPanel.display}`, lf:Math.round(gablePopTotalPanels * gablePopPanel.decimal) },
+      { i:`Shed panels interrupted — ${shedInterruptedPanel.display} each`, d:`${gableInterruptedCount} panels/slope cut where gable meets shed · replaces ${gableInterruptedCount} full panels per slope`, q:gableInterruptedCount*2, u:`PCS @ ${shedInterruptedPanel.display}`, lf:Math.round(gableInterruptedCount*2 * shedInterruptedPanel.decimal) },
+      { i:'Valley flashing', d:'Both valley intersections · field measure and cut on site', q:2, u:'EA — FIELD MEASURE', lf:null },
     ]}] : []),
     { name: `ROOF FRAMING — ${V.pitch} PITCH`, items: [
       { i:'Trusses', d:`24" OC · ${L}' building length — confirm type with engineer`, q:trusses, u:'EA', lf:null },
