@@ -854,6 +854,7 @@ function calculate() {
 
   // ── BUILD OUTPUT ──
   const categories = [
+    // 1 · EXTERIOR WALL FRAMING
     { name: 'EXTERIOR WALL FRAMING — 2×6 @ 16" OC', items: [
       { i:'Studs — 2×6 precut 104-5/8"', d:`${extLF} LF of exterior wall @ 16" OC`, q:extStuds, u:'EA', lf:null },
       { i:"Top plate — 2×6 × 16'", d:`Double top plate · ${extTopSticks*16} LF total · always 16' sticks`, q:extTopSticks, u:"PCS @ 16'", lf:extTopSticks*16 },
@@ -865,6 +866,15 @@ function calculate() {
         ? [{ i:'ZIP tape', d:'1 roll per 100 LF seams', q:Math.ceil(extLF/100), u:'ROLLS', lf:null }]
         : [{ i:'House wrap', d:'Per wall SF + 15% overlap', q:houseWrapSF.toLocaleString(), u:'SF', lf:null }]),
     ]},
+    // 2 · ROOF FRAMING
+    { name: `ROOF FRAMING — ${V.pitch} PITCH`, items: [
+      { i:'Trusses', d:`24" OC · ${L}' building length — confirm type with engineer`, q:trusses, u:'EA', lf:null },
+      { i:'Ridge nailer — 2×12 #2 SP', d:`Building width ${W}' + 10%`, q:Math.ceil(W*1.1/16)+' sticks', u:`PCS @ 16'`, lf:ridgeLF },
+      { i:"Purlins — 2×4 × 12' #2 SP", d:`Gable-end rows · 2 per purlin row · ${purlinRowsMain} rows (${purlinRowsPerSlope}/slope)`, q:purlin12Main, u:"PCS @ 12'", lf:purlin12Main*12 },
+      { i:"Purlins — 2×4 × 16' #2 SP", d:`Fill rows · ${purlin16PerRow} sticks/row · ${purlinRowsMain} rows`, q:purlin16Main, u:"PCS @ 16'", lf:purlin16Main*16 },
+      { i:'Fascia — 2×6 #2 SP', d:'Eave perimeter + 10%', q:Math.ceil(fasciaLF/16), u:"PCS @ 16'", lf:fasciaLF },
+    ]},
+    // 3 · INTERIOR WALL FRAMING
     { name: 'INTERIOR WALL FRAMING', items: [
       { i:'Studs — 2×4 precut 92-5/8"', d:`${intLF} LF of interior wall @ 16" OC`, q:intStuds, u:'EA', lf:null },
       { i:"Top plate — 2×4 × 16'", d:`Double top plate · ${int2x4TopStks*16} LF · always 16' sticks`, q:int2x4TopStks, u:"PCS @ 16'", lf:int2x4TopStks*16 },
@@ -877,7 +887,8 @@ function calculate() {
         { i:"Bottom plate — 2×6 plumbing × 16'", d:`Single bottom plate · ${int2x6BotStks*16} LF · 16' sticks`, q:int2x6BotStks, u:"PCS @ 16'", lf:int2x6BotStks*16 },
       ] : []),
     ]},
-    ...(porchDepth > 0 ? [{ name: `PORCH — ${isCypress ? 'CYPRESS TIMBER' : 'STD TIMBER'} · ${postLabel} POSTS`, items: [
+    // 4 · PORCH FRAMING
+    ...(porchDepth > 0 ? [{ name: `PORCH FRAMING — ${isCypress ? 'CYPRESS TIMBER' : 'STD TIMBER'} · ${postLabel} POSTS`, items: [
       { i:`Posts — ${postLabel}`, d:`${postCount} posts @ ${postSpacingFt}' OC · ${postHeightFt}' height`, q:postCount, u:'EA', lf:postLF },
       { i:`Rafters — ${rafterSize} ${isCypress ? 'Cypress' : '#2 SYP'}`, d:`${rafterCount} rafters @ ${rafterSpacingFt*12}" OC · ${rafterLengthFt}' length · order ${rafterStockLen}' stock`, q:rafterCount, u:`EA @ ${rafterStockLen}'`, lf:rafterCount*rafterStockLen },
       { i:`Header beam — ${headerBeamSize} ${isCypress ? 'Cypress' : 'SYP'}`, d:`Runs ${porchWidth}' at wall · ${postSpacingFt}' post spacing · order 16' stock`, q:headerBeamPcs, u:"PCS @ 16'", lf:headerBeamLF },
@@ -887,42 +898,33 @@ function calculate() {
       ...(purlin12Porch > 0 ? [{ i:"Purlins — 2×4 × 12' #2 SP · porch", d:`Gable-end rows · 2 per row · ${purlinRowsPorch} rows`, q:purlin12Porch, u:"PCS @ 12'", lf:purlin12Porch*12 }] : []),
       ...(purlin16Porch > 0 ? [{ i:"Purlins — 2×4 × 16' #2 SP · porch", d:`Fill rows · ${purlinRowsPorch} rows`, q:purlin16Porch, u:"PCS @ 16'", lf:purlin16Porch*16 }] : []),
     ]}] : []),
-    ...(hasGable ? [{ name: `PORCH GABLE POP-OUT — ${V.gablePitch} · ${isTimberGable ? 'TIMBER CYPRESS' : 'STANDARD FRAME'}`, items: [
+    ...(hasGable ? [{ name: `PORCH GABLE POP-OUT FRAMING — ${V.gablePitch} · ${isTimberGable ? 'TIMBER CYPRESS' : 'STANDARD FRAME'}`, items: [
       { i:`Gable rafters — ${gableRafterSize}`, d:`${gableRafterCount} rafters @ ${rafterSpacingFt*12}" OC · ${gableRafterSlopedLen.toFixed(2)}' sloped · order ${gableRafterStockLen}' stock · both slopes`, q:gableRafterCount, u:`EA @ ${gableRafterStockLen}'`, lf:gableRafterCount*gableRafterStockLen },
       { i:`Ridge beam — ${gableRidgeLabel}`, d:`Spans ${gableRidgeLen}' porch depth · order ${gableRidgeStockLen}' stock`, q:1, u:`EA @ ${gableRidgeStockLen}'`, lf:gableRidgeStockLen },
       { i:`King post — ${gableKingPostLabel}`, d:`Vertical · ${gableKingPostHt.toFixed(2)}' rise · order ${gableKingPostStock}' stock`, q:1, u:`EA @ ${gableKingPostStock}'`, lf:gableKingPostStock },
       { i:`Struts — ${gableStrutLabel}`, d:`Diagonal bracing · ${gableStrutLen.toFixed(2)}' each · order ${gableStrutStock}' stock`, q:2, u:`EA @ ${gableStrutStock}'`, lf:2*gableStrutStock },
-      { i:'Valley rafters — 2×12 #2 SYP', d:'2 valleys · always 20\' stock · field cut to fit', q:2, u:"EA @ 20'", lf:40 },
+      { i:'Valley rafters — 2×12 #2 SYP', d:"2 valleys · always 20' stock · field cut to fit", q:2, u:"EA @ 20'", lf:40 },
       { i:'Fly rafters — 2×6 #2 SP · gable pop-out', d:`2 per gable face × 2 sides · ${gableFlyRafterStock}' stock`, q:gableFlyRafterCount, u:`EA @ ${gableFlyRafterStock}'`, lf:gableFlyRafterCount*gableFlyRafterStock },
     ]}] : []),
-    ...(hasGable ? [{ name: `PORCH GABLE PANELS — ${V.gablePitch} · Tuff-Rib 3' Coverage`, items: [
-      { i:`Gable pop-out panels — ${gablePopPanel.display} each`, d:`(${porchDepth}' porch depth + ${overhangFt.toFixed(2)}' OH) × ${V.gablePitch} · ${gablePopPanelsPerSlope}/slope × 2 slopes · gable face is open — no panels`, q:gablePopTotalPanels, u:`PCS @ ${gablePopPanel.display}`, lf:Math.round(gablePopTotalPanels * gablePopPanel.decimal) },
-      { i:`Shed panels interrupted — ${shedInterruptedPanel.display} each`, d:`${gableInterruptedCount} panels/slope cut where gable meets shed · replaces ${gableInterruptedCount} full panels per slope`, q:gableInterruptedCount*2, u:`PCS @ ${shedInterruptedPanel.display}`, lf:Math.round(gableInterruptedCount*2 * shedInterruptedPanel.decimal) },
-      { i:'Valley flashing', d:'Both valley intersections · field measure and cut on site', q:2, u:'EA — FIELD MEASURE', lf:null },
-    ]}] : []),
-    { name: `ROOF FRAMING — ${V.pitch} PITCH`, items: [
-      { i:'Trusses', d:`24" OC · ${L}' building length — confirm type with engineer`, q:trusses, u:'EA', lf:null },
-      { i:'Ridge nailer — 2×12 #2 SP', d:`Building width ${W}' + 10%`, q:Math.ceil(W*1.1/16)+' sticks', u:`PCS @ 16'`, lf:ridgeLF },
-      { i:'Purlins — 2×4 × 12\' #2 SP', d:`Gable-end rows · 2 per purlin row · ${purlinRowsMain} rows (${purlinRowsPerSlope}/slope)`, q:purlin12Main, u:"PCS @ 12'", lf:purlin12Main*12 },
-      { i:'Purlins — 2×4 × 16\' #2 SP', d:`Fill rows · ${purlin16PerRow} sticks/row · ${purlinRowsMain} rows`, q:purlin16Main, u:"PCS @ 16'", lf:purlin16Main*16 },
-      { i:'Fascia — 2×6 #2 SP', d:'Eave perimeter + 10%', q:Math.ceil(fasciaLF/16), u:"PCS @ 16'", lf:fasciaLF },
-    ]},
-    { name: `ROOF PANELS — ${V.roofing} · Tuff-Rib 3' Coverage`, items: [
+    // 5 · ROOF METAL
+    { name: `ROOF METAL — ${V.roofing} · Tuff-Rib 3' Coverage`, items: [
       { i:`Roof sheathing — ${V.sheathing} 7/16" 4×8`, d:`${totalRoof.toLocaleString()} SF sloped area + 10%`, q:roofOSBSheets, u:'SHEETS', lf:null },
       ...(V.sheathing==='ZIP'
         ? [{ i:'ZIP tape — roof', d:'Seam sealing', q:Math.ceil(totalRoof/100), u:'ROLLS', lf:null }]
         : [{ i:'Underlayment — synthetic', d:'Full sloped area', q:totalRoof.toLocaleString(), u:'SF', lf:null }]),
       { i:`Main roof panels — ${panelLengthDisplay} each`, d:`(${W/2}' half-span + ${overhangFt.toFixed(2)}' OH) × ${V.pitch} = ${(panelRunFt*12).toFixed(2)}" → up to ${Math.ceil(panelRunFt*12)}" + 3" = ${panel.totalInches}" = ${panelLengthDisplay} · ${panelsPerSlope}/slope`, q:totalRoofPanels, u:`PCS @ ${panelLengthDisplay}`, lf:Math.round(totalRoofPanels * panel.decimal) },
-      ...(porchDepth > 0 ? [{
-        i:`Porch panels — ${porchPanelLengthDisplay} each`,
-        d:`(${porchDepth}' depth + ${overhangFt.toFixed(2)}' OH) × ${V.porchPitch} = ${(porchPanelRunFt*12).toFixed(2)}" → up to ${Math.ceil(porchPanelRunFt*12)}" + 3" = ${porchPanel.totalInches}" = ${porchPanelLengthDisplay} · ${porchPanelsPerSlope} panels`,
-        q:porchPanelsPerSlope, u:`PCS @ ${porchPanelLengthDisplay}`, lf:Math.round(porchPanelsPerSlope * porchPanel.decimal)
-      }] : []),
-      { i:'Ridge cap — 10\' sticks', d:`${ridgeCapRunLF}' run (${L}' + OH each end) · 10% overlap`, q:ridgeCapPcs, u:"PCS @ 10'", lf:ridgeCapPcs*10 },
+      ...(porchDepth > 0 ? [{ i:`Porch panels — ${porchPanelLengthDisplay} each`, d:`(${porchDepth}' depth + ${overhangFt.toFixed(2)}' OH) × ${V.porchPitch} = ${(porchPanelRunFt*12).toFixed(2)}" → up to ${Math.ceil(porchPanelRunFt*12)}" + 3" = ${porchPanel.totalInches}" = ${porchPanelLengthDisplay} · ${porchPanelsPerSlope} panels`, q:porchPanelsPerSlope, u:`PCS @ ${porchPanelLengthDisplay}`, lf:Math.round(porchPanelsPerSlope * porchPanel.decimal) }] : []),
+      ...(hasGable ? [
+        { i:`Gable pop-out panels — ${gablePopPanel.display} each`, d:`(${porchDepth}' depth + ${overhangFt.toFixed(2)}' OH) × ${V.gablePitch} · ${gablePopPanelsPerSlope}/slope × 2 slopes · gable face open — no panels`, q:gablePopTotalPanels, u:`PCS @ ${gablePopPanel.display}`, lf:Math.round(gablePopTotalPanels * gablePopPanel.decimal) },
+        { i:`Shed panels interrupted — ${shedInterruptedPanel.display} each`, d:`${gableInterruptedCount} panels/slope cut where gable meets shed · replaces ${gableInterruptedCount} full panels per slope`, q:gableInterruptedCount*2, u:`PCS @ ${shedInterruptedPanel.display}`, lf:Math.round(gableInterruptedCount*2 * shedInterruptedPanel.decimal) },
+        { i:'Valley flashing', d:'Both valley intersections · field measure and cut on site', q:2, u:'EA — FIELD MEASURE', lf:null },
+      ] : []),
+      { i:"Ridge cap — 10' sticks", d:`${ridgeCapRunLF}' run (${L}' + OH each end) · 10% overlap`, q:ridgeCapPcs, u:"PCS @ 10'", lf:ridgeCapPcs*10 },
       { i:'Rake trim — both gable ends', d:`${panelLengthDisplay} × 2 slopes × 2 ends + 10%`, q:rakeTrimPcs, u:"PCS @ 10'", lf:rakeTrimPcs*10 },
       { i:'Eave trim / drip edge', d:`(${L}' + OH each end) × 2 slopes`, q:eaveTrimPcs, u:"PCS @ 10'", lf:eaveTrimPcs*10 },
     ]},
-    { name: 'WALL PANELS — Tuff-Rib 3\' Coverage', items: [
+    // 6 · WALL METAL
+    { name: "WALL METAL — Tuff-Rib 3' Coverage", items: [
       { i:`Eave wall panels — ${fmtHt(eaveWallLongPanelH)}`, d:`Front & back walls · ${L}' ÷ 3 = ${eaveWallLongCount} panels × 2 sides${frontBackWainH>0?' · reduced from '+pH+"' by "+frontBackWainH+"' wainscot":''}`, q:eaveWallLongCount*2, u:`PCS @ ${fmtHt(eaveWallLongPanelH)}`, lf:Math.round(eaveWallLongCount*2 * eaveWallLongPanelH) },
       ...gableSchedule.map((p,i) => ({
         i: `Gable panel ${i+1} of ${gablePanelsPerHalf} — ${p.display}`,
@@ -940,11 +942,7 @@ function calculate() {
       { i:'Corner trim', d:`4 corners × ${pH}' eave height + 10%`, q:cornerTrimPcs, u:"PCS @ 10'", lf:cornerTrimPcs*10 },
       { i:`Soffit panels — ${soffitPanelDisplay} · eave walls`, d:`(${L}' + ${overhangFt.toFixed(2)}' + ${overhangFt.toFixed(2)}' OH) ÷ 3 × 2 eave sides`, q:eaveSoffitCount, u:`PCS @ ${soffitPanelDisplay}`, lf:eaveSoffitLF },
       { i:`Soffit panels — ${soffitPanelDisplay} · gable ends`, d:`Roof panel ${panelLengthDisplay} ÷ 3 = ${gableSoffitPerHalf}/half × 4`, q:gableSoffitCount, u:`PCS @ ${soffitPanelDisplay}`, lf:gableSoffitLF },
-      ...(porchDepth > 0 ? [{
-        i:`Soffit panels — ${soffitPanelDisplay} · porch`,
-        d:`Porch panel ${porchPanelLengthDisplay} ÷ 3 × ${porchPanelsPerSlope} panels`,
-        q:porchSoffitCount, u:`PCS @ ${soffitPanelDisplay}`, lf:porchSoffitLF
-      }] : []),
+      ...(porchDepth > 0 ? [{ i:`Soffit panels — ${soffitPanelDisplay} · porch`, d:`Porch panel ${porchPanelLengthDisplay} ÷ 3 × ${porchPanelsPerSlope} panels`, q:porchSoffitCount, u:`PCS @ ${soffitPanelDisplay}`, lf:porchSoffitLF }] : []),
     ]},
   ];
 
