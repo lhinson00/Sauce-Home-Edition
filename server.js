@@ -171,14 +171,18 @@ function runRulesEngine(extracted) {
 
   // ─── ROOF FRAMING ───
   const roofFramingItems = [];
+  const buildingLen = building_depth_ft || building_width_ft || 40;
+  const buildingSpan = building_width_ft || building_depth_ft || 56;
 
-  if (trusses.length > 0) {
+  if (trusses && trusses.length > 0) {
     trusses.forEach(t => {
-      roofFramingItems.push({ item: `${t.type} (${t.mark})`, description: t.description || '24" OC spacing', qty: t.count, unit: 'EA', confidence: 'high' });
+      const qty = t.count || Math.ceil(buildingLen / 2) + 1;
+      roofFramingItems.push({ item: `${t.type} (${t.mark})`, description: t.description || '24" OC spacing', qty, unit: 'EA', confidence: 'high' });
     });
   } else {
-    const totalTrusses = Math.ceil(building_width_ft / 2) + 1;
-    roofFramingItems.push({ item: 'Trusses — calculated', description: '24" OC — confirm type with engineer', qty: totalTrusses, unit: 'EA', confidence: 'medium' });
+    // Calculate from building length — one truss every 2ft at 24" OC
+    const totalTrusses = Math.ceil(buildingLen / 2) + 1;
+    roofFramingItems.push({ item: 'Trusses', description: `24" OC · ${buildingLen}' building length · confirm type`, qty: totalTrusses, unit: 'EA', confidence: 'medium' });
   }
 
   if (rough_timber.length > 0) {
