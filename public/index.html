@@ -286,11 +286,27 @@ async function uploadFile(file){
   show('screenProcessing');
   for(let i=0;i<STAGES.length;i++){setStages(i);await delay(550);}
   const fd=new FormData();fd.append('drawing',file);
-  try{const res=await fetch('/api/analyze',{method:'POST',body:fd});const data=await res.json();setStages(STAGES.length);await delay(300);if(data.success&&data.extracted&&data.takeoff){appData=data;renderResults(data);}else showError(data.error||'Analysis failed — try a clearer image or crop the plan closer');}
-  catch(e){showError('Server error: '+e.message);}
+  try{
+    const res=await fetch('/api/analyze',{method:'POST',body:fd});
+    const text=await res.text();
+    let data;
+    try{ data=JSON.parse(text); }
+    catch(e){ showError('Server returned invalid response: '+text.substring(0,200)); return; }
+    setStages(STAGES.length);await delay(300);
+    if(data.success&&data.extracted&&data.takeoff){
+      appData=data;renderResults(data);
+    } else {
+      showError((data.error||'Analysis failed')+' — '+JSON.stringify(data).substring(0,150));
+    }
+  }
+  catch(e){showError('Network error: '+e.message);}
 }
 function show(id){['screenUpload','screenProcessing','screenResults','errorWrap'].forEach(s=>{const el=document.getElementById(s);if(el)el.style.display=s===id?'block':'none';});const res=document.getElementById('screenResults');if(id==='screenResults'&&res)res.style.display='block';}
-function showError(msg){document.getElementById('errorMsg').textContent=msg;document.getElementById('screenProcessing').style.display='none';document.getElementById('errorWrap').style.display='';}
+function showError(msg){
+  ['screenUpload','screenProcessing','screenResults'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+  const eb=document.getElementById('errorWrap');
+  if(eb){eb.style.display='block';document.getElementById('errorMsg').textContent=msg;}
+}
 function resetApp(){appData=null;if(renderer){renderer.dispose();renderer=null;}document.getElementById('fileInput').value='';show('screenUpload');}
 function renderResults(data){
   try {
