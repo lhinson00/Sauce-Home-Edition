@@ -573,23 +573,6 @@ function calculate() {
   const ridgeLF = Math.ceil(W * 1.1);
   const fasciaLF = Math.ceil(perim * 1.1);
 
-  // ── PURLINS — 2' OC along slope, 12' on gable ends, 16' fill ──
-  // Rows per slope = ceil(panel length in ft / 2), × 2 slopes
-  const purlinRowsPerSlope = Math.ceil(panel.decimal / 2);
-  const purlinRowsMain = purlinRowsPerSlope * 2;
-  // Each row: 2 sticks of 12' (one per gable end) + 16' fill for remaining span
-  const purlin12PerRow = 2;
-  const purlin16PerRow = Math.ceil(Math.max(0, L - 24) / 16); // remaining after 2×12'
-  const purlin12Main = purlinRowsMain * purlin12PerRow;
-  const purlin16Main = purlinRowsMain * purlin16PerRow;
-  const purlinMainLF = purlin12Main * 12 + purlin16Main * 16;
-
-  // Porch purlins — same logic, rows based on porch panel length
-  const purlinRowsPorch = porchDepth > 0 ? Math.ceil(porchPanel.decimal / 2) : 0;
-  const purlin12Porch = porchDepth > 0 ? purlinRowsPorch * 2 : 0;
-  const purlin16Porch = porchDepth > 0 ? purlinRowsPorch * Math.ceil(Math.max(0, porchWidth - 24) / 16) : 0;
-  const purlinPorchLF = purlin12Porch * 12 + purlin16Porch * 16;
-
   // ── ROOF SHEATHING + COVERING ──
   const roofOSBSheets = Math.ceil(totalRoof / 32 * 1.1);
 
@@ -633,6 +616,19 @@ function calculate() {
   const porchPanelsPerSlope = porchDepth > 0
     ? Math.ceil((L + overhangFt + overhangFt) / 3)
     : 0;
+
+  // ── PURLINS — 2' OC along slope, 12' on gable ends, 16' fill ──
+  const purlinRowsPerSlope = Math.ceil(panel.decimal / 2);
+  const purlinRowsMain = purlinRowsPerSlope * 2;
+  const purlin12PerRow = 2;
+  const purlin16PerRow = Math.ceil(Math.max(0, L - 24) / 16);
+  const purlin12Main = purlinRowsMain * purlin12PerRow;
+  const purlin16Main = purlinRowsMain * purlin16PerRow;
+
+  // Porch purlins
+  const purlinRowsPorch = porchDepth > 0 ? Math.ceil(porchPanel.decimal / 2) : 0;
+  const purlin12Porch = porchDepth > 0 ? purlinRowsPorch * 2 : 0;
+  const purlin16Porch = porchDepth > 0 ? purlinRowsPorch * Math.ceil(Math.max(0, porchWidth - 24) / 16) : 0;
 
   // Ridge cap — building length + overhang each end, 10' sticks
   const ridgeCapRunLF = Math.ceil(L + overhangFt + overhangFt);
