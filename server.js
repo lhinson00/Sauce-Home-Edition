@@ -625,6 +625,7 @@ app.get('/api/health', (req, res) => {
 // Serve specific HTML pages explicitly
 app.get('/estimator.html', (req, res) => res.sendFile(path.join(__dirname, 'public', 'estimator.html')));
 app.get('/designer.html', (req, res) => res.sendFile(path.join(__dirname, 'public', 'designer.html')));
+app.get('/upload.html', (req, res) => res.sendFile(path.join(__dirname, 'public', 'upload.html')));
 
 // Catch-all — serve index for everything else
 app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
