@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -144,7 +143,7 @@ tr.cr td{background:var(--navy);color:rgba(255,255,255,.6);font-size:10px;font-w
 </head>
 <body>
 <nav class="nav">
-  <a class="nav-logo" href="#">
+  <a class="nav-logo" href="/">
     <div class="nav-mark">SE</div>
     <div><span class="nav-name">Sauce Estimator</span><span class="nav-sub">Home Edition</span></div>
   </a>
@@ -152,8 +151,8 @@ tr.cr td{background:var(--navy);color:rgba(255,255,255,.6);font-size:10px;font-w
   <div class="nav-mod"><span>Plan Takeoff</span></div>
   <div class="nav-sp"></div>
   <div class="nav-ready"><div class="nav-ready-dot"></div>READY</div>
-  <button class="nav-btn" onclick="window.location='/estimator.html'">Quick Estimate</button>
-  <button class="nav-btn" onclick="window.location='/designer.html'">Floor Plan Designer</button>
+  <a href="/estimator.html" class="nav-btn" style="text-decoration:none">Quick Estimate</a>
+  <a href="/designer.html" class="nav-btn" style="text-decoration:none">Floor Plan Designer</a>
   <button class="nav-btn" onclick="resetApp()">New Analysis</button>
 </nav>
 
@@ -197,6 +196,19 @@ tr.cr td{background:var(--navy);color:rgba(255,255,255,.6);font-size:10px;font-w
         </div>
       </div>
       <div class="info-row">
+        <a href="/estimator.html" style="text-decoration:none;flex:1;min-width:200px">
+          <div class="info-card" style="cursor:pointer;border-color:var(--border2);transition:all .15s" onmouseover="this.style.borderColor='var(--amber)'" onmouseout="this.style.borderColor='var(--border2)'">
+            <div class="info-title" style="color:var(--amber)">Quick Estimate →</div>
+            <div class="info-body">Know your dimensions? Enter them directly and get a material list instantly — no upload needed.</div>
+          </div>
+        </a>
+        <a href="/designer.html" style="text-decoration:none;flex:1;min-width:200px">
+          <div class="info-card" style="cursor:pointer;border-color:var(--border2);transition:all .15s" onmouseover="this.style.borderColor='var(--amber)'" onmouseout="this.style.borderColor='var(--border2)'">
+            <div class="info-title" style="color:var(--amber)">Draw a Plan →</div>
+            <div class="info-body">Start from scratch — draw the shell, add rooms and porches, generate a 3D model and takeoff.</div>
+          </div>
+        </a>
+      </div>
         <div class="info-card"><div class="info-title">What gets extracted</div><div class="info-body">Dimensions · Door &amp; window schedules · Roof pitch &amp; area · Wall linear footage · Truss schedule · Foundation spec</div></div>
         <div class="info-card"><div class="info-title">What gets calculated</div><div class="info-body">Framing lumber · Sheathing · Trusses · Metal roofing &amp; siding · Spray foam insulation · Concrete &amp; rebar</div></div>
         <div class="info-card"><div class="info-title">Assembly rules</div><div class="info-body">2×6 ext walls · 2×4/2×6 int walls · Tuff-Rib 29ga · Open-cell spray foam · Monolithic slab · OSB or ZIP</div></div>
@@ -205,7 +217,6 @@ tr.cr td{background:var(--navy);color:rgba(255,255,255,.6);font-size:10px;font-w
   </div>
 
   <!-- PROCESSING -->
-
   <div class="proc" id="screenProcessing">
     <div class="spin"></div>
     <div class="proc-t">Analyzing Drawing</div>
@@ -214,7 +225,6 @@ tr.cr td{background:var(--navy);color:rgba(255,255,255,.6);font-size:10px;font-w
   </div>
 
   <!-- ERROR -->
-
   <div class="err-wrap" id="errorWrap">
     <div class="err-card">
       <h3>Analysis Failed</h3>
@@ -224,7 +234,6 @@ tr.cr td{background:var(--navy);color:rgba(255,255,255,.6);font-size:10px;font-w
   </div>
 
   <!-- RESULTS -->
-
   <div class="results" id="screenResults">
     <div class="res-bar">
       <div class="res-bar-l">
@@ -283,7 +292,6 @@ tr.cr td{background:var(--navy);color:rgba(255,255,255,.6);font-size:10px;font-w
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-
 <script>
 let appData=null,renderer,scene,camera,roofGroup,wallGroup;
 let isDrag=false,prevMouse={x:0,y:0},rotX=0.38,rotY=-0.52,showRoof=true,showWalls=true;
@@ -459,6 +467,5 @@ function toggleRoof(){if(roofGroup){showRoof=!showRoof;roofGroup.visible=showRoo
 function toggleWalls(){if(wallGroup){showWalls=!showWalls;wallGroup.visible=showWalls;if(renderer)renderer.render(scene,camera);}}
 function resetCam(){rotX=0.38;rotY=-0.52;camera.position.set(20,13,24);camera.lookAt(0,3,0);if(renderer)renderer.render(scene,camera);}
 </script>
-
 </body>
 </html>
