@@ -457,11 +457,11 @@ app.post('/api/analyze', upload.single('drawing'), async (req, res) => {
   }
 });
 
-// Demo endpoint — uses Brookside data
+// Demo endpoint — uses sample plan data
 app.get('/api/demo', (req, res) => {
-  const brookside = {
-    project_name: 'Brookside',
-    sheet_info: 'S.3 — 1st Floor Layout | Summertown Metals',
+  const samplePlan = {
+    project_name: 'Sample Home',
+    sheet_info: '1st Floor Layout — 3 Bed / 2 Bath Ranch',
     living_sf: 1680,
     porch_sf: 448,
     building_width_ft: 56,
@@ -510,8 +510,8 @@ app.get('/api/demo', (req, res) => {
     notes: ['Exterior wall net area from schedule: 1,612 SF', 'Stone wainscoting front wall only — 3ft height']
   };
 
-  const takeoff = runRulesEngine(brookside);
-  res.json({ success: true, extracted: brookside, takeoff, filename: 'Brookside_Demo.pdf' });
+  const takeoff = runRulesEngine(samplePlan);
+  res.json({ success: true, extracted: samplePlan, takeoff, filename: 'Sample_Home_Demo.pdf' });
 });
 
 // Health check
