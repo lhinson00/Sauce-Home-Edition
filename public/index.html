@@ -369,13 +369,38 @@ function buildHouse(e){
   stone.position.set(0,0.32,-D/2-0.01);wallGroup.add(stone);
   scene.add(wallGroup);
   roofGroup=new THREE.Group();
-  const rm=new THREE.MeshLambertMaterial({color:0x2a2520,side:THREE.DoubleSide});
-  const ridge=(W/2+0.35)*mp;
-  const rs=new THREE.Shape();rs.moveTo(-W/2-0.35,0);rs.lineTo(0,ridge);rs.lineTo(W/2+0.35,0);rs.closePath();
-  const rg=new THREE.ExtrudeGeometry(rs,{depth:D+0.35,bevelEnabled:false});
-  const rmesh=new THREE.Mesh(rg,rm);rmesh.rotation.y=Math.PI/2;rmesh.position.set(W/2+0.35,H,-(D+0.35)/2);roofGroup.add(rmesh);
-  const pr=(W/2+0.35)*pp;
-  const ps=new THREE.Shape();ps.moveTo(-W/2-0.35,0);ps.lineTo(-W/2-0.35,pr*0.25);ps.lineTo(W/2+0.35,pr);ps.lineTo(W/2+0.35,0);ps.closePath();
+  const roofMat=new THREE.MeshLambertMaterial({color:0x2a2520,side:THREE.DoubleSide});
+  const ridge=W/2*mp;
+
+  // Left panel
+  const lGeo=new THREE.BufferGeometry();
+  lGeo.setAttribute('position',new THREE.BufferAttribute(new Float32Array([
+    -W/2-0.3,0,-D/2-0.3, 0,ridge,-D/2-0.3, 0,ridge,D/2+0.3,
+    -W/2-0.3,0,-D/2-0.3, 0,ridge,D/2+0.3, -W/2-0.3,0,D/2+0.3
+  ]),3));lGeo.computeVertexNormals();
+  const lPanel=new THREE.Mesh(lGeo,roofMat);lPanel.position.set(0,H,0);roofGroup.add(lPanel);
+
+  // Right panel
+  const rGeo=new THREE.BufferGeometry();
+  rGeo.setAttribute('position',new THREE.BufferAttribute(new Float32Array([
+    W/2+0.3,0,-D/2-0.3, 0,ridge,D/2+0.3, 0,ridge,-D/2-0.3,
+    W/2+0.3,0,-D/2-0.3, W/2+0.3,0,D/2+0.3, 0,ridge,D/2+0.3
+  ]),3));rGeo.computeVertexNormals();
+  const rPanel=new THREE.Mesh(rGeo,roofMat);rPanel.position.set(0,H,0);roofGroup.add(rPanel);
+
+  // Gable ends
+  const gMat=new THREE.MeshLambertMaterial({color:0xb0aaa0,side:THREE.DoubleSide});
+  [-D/2,D/2].forEach(z=>{
+    const gGeo=new THREE.BufferGeometry();
+    gGeo.setAttribute('position',new THREE.BufferAttribute(new Float32Array([-W/2,0,z, W/2,0,z, 0,ridge,z]),3));
+    gGeo.computeVertexNormals();
+    roofGroup.add(new THREE.Mesh(gGeo,gMat));
+  });
+  roofGroup.position.set(0,0,0);
+
+  // Porch roof
+  const pr=W/2*pp;
+  const ps=new THREE.Shape();ps.moveTo(-W/2-0.3,0);ps.lineTo(-W/2-0.3,pr*0.25);ps.lineTo(W/2+0.3,pr);ps.lineTo(W/2+0.3,0);ps.closePath();
   const pg=new THREE.ExtrudeGeometry(ps,{depth:PD+0.25,bevelEnabled:false});
   const pmesh=new THREE.Mesh(pg,new THREE.MeshLambertMaterial({color:0x2a2520,side:THREE.DoubleSide}));
   pmesh.position.set(0,H,-D/2-PD+0.05);roofGroup.add(pmesh);
