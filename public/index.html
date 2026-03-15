@@ -332,7 +332,21 @@ function renderResults(data){
   show('screenResults');setTimeout(()=>init3D(e),400);
   } catch(err){ showError('Error displaying results: '+err.message+'. Raw data received — check console.'); console.error(err); }
 }
-function showTab(tab,btn){['Materials','Extraction','Model3d'].forEach(t=>{document.getElementById('tab'+t).style.display=t===tab?'':'none';});document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');if(tab==='Model3d'&&renderer)renderer.render(scene,camera);}
+function showTab(tab,btn){
+  ['Materials','Extraction','Model3d'].forEach(t=>{document.getElementById('tab'+t).style.display=t===tab?'':'none';});
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(tab==='Model3d'){
+    setTimeout(()=>{
+      const canvas=document.getElementById('houseCanvas');
+      const cont=canvas.parentElement;
+      const W=cont.clientWidth,H=cont.clientHeight;
+      if(renderer&&W>0&&H>0){renderer.setSize(W,H);camera.aspect=W/H;camera.updateProjectionMatrix();}
+      if(renderer&&scene&&camera)renderer.render(scene,camera);
+      else if(appData)init3D(appData.extracted);
+    },50);
+  }
+}
 function exportCSV(){if(!appData)return;const rows=[['Category','Item','Description','Quantity','Unit','Confidence']];(appData.takeoff.categories||[]).forEach(cat=>{cat.items.forEach(i=>rows.push([cat.name,i.item,i.description,i.qty,i.unit,i.confidence]));});const csv=rows.map(r=>r.map(c=>'"'+(c||'').toString().replace(/"/g,'""')+'"').join(',')).join('\n');Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob([csv],{type:'text/csv'})),download:(appData.extracted?.project_name||'Takeoff')+'_SE_Home.csv'}).click();}
 document.getElementById('fileInput').addEventListener('change',e=>{if(e.target.files[0])uploadFile(e.target.files[0]);});
 const dz=document.getElementById('dropZone');
@@ -342,7 +356,9 @@ dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');if
 function init3D(e){
   const canvas=document.getElementById('houseCanvas');
   const cont=canvas.parentElement;
-  const W=cont.clientWidth,H=cont.clientHeight;
+  // Use fallback dimensions if container is hidden (tab not active)
+  const W=Math.max(cont.clientWidth,600);
+  const H=Math.max(cont.clientHeight,400);
   if(renderer)renderer.dispose();
   renderer=new THREE.WebGLRenderer({canvas,antialias:true});
   renderer.setSize(W,H);renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
