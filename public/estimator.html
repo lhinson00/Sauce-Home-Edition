@@ -327,6 +327,54 @@ tr:hover td{background:#fafbfc;}
       </div>
     </div>
 
+    <!-- Wainscot -->
+    <div class="section">
+      <div class="sec-head">
+        <div class="sec-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="7" width="12" height="6" rx="1" stroke="white" stroke-width="1.5"/><rect x="1" y="1" width="12" height="6" rx="1" stroke="#f5a623" stroke-width="1.5"/></svg></div>
+        <span class="sec-title">Wainscot</span>
+      </div>
+      <div class="sec-body">
+        <div class="field-row">
+          <span class="field-label">Type</span>
+          <div class="field-inputs">
+            <div class="seg" style="width:220px">
+              <button class="seg-btn on" onclick="setSeg(this,'wainType','none');toggleWainscot()">None</button>
+              <button class="seg-btn" onclick="setSeg(this,'wainType','stone');toggleWainscot()">Stone</button>
+              <button class="seg-btn" onclick="setSeg(this,'wainType','metal');toggleWainscot()">Metal Panel</button>
+            </div>
+          </div>
+        </div>
+        <div id="wainscotOptions" style="display:none">
+          <div class="field-row" style="margin-top:4px">
+            <span class="field-label">Height</span>
+            <div class="field-inputs">
+              <div class="seg" style="width:140px">
+                <button class="seg-btn on" onclick="setSeg(this,'wainHeight','3')">3'</button>
+                <button class="seg-btn" onclick="setSeg(this,'wainHeight','4')">4'</button>
+              </div>
+            </div>
+          </div>
+          <div class="field-row">
+            <span class="field-label">Walls</span>
+            <div class="field-inputs" style="gap:10px;flex-wrap:wrap">
+              <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--text);cursor:pointer">
+                <input type="checkbox" id="wFront" onchange="liveUpdate()" style="width:14px;height:14px;accent-color:var(--amber)"> Front
+              </label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--text);cursor:pointer">
+                <input type="checkbox" id="wBack" onchange="liveUpdate()" style="width:14px;height:14px;accent-color:var(--amber)"> Back
+              </label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--text);cursor:pointer">
+                <input type="checkbox" id="wLeft" onchange="liveUpdate()" style="width:14px;height:14px;accent-color:var(--amber)"> Left
+              </label>
+              <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--text);cursor:pointer">
+                <input type="checkbox" id="wRight" onchange="liveUpdate()" style="width:14px;height:14px;accent-color:var(--amber)"> Right
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Foundation -->
     <div class="section">
       <div class="sec-head">
@@ -399,8 +447,13 @@ tr:hover td{background:#fafbfc;}
 const V = {
   plateH: '9', pitch: '6:12', overhang: '16', sheathing: 'OSB',
   roofing: 'Tuff-Rib 29ga', porchPitch: '2:12', wallSheathing: 'OSB', slabThk: '4',
-  postSpacing: '10', timberSpec: 'STD', rafterSpacing: '24'
+  postSpacing: '10', timberSpec: 'STD', rafterSpacing: '24',
+  wainType: 'none', wainHeight: '3'
 };
+
+function toggleWainscot() {
+  document.getElementById('wainscotOptions').style.display = V.wainType === 'none' ? 'none' : '';
+}
 let lastResult = null;
 
 function setSeg(btn, key, val) {
@@ -606,11 +659,72 @@ function calculate() {
   const ridgeCapLF = ridgeCapRunLF;
   const eavesTrimLF = eaveRunLF;
 
-  // ── SIDING ──
-  const netWallSF = extLF * pH * 0.85;
-  const sidingLF = Math.ceil(netWallSF / 3 * 1.1);
-  const soffitSF = Math.ceil(perim * overhangFt);
+  // ── WAINSCOT ──
+  const wainType = V.wainType; // 'none', 'stone', 'metal'
+  const wainH = parseInt(V.wainHeight) || 3;
+  const wFront = document.getElementById('wFront').checked;
+  const wBack  = document.getElementById('wBack').checked;
+  const wLeft  = document.getElementById('wLeft').checked;
+  const wRight = document.getElementById('wRight').checked;
+
+  // Wall lengths: front/back = L (long walls), left/right = W (short gable walls)
+  const wainWalls = [
+    ...(wFront ? [{ name:'Front', len:L }] : []),
+    ...(wBack  ? [{ name:'Back',  len:L }] : []),
+    ...(wLeft  ? [{ name:'Left',  len:W }] : []),
+    ...(wRight ? [{ name:'Right', len:W }] : []),
+  ];
+  const totalWainLF = wainWalls.reduce((a,w) => a + w.len, 0);
+  const totalWainSF = totalWainLF * wainH;
+
+  // Metal wainscot — same 3' panels, height = wainH
+  // Eave wall panel height reduced by wainH on wainscot walls
+  const wainMetalPanels = wainType === 'metal'
+    ? wainWalls.map(w => ({ name: w.name, count: Math.ceil(w.len / 3), height: wainH }))
+    : [];
+
+  // ── WALL PANELS — EAVE WALLS + GABLE ENDS ──
+
+  // First panel offset above eave (locked values per pitch)
+  const gableFirstOffset = {'4:12':2.0, '6:12':2.5, '8:12':3.0, '10:12':4.0}[V.pitch] || 2.5;
+  // Step increment per panel = (pitch/12) × 3
+  const pitchNum = parseInt(V.pitch.split(':')[0]);
+  const gableStep = (pitchNum / 12) * 3;
+
+  // EAVE WALLS — panel height = plate height minus wainscot if applicable
+  // Front/back are the long walls (L), left/right are short walls (W)
+  const frontBackWainH = (wainType !== 'none' && (wFront || wBack)) ? wainH : 0;
+  const leftRightWainH = (wainType !== 'none' && (wLeft || wRight)) ? wainH : 0;
+
+  const eaveWallLongPanelH  = pH - frontBackWainH;   // front & back walls
+  const eaveWallShortPanelH = pH - leftRightWainH;   // left & right walls
+  const eaveWallLongCount   = Math.ceil(L / 3);
+  const eaveWallShortCount  = Math.ceil(W / 3);
+
+  function fmtHt(h) {
+    const ft = Math.floor(h), inches = Math.round((h - ft) * 12);
+    return inches === 0 ? `${ft}'-0"` : `${ft}'-${inches}"`;
+  }
+  const eaveHtDisplay = fmtHt(eaveWallLongPanelH);
+
+  // GABLE ENDS — stepped panels
+  // If wainscot on gable ends (left/right), subtract wainH from every panel height
+  const gableWainH = (wainType !== 'none' && (wLeft || wRight)) ? wainH : 0;
+  const gablePanelsPerHalf = Math.ceil((W / 2) / 3);
+  const gableSchedule = [];
+  for (let i = 0; i < gablePanelsPerHalf; i++) {
+    const heightFt = pH + gableFirstOffset + (gableStep * i) - gableWainH;
+    const totalInches = Math.ceil(heightFt * 12);
+    const ft = Math.floor(totalInches / 12);
+    const inches = totalInches % 12;
+    const display = inches === 0 ? `${ft}'-0"` : `${ft}'-${inches}"`;
+    gableSchedule.push({ heightFt, totalInches, display, qty: 4 });
+  }
+
+  // Corner trim — 4 corners × eave height, 10' sticks
   const cornerTrimLF = Math.ceil(4 * pH * 1.1);
+  const cornerTrimPcs = Math.ceil(cornerTrimLF / 10);
+  const soffitSF = Math.ceil(perim * overhangFt);
 
   // ── INSULATION ──
   const wallFoamBF = Math.ceil(extLF * pH * 0.85 * 5.5 * 1.1);
@@ -677,10 +791,23 @@ function calculate() {
       { i:'Rake trim — both gable ends', d:`${panelLengthDisplay} × 2 slopes × 2 ends + 10%`, q:rakeTrimPcs, u:"PCS @ 10'", lf:rakeTrimLF },
       { i:'Eave trim / drip edge', d:`(${L}' + OH each end) × 2 slopes`, q:eaveTrimPcs, u:"PCS @ 10'", lf:eaveRunLF },
     ]},
-    { name: 'EXTERIOR SIDING + FINISHES', items: [
-      { i:`Metal siding — ${V.roofing}`, d:`3' panels · ${Math.round(netWallSF)} SF net wall area + 10%`, q:sidingLF.toLocaleString(), u:'LF', lf:sidingLF },
+    { name: 'WALL PANELS — Tuff-Rib 3\' Coverage', items: [
+      { i:`Eave wall panels — ${fmtHt(eaveWallLongPanelH)}`, d:`Front & back walls · ${L}' ÷ 3 = ${eaveWallLongCount} panels × 2 sides${frontBackWainH>0?' · reduced from '+pH+"' by "+frontBackWainH+"' wainscot":''}`, q:eaveWallLongCount*2, u:`PCS @ ${fmtHt(eaveWallLongPanelH)}`, lf:null },
+      ...gableSchedule.map((p,i) => ({
+        i: `Gable panel ${i+1} of ${gablePanelsPerHalf} — ${p.display}`,
+        d: `${i===0 ? `Eave ${pH}' + ${gableFirstOffset}' offset${gableWainH>0?' − '+gableWainH+"' wainscot":''}` : `Panel ${i} + ${gableStep}' step`} · 4 pcs (2 per half × 2 ends)`,
+        q: p.qty,
+        u: `PCS @ ${p.display}`,
+        lf: null
+      })),
+      ...(wainType === 'metal' ? [
+        { i:`Wainscot panels — ${wainH}'-0" (metal · different color)`, d:`${wainWalls.map(w=>w.name+' '+Math.ceil(w.len/3)+'pcs').join(' · ')} · same 3' Tuff-Rib`, q:wainWalls.reduce((a,w)=>a+Math.ceil(w.len/3),0), u:`PCS @ ${wainH}'-0"`, lf:totalWainLF },
+      ] : []),
+      ...(wainType === 'stone' ? [
+        { i:`Wainscot — stone ${wainH}'`, d:`${wainWalls.map(w=>w.name).join(' + ')} · mason scope · ${totalWainLF} LF × ${wainH}'`, q:totalWainSF, u:'SF', lf:totalWainLF },
+      ] : []),
+      { i:'Corner trim', d:`4 corners × ${pH}' eave height + 10%`, q:cornerTrimPcs, u:"PCS @ 10'", lf:cornerTrimLF },
       { i:'Metal soffit', d:'Eave coverage — panel match', q:soffitSF, u:'SF', lf:null },
-      { i:'Corner trim', d:'All exterior corners', q:cornerTrimLF, u:'LF', lf:cornerTrimLF },
     ]},
     { name: 'INSULATION — OPEN-CELL SPRAY FOAM', items: [
       { i:'Spray foam — walls', d:`Open-cell · 2×6 full cavity · R-20 · ${extLF} LF`, q:wallFoamBF.toLocaleString(), u:'BF', lf:null },
