@@ -4,468 +4,149 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sauce Estimator — Home Edition</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
-<noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"></noscript>
 <style>
-:root{--navy:#1a2332;--navy2:#212d3d;--navy3:#263044;--amber:#f5a623;--amber2:#f7b94a;--teal:#2dd4aa;--teal2:#25b994;--white:#ffffff;--off:#f7f8fa;--border:#e2e5ea;--border2:#d0d4da;--text:#1a2332;--muted:#6b7280;--muted2:#9ca3af;--success:#10b981;--warn:#f59e0b;--danger:#ef4444;}
+:root{--navy:#1a2332;--navy2:#212d3d;--amber:#f5a623;--amber2:#f7b94a;--teal:#2dd4aa;--white:#fff;--off:#f7f8fa;--border:#e2e5ea;--text:#1a2332;--muted:#6b7280;--muted2:#9ca3af;--success:#10b981;}
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Inter',sans-serif;background:var(--off);color:var(--text);min-height:100vh;font-size:14px;}
-.nav{background:var(--navy);height:52px;display:flex;align-items:center;padding:0 20px;position:sticky;top:0;z-index:200;}
-.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;margin-right:24px;}
-.nav-mark{width:32px;height:32px;background:var(--amber);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--navy);flex-shrink:0;}
-.nav-name{font-size:13px;font-weight:700;color:#fff;display:block;}
-.nav-sub{font-size:10px;font-weight:600;color:var(--amber);letter-spacing:.5px;text-transform:uppercase;display:block;}
-.nav-div{width:1px;height:28px;background:rgba(255,255,255,.12);margin:0 20px;}
-.nav-mod{font-size:12px;font-weight:600;color:rgba(255,255,255,.5);letter-spacing:.3px;text-transform:uppercase;}
-.nav-mod span{color:rgba(255,255,255,.9);}
+body{font-family:'Inter',sans-serif;background:var(--off);color:var(--text);min-height:100vh;}
+
+/* NAV */
+.nav{background:var(--navy);height:52px;display:flex;align-items:center;padding:0 24px;position:sticky;top:0;z-index:100;}
+.nav-mark{width:32px;height:32px;background:var(--amber);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--navy);margin-right:10px;flex-shrink:0;text-decoration:none;}
+.nav-name{font-size:13px;font-weight:700;color:#fff;}
+.nav-sub{font-size:10px;font-weight:600;color:var(--amber);letter-spacing:.5px;text-transform:uppercase;}
 .nav-sp{flex:1;}
-.nav-ready{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:700;color:var(--teal);letter-spacing:.5px;}
-.nav-ready-dot{width:7px;height:7px;border-radius:50%;background:var(--teal);}
-.nav-btn{background:transparent;border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.7);padding:5px 14px;border-radius:5px;font-size:12px;font-weight:500;cursor:pointer;margin-left:10px;transition:all .15s;font-family:inherit;}
-.nav-btn:hover{background:rgba(255,255,255,.08);color:#fff;}
-.page{max-width:1200px;margin:0 auto;padding:0 0 48px;}
-.crumb{padding:16px 32px 0;display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--muted2);}
-.crumb-dot{width:6px;height:6px;border-radius:50%;background:var(--amber);margin-right:2px;}
-.ph{padding:12px 32px 24px;}
-.ph-title{font-size:28px;font-weight:700;color:var(--navy);letter-spacing:-.5px;margin-bottom:4px;}
-.ph-sub{font-size:14px;color:var(--muted);}
-.uw{padding:0 32px;}
-.ug{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;}
-@media(max-width:720px){.ug{grid-template-columns:1fr;}}
-.card{background:#fff;border:1px solid var(--border);border-radius:8px;padding:20px 24px;}
-.ct{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:6px;}
-.dz{border:2px dashed var(--border2);border-radius:6px;padding:40px 24px;text-align:center;cursor:pointer;transition:all .15s;position:relative;background:var(--off);}
-.dz:hover,.dz.over{border-color:var(--amber);background:#fffbf2;}
-.dz input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
-.dz-icon{width:42px;height:42px;background:var(--navy);border-radius:8px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;}
-.dz h3{font-size:14px;font-weight:600;color:var(--navy);margin-bottom:4px;}
-.dz p{font-size:12px;color:var(--muted);}
-.fmts{display:flex;gap:6px;justify-content:center;margin-top:12px;flex-wrap:wrap;}
-.fmt{font-size:10px;font-weight:600;letter-spacing:.5px;padding:2px 8px;border-radius:3px;background:#eef0f3;color:var(--muted);text-transform:uppercase;}
-.dc{background:var(--navy);border:1px solid var(--navy3);border-radius:8px;padding:20px 24px;display:flex;flex-direction:column;justify-content:space-between;}
-.dc-lbl{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--amber);margin-bottom:10px;}
-.dc-title{font-size:18px;font-weight:700;color:#fff;margin-bottom:6px;}
-.dc-sub{font-size:12px;color:rgba(255,255,255,.5);line-height:1.5;margin-bottom:16px;}
-.dc-specs{display:flex;flex-direction:column;gap:0;margin-bottom:20px;}
-.dc-row{display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.07);}
-.dc-row:last-child{border-bottom:none;}
-.dc-k{color:rgba(255,255,255,.45);}
-.dc-v{color:rgba(255,255,255,.85);font-weight:500;}
-.info-row{display:flex;gap:12px;flex-wrap:wrap;margin-top:4px;}
-.info-card{background:#fff;border:1px solid var(--border);border-radius:6px;padding:12px 16px;flex:1;min-width:200px;}
+.nav-user{font-size:12px;color:rgba(255,255,255,.5);}
+
+/* PAGE */
+.page{max-width:1100px;margin:0 auto;padding:40px 24px;}
+.crumb{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--muted2);margin-bottom:20px;}
+.crumb-dot{width:6px;height:6px;border-radius:50%;background:var(--amber);}
+.page-title{font-size:32px;font-weight:700;color:var(--navy);letter-spacing:-.5px;margin-bottom:6px;}
+.page-sub{font-size:14px;color:var(--muted);margin-bottom:40px;}
+
+/* TOOL SECTION */
+.section-label{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
+
+/* TOOL CARDS */
+.tools-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:40px;}
+@media(max-width:720px){.tools-grid{grid-template-columns:1fr;}}
+@media(max-width:960px) and (min-width:721px){.tools-grid{grid-template-columns:1fr 1fr;}}
+
+.tool-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:24px;cursor:pointer;transition:all .15s;text-decoration:none;display:block;position:relative;overflow:hidden;}
+.tool-card:hover{border-color:var(--amber);transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.06);}
+.tool-card.primary{border-color:var(--amber);}
+.tool-badge{position:absolute;top:16px;right:16px;font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;letter-spacing:.5px;}
+.badge-live{background:#d1fae5;color:#065f46;}
+.badge-new{background:#fef3c7;color:#92400e;}
+.tool-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;}
+.icon-blue{background:#e6f1fb;}
+.icon-amber{background:#fef3c7;}
+.icon-teal{background:#d1fae5;}
+.tool-name{font-size:17px;font-weight:700;color:var(--navy);margin-bottom:6px;}
+.tool-desc{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:16px;}
+.tool-tags{display:flex;gap:6px;flex-wrap:wrap;}
+.tag{font-size:11px;color:var(--muted);background:var(--off);border:1px solid var(--border);border-radius:4px;padding:2px 8px;}
+
+/* INFO STRIP */
+.info-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:40px;}
+@media(max-width:720px){.info-strip{grid-template-columns:1fr;}}
+.info-card{background:var(--white);border:1px solid var(--border);border-radius:8px;padding:16px 18px;}
 .info-title{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
 .info-body{font-size:12px;color:var(--muted);line-height:1.7;}
-.btn{padding:8px 18px;border-radius:5px;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;border:none;font-family:inherit;display:inline-flex;align-items:center;gap:6px;letter-spacing:.1px;}
-.btn-amber{background:var(--amber);color:var(--navy);}
-.btn-amber:hover{background:var(--amber2);}
-.btn-navy{background:var(--navy);color:#fff;}
-.btn-navy:hover{background:var(--navy2);}
-.btn-outline{background:transparent;color:var(--navy);border:1px solid var(--border2);}
-.btn-outline:hover{background:var(--off);}
-.btn-sm{padding:5px 12px;font-size:12px;}
-.btn-full{width:100%;justify-content:center;}
-.proc{display:none;padding:64px 32px;text-align:center;max-width:520px;margin:0 auto;}
-.spin{width:48px;height:48px;border:3px solid var(--border);border-top-color:var(--amber);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 20px;}
-@keyframes spin{to{transform:rotate(360deg)}}
-.proc-t{font-size:20px;font-weight:700;color:var(--navy);margin-bottom:6px;}
-.proc-s{font-size:13px;color:var(--muted);margin-bottom:28px;}
-.stages{text-align:left;max-width:360px;margin:0 auto;}
-.stage{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--muted);}
-.stage:last-child{border-bottom:none;}
-.s-dot{width:20px;height:20px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;}
-.s-dot.done{background:var(--teal);color:#fff;}
-.s-dot.active{background:var(--amber);color:var(--navy);animation:pulse .9s ease-in-out infinite;}
-.s-dot.pending{background:var(--border);color:var(--muted2);}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
-.err-wrap{display:none;padding:24px 32px;max-width:560px;}
-.err-card{background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:20px 24px;}
-.err-card h3{font-size:15px;font-weight:700;color:var(--danger);margin-bottom:6px;}
-.err-card p{font-size:13px;color:#991b1b;}
-.results{display:none;}
-.res-bar{background:#fff;border-bottom:1px solid var(--border);padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:52px;gap:12px;flex-wrap:wrap;}
-.res-bar-l{display:flex;align-items:center;gap:10px;}
-.res-proj{font-size:15px;font-weight:700;color:var(--navy);}
-.res-tag{font-size:11px;font-weight:500;color:var(--muted);background:var(--off);border:1px solid var(--border);border-radius:4px;padding:2px 8px;}
-.pill{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;letter-spacing:.3px;}
-.pill-ok{background:#d1fae5;color:#065f46;}
-.pill-w{background:#fef3c7;color:#92400e;}
-.res-bar-r{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
-.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--border);border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:24px;}
-.stat{background:#fff;padding:14px 20px;}
-.s-lbl{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--muted2);margin-bottom:5px;}
-.s-val{font-size:22px;font-weight:700;color:var(--navy);line-height:1;}
-.s-unit{font-size:11px;color:var(--muted);margin-top:2px;}
-.alerts{padding:0 32px;margin-bottom:16px;}
-.alert{border-radius:6px;padding:10px 14px;margin-bottom:8px;font-size:13px;display:flex;gap:8px;align-items:flex-start;}
-.a-warn{background:#fffbeb;border:1px solid #fde68a;color:#78350f;}
-.a-info{background:#eff6ff;border:1px solid #bfdbfe;color:#1e3a8a;}
-.a-icon{flex-shrink:0;font-size:14px;}
-.tabs-w{padding:0 32px;margin-bottom:20px;}
-.tab-bar{display:flex;border-bottom:2px solid var(--border);}
-.tab{padding:10px 20px;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border:none;background:transparent;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;font-family:inherit;letter-spacing:.2px;}
-.tab:hover{color:var(--navy);}
-.tab.active{color:var(--navy);border-bottom-color:var(--amber);}
-.tc{padding:0 32px;}
-.tcard{background:#fff;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px;}
-table{width:100%;border-collapse:collapse;font-size:13px;}
-th{text-align:left;padding:10px 16px;font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);background:var(--off);border-bottom:1px solid var(--border);}
-td{padding:10px 16px;border-bottom:1px solid var(--border);vertical-align:middle;}
-tr:last-child td{border-bottom:none;}
-tr.dr:hover td{background:#fafbfc;}
-tr.cr td{background:var(--navy);color:rgba(255,255,255,.6);font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;padding:7px 16px;border-bottom:none;}
-.qv{font-weight:700;color:var(--navy);font-size:14px;}
-.ut{font-size:11px;color:var(--muted);}
-.cb{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;letter-spacing:.3px;}
-.ch{background:#d1fae5;color:#065f46;}
-.cm{background:#fef3c7;color:#92400e;}
-.cl{background:#fee2e2;color:#991b1b;}
-.eg{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-@media(max-width:640px){.eg{grid-template-columns:1fr;}}
-.ec{background:#fff;border:1px solid var(--border);border-radius:8px;padding:16px 20px;}
-.ec-t{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);}
-.er{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f3f4f6;font-size:12px;}
-.er:last-child{border-bottom:none;}
-.ek{color:var(--muted);}
-.ev{font-weight:600;color:var(--navy);text-align:right;}
-.ef{font-size:10px;color:var(--warn);font-weight:600;margin-left:4px;}
-.v3d{background:var(--navy);border-radius:8px;height:420px;position:relative;overflow:hidden;border:1px solid var(--navy3);}
-#houseCanvas{position:absolute;inset:0;width:100%!important;height:100%!important;}
-.v3d-ov{position:absolute;bottom:14px;right:14px;display:flex;gap:6px;z-index:2;}
-.v3d-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);padding:5px 12px;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;letter-spacing:.3px;}
-.v3d-btn:hover{background:rgba(255,255,255,.15);color:#fff;}
-.v3d-hint{position:absolute;top:12px;left:14px;font-size:10px;color:rgba(255,255,255,.3);font-weight:500;letter-spacing:.5px;text-transform:uppercase;}
-.v3d-dims{position:absolute;top:12px;right:14px;font-size:11px;color:var(--amber);font-weight:600;text-align:right;line-height:1.7;}
-.v3d-live{position:absolute;bottom:14px;left:14px;display:flex;align-items:center;gap:5px;font-size:10px;color:var(--teal);font-weight:700;letter-spacing:.5px;}
-.v3d-live-dot{width:6px;height:6px;border-radius:50%;background:var(--teal);}
-@media print{nav,.crumb,.res-bar,.tabs-w,.v3d-ov,.v3d-hint{display:none!important;}.results{display:block!important;}.tc>div{display:block!important;}}
 </style>
 </head>
 <body>
+
 <nav class="nav">
-  <a class="nav-logo" href="/">
-    <div class="nav-mark">SE</div>
-    <div><span class="nav-name">Sauce Estimator</span><span class="nav-sub">Home Edition</span></div>
-  </a>
-  <div class="nav-div"></div>
-  <div class="nav-mod"><span>Plan Takeoff</span></div>
+  <a class="nav-mark" href="/">SE</a>
+  <div style="margin-right:16px"><div class="nav-name">Sauce Estimator</div><div class="nav-sub">Home Edition</div></div>
   <div class="nav-sp"></div>
-  <div class="nav-ready"><div class="nav-ready-dot"></div>READY</div>
-  <a href="/estimator.html" class="nav-btn" style="text-decoration:none">Quick Estimate</a>
-  <a href="/designer.html" class="nav-btn" style="text-decoration:none">Floor Plan Designer</a>
-  <button class="nav-btn" onclick="resetApp()">New Analysis</button>
+  <span class="nav-user">lain.hinson</span>
 </nav>
 
 <div class="page">
-  <!-- UPLOAD -->
-  <div id="screenUpload">
-    <div class="crumb"><div class="crumb-dot"></div><span style="color:var(--muted)">Dashboard</span><span style="color:var(--muted2)"> / </span><span>Plan Takeoff</span></div>
-    <div class="ph"><div class="ph-title">Upload a Plan</div><div class="ph-sub">Upload an engineered floor plan to generate an accurate material takeoff</div></div>
-    <div class="uw">
-      <div class="ug">
-        <div class="card">
-          <div class="ct">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect width="16" height="16" rx="3" fill="#1a2332"/><path d="M8 3v8M8 3L5 6M8 3l3 3" stroke="#f5a623" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 12v.5a.5.5 0 00.5.5h9a.5.5 0 00.5-.5V12" stroke="white" stroke-width="1.5" stroke-linecap="round"/></svg>
-            Upload Drawing
-          </div>
-          <div class="dz" id="dropZone">
-            <input type="file" id="fileInput" accept=".pdf,.png,.jpg,.jpeg,.webp">
-            <div class="dz-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2v12M10 2L6 6M10 2l4 4" stroke="#f5a623" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 15v1a1 1 0 001 1h14a1 1 0 001-1v-1" stroke="white" stroke-width="2" stroke-linecap="round"/></svg></div>
-            <h3>Drop your floor plan here</h3>
-            <p>or click to browse — PDF, PNG, or JPG</p>
-            <div class="fmts"><span class="fmt">PDF</span><span class="fmt">PNG</span><span class="fmt">JPG</span><span class="fmt">WebP</span></div>
-          </div>
-        </div>
-        <div class="dc">
-          <div>
-            <div class="dc-lbl">Demo Project</div>
-            <div class="dc-title">Sample Home — 3/2 Ranch</div>
-            <div class="dc-sub">Run a live demo using a sample residential plan set to see the full takeoff in action.</div>
-            <div class="dc-specs">
-              <div class="dc-row"><span class="dc-k">Living area</span><span class="dc-v">1,680 SF</span></div>
-              <div class="dc-row"><span class="dc-k">Porch</span><span class="dc-v">448 SF</span></div>
-              <div class="dc-row"><span class="dc-k">Dimensions</span><span class="dc-v">56' × 35'</span></div>
-              <div class="dc-row"><span class="dc-k">Roof</span><span class="dc-v">6:12 gable · Tuff-Rib</span></div>
-              <div class="dc-row"><span class="dc-k">Foundation</span><span class="dc-v">Monolithic slab · 4"</span></div>
-            </div>
-          </div>
-          <button class="btn btn-amber btn-full" onclick="runDemo()">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 1.5l8 4.5-8 4.5V1.5z" fill="currentColor"/></svg>
-            Run Demo
-          </button>
-        </div>
+  <div class="crumb"><div class="crumb-dot"></div>Dashboard</div>
+  <div class="page-title">Home Edition</div>
+  <div class="page-sub">Generate accurate material takeoffs for custom residential builds — three ways to work.</div>
+
+  <div class="section-label">Choose Your Method</div>
+
+  <div class="tools-grid">
+
+    <!-- Quick Estimate -->
+    <a href="/estimator.html" class="tool-card primary">
+      <span class="tool-badge badge-live">LIVE</span>
+      <div class="tool-icon icon-amber">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <rect x="3" y="3" width="16" height="16" rx="2" stroke="#92400e" stroke-width="1.5"/>
+          <path d="M7 8h8M7 11h8M7 14h5" stroke="#92400e" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
       </div>
-      <div class="info-row">
-        <a href="/estimator.html" style="text-decoration:none;flex:1;min-width:200px">
-          <div class="info-card" style="cursor:pointer;border-color:var(--border2);transition:all .15s" onmouseover="this.style.borderColor='var(--amber)'" onmouseout="this.style.borderColor='var(--border2)'">
-            <div class="info-title" style="color:var(--amber)">Quick Estimate →</div>
-            <div class="info-body">Know your dimensions? Enter them directly and get a material list instantly — no upload needed.</div>
-          </div>
-        </a>
-        <a href="/designer.html" style="text-decoration:none;flex:1;min-width:200px">
-          <div class="info-card" style="cursor:pointer;border-color:var(--border2);transition:all .15s" onmouseover="this.style.borderColor='var(--amber)'" onmouseout="this.style.borderColor='var(--border2)'">
-            <div class="info-title" style="color:var(--amber)">Draw a Plan →</div>
-            <div class="info-body">Start from scratch — draw the shell, add rooms and porches, generate a 3D model and takeoff.</div>
-          </div>
-        </a>
+      <div class="tool-name">Quick Estimate</div>
+      <div class="tool-desc">You've already reviewed the plan. Enter dimensions, door and window counts, and get a full material list instantly — no upload needed.</div>
+      <div class="tool-tags">
+        <span class="tag">Fastest</span>
+        <span class="tag">Piece counts</span>
+        <span class="tag">CSV export</span>
       </div>
-        <div class="info-card"><div class="info-title">What gets extracted</div><div class="info-body">Dimensions · Door &amp; window schedules · Roof pitch &amp; area · Wall linear footage · Truss schedule · Foundation spec</div></div>
-        <div class="info-card"><div class="info-title">What gets calculated</div><div class="info-body">Framing lumber · Sheathing · Trusses · Metal roofing &amp; siding · Spray foam insulation · Concrete &amp; rebar</div></div>
-        <div class="info-card"><div class="info-title">Assembly rules</div><div class="info-body">2×6 ext walls · 2×4/2×6 int walls · Tuff-Rib 29ga · Open-cell spray foam · Monolithic slab · OSB or ZIP</div></div>
+    </a>
+
+    <!-- Upload Plan -->
+    <a href="/upload.html" class="tool-card">
+      <span class="tool-badge badge-live">LIVE</span>
+      <div class="tool-icon icon-blue">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <path d="M11 3v12M11 3L7 7M11 3l4 4" stroke="#1F4E79" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M3 17v1a1 1 0 001 1h14a1 1 0 001-1v-1" stroke="#1F4E79" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
       </div>
+      <div class="tool-name">Upload a Plan</div>
+      <div class="tool-desc">Upload an engineered floor plan — PDF or image. AI reads the drawing and extracts dimensions, schedules, and structural data automatically.</div>
+      <div class="tool-tags">
+        <span class="tag">AI extraction</span>
+        <span class="tag">PDF / PNG / JPG</span>
+        <span class="tag">3D model</span>
+      </div>
+    </a>
+
+    <!-- Draw a Plan -->
+    <a href="/designer.html" class="tool-card">
+      <span class="tool-badge badge-new">BETA</span>
+      <div class="tool-icon icon-teal">
+        <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+          <rect x="3" y="3" width="16" height="16" rx="2" stroke="#065f46" stroke-width="1.5"/>
+          <path d="M3 9h16M9 3v16" stroke="#065f46" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="tool-name">Draw a Plan</div>
+      <div class="tool-desc">Start from scratch. Draw the exterior shell, add rooms and porches room by room, place doors and windows, and generate a live 3D model.</div>
+      <div class="tool-tags">
+        <span class="tag">Floor plan builder</span>
+        <span class="tag">Live 3D</span>
+        <span class="tag">Room by room</span>
+      </div>
+    </a>
+
+  </div>
+
+  <div class="section-label">Assembly Rules</div>
+  <div class="info-strip">
+    <div class="info-card">
+      <div class="info-title">Framing</div>
+      <div class="info-body">2×6 ext walls @ 16" OC · 2×4 int walls · 2×6 plumbing walls · ladder blocking · plates always 16' lumber · headers per schedule</div>
+    </div>
+    <div class="info-card">
+      <div class="info-title">Roof + Exterior</div>
+      <div class="info-body">Trusses @ 24" OC · Tuff-Rib 29ga metal roofing and siding · OSB or ZIP sheathing · open-cell spray foam R-20 walls / R-49 roof</div>
+    </div>
+    <div class="info-card">
+      <div class="info-title">Foundation</div>
+      <div class="info-body">Monolithic slab 4" standard · thickened edge beam · #4 rebar @ 18" OC · 6 mil vapor barrier · 4" compacted gravel base</div>
     </div>
   </div>
 
-  <!-- PROCESSING -->
-  <div class="proc" id="screenProcessing">
-    <div class="spin"></div>
-    <div class="proc-t">Analyzing Drawing</div>
-    <div class="proc-s">AI is reading your plan set</div>
-    <div class="stages" id="stageList"></div>
-  </div>
-
-  <!-- ERROR -->
-  <div class="err-wrap" id="errorWrap">
-    <div class="err-card">
-      <h3>Analysis Failed</h3>
-      <p id="errorMsg">Something went wrong. Please try again.</p>
-      <button class="btn btn-navy btn-sm" style="margin-top:12px" onclick="resetApp()">Try Again</button>
-    </div>
-  </div>
-
-  <!-- RESULTS -->
-  <div class="results" id="screenResults">
-    <div class="res-bar">
-      <div class="res-bar-l">
-        <div class="res-proj" id="projTitle">Results</div>
-        <span class="res-tag" id="projMeta"></span>
-        <span class="pill pill-ok">● COMPLETE</span>
-      </div>
-      <div class="res-bar-r">
-        <button class="btn btn-outline btn-sm" onclick="exportCSV()">Export CSV</button>
-        <button class="btn btn-outline btn-sm" onclick="window.print()">Print</button>
-        <button class="btn btn-amber btn-sm" onclick="resetApp()">New Analysis</button>
-      </div>
-    </div>
-    <div class="stats-row" id="statsRow"></div>
-    <div class="alerts" id="alertsWrap"></div>
-    <div class="tabs-w">
-      <div class="tab-bar">
-        <button class="tab active" onclick="showTab('Materials',this)">Material List</button>
-        <button class="tab" onclick="showTab('Extraction',this)">Extracted Data</button>
-        <button class="tab" onclick="showTab('Model3d',this)">3D Model</button>
-      </div>
-    </div>
-    <div class="tc">
-      <div id="tabMaterials">
-        <div class="tcard">
-          <table>
-            <thead><tr>
-              <th>Item</th>
-              <th>Description</th>
-              <th style="text-align:right">Pieces / Qty</th>
-              <th>Unit</th>
-              <th style="text-align:right">Linear Ft</th>
-              <th>Confidence</th>
-            </tr></thead>
-            <tbody id="materialBody"></tbody>
-          </table>
-        </div>
-      </div>
-      <div id="tabExtraction" style="display:none"><div class="eg" id="extractionGrid"></div></div>
-      <div id="tabModel3d" style="display:none">
-        <div class="v3d">
-          <canvas id="houseCanvas"></canvas>
-          <div class="v3d-hint">Drag to rotate · Scroll to zoom</div>
-          <div class="v3d-dims" id="v3dDims"></div>
-          <div class="v3d-live"><div class="v3d-live-dot"></div>LIVE 3D</div>
-          <div class="v3d-ov">
-            <button class="v3d-btn" onclick="toggleRoof()">Hide Roof</button>
-            <button class="v3d-btn" onclick="toggleWalls()">Hide Walls</button>
-            <button class="v3d-btn" onclick="resetCam()">Reset</button>
-          </div>
-        </div>
-        <div class="eg" style="margin-top:16px" id="model3dCards"></div>
-      </div>
-    </div>
-  </div>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script>
-let appData=null,renderer,scene,camera,roofGroup,wallGroup;
-let isDrag=false,prevMouse={x:0,y:0},rotX=0.38,rotY=-0.52,showRoof=true,showWalls=true;
-const STAGES=['Reading drawing — walls and dimensions','Extracting door and window schedules','Identifying roof system and pitch','Running assembly rules engine','Generating material quantities'];
-function setStages(a){document.getElementById('stageList').innerHTML=STAGES.map((s,i)=>{const c=i<a?'done':i===a?'active':'pending',ic=i<a?'✓':(i+1);return`<div class="stage"><div class="s-dot ${c}">${ic}</div><span>${s}</span></div>`;}).join('');}
-function delay(ms){return new Promise(r=>setTimeout(r,ms));}
-async function runDemo(){
-  show('screenProcessing');
-  for(let i=0;i<STAGES.length;i++){setStages(i);await delay(650);}
-  setStages(STAGES.length);await delay(350);
-  try{const res=await fetch('/api/demo');const data=await res.json();if(data.success&&data.extracted&&data.takeoff){appData=data;renderResults(data);}else showError(data.error||'Demo failed');}
-  catch(e){showError('Cannot connect to server: '+e.message);}
-}
-async function uploadFile(file){
-  show('screenProcessing');
-  for(let i=0;i<STAGES.length;i++){setStages(i);await delay(550);}
-  const fd=new FormData();fd.append('drawing',file);
-  try{
-    const res=await fetch('/api/analyze',{method:'POST',body:fd});
-    const text=await res.text();
-    let data;
-    try{ data=JSON.parse(text); }
-    catch(e){ showError('Server returned invalid response: '+text.substring(0,200)); return; }
-    setStages(STAGES.length);await delay(300);
-    if(data.success&&data.extracted&&data.takeoff){
-      appData=data;renderResults(data);
-    } else {
-      showError((data.error||'Analysis failed')+' — '+JSON.stringify(data).substring(0,150));
-    }
-  }
-  catch(e){showError('Network error: '+e.message);}
-}
-function show(id){['screenUpload','screenProcessing','screenResults','errorWrap'].forEach(s=>{const el=document.getElementById(s);if(el)el.style.display=s===id?'block':'none';});const res=document.getElementById('screenResults');if(id==='screenResults'&&res)res.style.display='block';}
-function showError(msg){
-  ['screenUpload','screenProcessing','screenResults'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
-  const eb=document.getElementById('errorWrap');
-  if(eb){eb.style.display='block';document.getElementById('errorMsg').textContent=msg;}
-}
-function resetApp(){appData=null;if(renderer){renderer.dispose();renderer=null;}document.getElementById('fileInput').value='';show('screenUpload');}
-function renderResults(data){
-  try {
-  const{extracted:e,takeoff:t,filename}=data;
-  document.getElementById('projTitle').textContent=e.project_name||filename||'Takeoff Results';
-  document.getElementById('projMeta').textContent=[e.sheet_info,t.summary.building_dimensions,t.summary.plate_height+' plate'].filter(Boolean).join(' · ');
-  document.getElementById('alertsWrap').innerHTML=(t.flags||[]).map(f=>`<div class="alert ${f.level==='warning'?'a-warn':'a-info'}"><span class="a-icon">${f.level==='warning'?'⚠':'ℹ'}</span><div>${f.message}</div></div>`).join('');
-  const s=t.summary;
-  document.getElementById('statsRow').innerHTML=[['Living Area',(s.living_sf||0).toLocaleString(),'sq ft'],['Porch',(s.porch_sf||0).toLocaleString(),'sq ft'],['Sloped Roof',(s.total_sloped_sf||0).toLocaleString(),'sq ft'],['Doors',s.total_doors||0,'total'],['Windows',s.total_windows||0,(s.total_glazing_sf||0)+' SF'],['Concrete',t.categories?.find(c=>c.name==='Foundation')?.items?.[0]?.qty||'—','cubic yards']].map(([l,v,u])=>`<div class="stat"><div class="s-lbl">${l}</div><div class="s-val">${v}</div><div class="s-unit">${u}</div></div>`).join('');
-  document.getElementById('materialBody').innerHTML=(t.categories||[]).map(cat=>`<tr class="cr"><td colspan="6">${cat.name}</td></tr>${cat.items.map(i=>`<tr class="dr"><td>${i.item}</td><td style="color:var(--muted);font-size:12px">${i.description}</td><td style="text-align:right"><span class="qv">${i.qty}</span></td><td><span class="ut">${i.unit}</span></td><td style="text-align:right;font-size:12px;color:var(--muted)">${i.lf!=null?i.lf.toLocaleString()+' LF':''}</td><td><span class="cb ${i.confidence==='high'?'ch':i.confidence==='medium'?'cm':'cl'}">${i.confidence==='high'?'✓ High':i.confidence==='medium'?'~ Med':'! Low'}</span></td></tr>`).join('')}`).join('');
-  document.getElementById('extractionGrid').innerHTML=[
-    {t:'Square Footage',r:[['Living area',(e.living_sf||0).toLocaleString()+' SF'],['Porch',(e.porch_sf||0).toLocaleString()+' SF'],['Total slab',((e.living_sf||0)+(e.porch_sf||0)).toLocaleString()+' SF']]},
-    {t:'Building Dimensions',r:[['Width',(e.building_width_ft||'—')+"'-0\""],['Depth',(e.building_depth_ft||'—')+"'-0\""],['Plate height',(e.plate_height_ft||9)+"'-0\""]]},
-    {t:'Roof Data',r:[['Structural pitch',e.structural_roof_pitch||'—'],e.ceiling_pitch&&e.ceiling_pitch!==e.structural_roof_pitch?['Ceiling pitch',e.ceiling_pitch+' <span class="ef">⚠ differs</span>']:null,['Porch pitch',e.porch_pitch||'—'],['Sheathing',e.sheathing_type||'OSB'],['Roofing',e.roofing_type||'Tuff-Rib 29ga']].filter(Boolean)},
-    {t:'Door Schedule',r:[...(e.doors||[]).reduce((acc,d)=>{if(!acc.find(r=>r[0].startsWith(d.mark)))acc.push([`${d.mark} — ${d.description||''} ×${d.count}`,`${d.rough_opening_width_ft||'?'}' × ${d.rough_opening_height_ft||'?'}'`]);return acc;},[]),['Total',(e.doors||[]).reduce((a,d)=>a+d.count,0)+' doors']]},
-    {t:'Window Schedule',r:[...(e.windows||[]).map(w=>[`${w.mark} ×${w.count}`,`${w.rough_opening_width_ft||'?'}' × ${w.rough_opening_height_ft||'?'}'`]),['Total glazing',(s.total_glazing_sf||0)+' SF']]},
-    {t:'Framing Spec',r:[['Ext. walls','2×6 @ 16" OC'],['Int. walls','2×4 @ 16" OC'],['Plumbing walls','2×6 @ 16" OC'],['Foundation',(e.foundation_type||'monolithic slab').replace(/_/g,' ')],['Slab',(e.slab_thickness_in||4)+'" thick']]},
-    e.trusses?.length?{t:'Truss Schedule',r:[...(e.trusses||[]).map(t=>[`${t.mark} — ${t.type}`,t.count+' EA']),['Total',(e.trusses||[]).reduce((a,t)=>a+t.count,0)+' EA']]}:null,
-    e.rough_timber?.length?{t:'Rough Timber',r:(e.rough_timber||[]).map(r=>[`${r.mark} — ${r.size}`,r.count+' EA'])}:null
-  ].filter(Boolean).map(card=>`<div class="ec"><div class="ec-t">${card.t}</div>${card.r.map(([k,v])=>`<div class="er"><span class="ek">${k}</span><span class="ev">${v}</span></div>`).join('')}</div>`).join('');
-  document.getElementById('v3dDims').innerHTML=`${e.building_width_ft||56}'×${e.building_depth_ft||35}'×${e.plate_height_ft||9}'<br>Pitch ${e.structural_roof_pitch||'6:12'}`;
-  document.getElementById('model3dCards').innerHTML=`<div class="ec"><div class="ec-t">Model Dimensions</div><div class="er"><span class="ek">Footprint</span><span class="ev">${e.building_width_ft||56}' × ${e.building_depth_ft||35}'</span></div><div class="er"><span class="ek">Wall height</span><span class="ev">${e.plate_height_ft||9}'-0"</span></div><div class="er"><span class="ek">Roof pitch</span><span class="ev">${e.structural_roof_pitch||'6:12'}</span></div><div class="er"><span class="ek">Porch pitch</span><span class="ev">${e.porch_pitch||'2:12'}</span></div></div><div class="ec"><div class="ec-t">Roof Geometry</div><div class="er"><span class="ek">Main sloped SF</span><span class="ev">${(s.main_sloped_sf||0).toLocaleString()} SF</span></div><div class="er"><span class="ek">Porch sloped SF</span><span class="ev">${(s.porch_sloped_sf||0).toLocaleString()} SF</span></div><div class="er"><span class="ek">Total sloped SF</span><span class="ev">${(s.total_sloped_sf||0).toLocaleString()} SF</span></div><div class="er"><span class="ek">Overhang</span><span class="ev">16" typical</span></div></div>`;
-  show('screenResults');setTimeout(()=>init3D(e),400);
-  } catch(err){ showError('Error displaying results: '+err.message+'. Raw data received — check console.'); console.error(err); }
-}
-function showTab(tab,btn){
-  ['Materials','Extraction','Model3d'].forEach(t=>{document.getElementById('tab'+t).style.display=t===tab?'':'none';});
-  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  if(tab==='Model3d'){
-    setTimeout(()=>{
-      const canvas=document.getElementById('houseCanvas');
-      const cont=canvas.parentElement;
-      const W=cont.clientWidth,H=cont.clientHeight;
-      if(renderer&&W>0&&H>0){renderer.setSize(W,H);camera.aspect=W/H;camera.updateProjectionMatrix();}
-      if(renderer&&scene&&camera)renderer.render(scene,camera);
-      else if(appData)init3D(appData.extracted);
-    },50);
-  }
-}
-function exportCSV(){if(!appData)return;const rows=[['Category','Item','Description','Quantity','Unit','Confidence']];(appData.takeoff.categories||[]).forEach(cat=>{cat.items.forEach(i=>rows.push([cat.name,i.item,i.description,i.qty,i.unit,i.confidence]));});const csv=rows.map(r=>r.map(c=>'"'+(c||'').toString().replace(/"/g,'""')+'"').join(',')).join('\n');Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob([csv],{type:'text/csv'})),download:(appData.extracted?.project_name||'Takeoff')+'_SE_Home.csv'}).click();}
-document.getElementById('fileInput').addEventListener('change',e=>{if(e.target.files[0])uploadFile(e.target.files[0]);});
-const dz=document.getElementById('dropZone');
-dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over');});
-dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
-dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');if(e.dataTransfer.files[0])uploadFile(e.dataTransfer.files[0]);});
-function init3D(e){
-  const canvas=document.getElementById('houseCanvas');
-  const cont=canvas.parentElement;
-  // Use fallback dimensions if container is hidden (tab not active)
-  const W=Math.max(cont.clientWidth,600);
-  const H=Math.max(cont.clientHeight,400);
-  if(renderer)renderer.dispose();
-  renderer=new THREE.WebGLRenderer({canvas,antialias:true});
-  renderer.setSize(W,H);renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
-  renderer.setClearColor(0x1a2332);renderer.shadowMap.enabled=true;
-  scene=new THREE.Scene();
-  camera=new THREE.PerspectiveCamera(45,W/H,0.1,1000);
-  camera.position.set(20,13,24);camera.lookAt(0,3,0);
-  scene.add(new THREE.AmbientLight(0xffffff,0.4));
-  const sun=new THREE.DirectionalLight(0xfff8e8,1.2);sun.position.set(12,22,12);sun.castShadow=true;scene.add(sun);
-  const fill=new THREE.DirectionalLight(0xd0e8ff,0.3);fill.position.set(-10,6,-6);scene.add(fill);
-  const grid=new THREE.GridHelper(80,40,0x263044,0x263044);grid.position.y=-0.01;scene.add(grid);
-  const ground=new THREE.Mesh(new THREE.PlaneGeometry(80,80),new THREE.MeshLambertMaterial({color:0x1e3a1e}));
-  ground.rotation.x=-Math.PI/2;ground.position.y=-0.05;scene.add(ground);
-  buildHouse(e);
-  canvas.addEventListener('mousedown',ev=>{isDrag=true;prevMouse={x:ev.clientX,y:ev.clientY};});
-  canvas.addEventListener('touchstart',ev=>{isDrag=true;prevMouse={x:ev.touches[0].clientX,y:ev.touches[0].clientY};},{passive:true});
-  window.addEventListener('mouseup',()=>isDrag=false);
-  window.addEventListener('touchend',()=>isDrag=false);
-  window.addEventListener('mousemove',onDrag);
-  window.addEventListener('touchmove',ev=>onDrag(ev.touches[0]),{passive:true});
-  canvas.addEventListener('wheel',ev=>{camera.position.multiplyScalar(ev.deltaY>0?1.1:0.91);renderer.render(scene,camera);},{passive:true});
-  renderer.render(scene,camera);
-}
-function onDrag(ev){if(!isDrag||!renderer)return;rotY+=(ev.clientX-prevMouse.x)*0.007;rotX+=(ev.clientY-prevMouse.y)*0.007;rotX=Math.max(-0.85,Math.min(1.2,rotX));prevMouse={x:ev.clientX,y:ev.clientY};const r=34;camera.position.set(r*Math.sin(rotY)*Math.cos(rotX),r*Math.sin(rotX)+5,r*Math.cos(rotY)*Math.cos(rotX));camera.lookAt(0,3,0);renderer.render(scene,camera);}
-function buildHouse(e){
-  const W=(e.building_width_ft||56)/4,D=(e.building_depth_ft||35)/4,H=(e.plate_height_ft||9)/4;
-  const PD=(e.porch_sf||448)/(e.building_width_ft||56)/4;
-  const pm={'6:12':0.5,'2:12':0.167,'4:12':0.333,'5:12':0.417,'8:12':0.667,'12:12':1.0};
-  const mp=pm[e.structural_roof_pitch||'6:12']||0.5,pp=pm[e.porch_pitch||'2:12']||0.167;
-  const slab=new THREE.Mesh(new THREE.BoxGeometry(W,0.1,D),new THREE.MeshLambertMaterial({color:0x888880}));
-  slab.position.y=-0.05;scene.add(slab);
-  wallGroup=new THREE.Group();
-  const wm=new THREE.MeshLambertMaterial({color:0xb0aaa0});
-  [[W,H,0.16,0,H/2,-D/2],[W,H,0.16,0,H/2,D/2],[0.16,H,D,-W/2,H/2,0],[0.16,H,D,W/2,H/2,0]].forEach(([w,h,d,x,y,z])=>{const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),wm);m.position.set(x,y,z);wallGroup.add(m);});
-  const winm=new THREE.MeshLambertMaterial({color:0x6a9cb8,transparent:true,opacity:0.6});
-  [[-W*0.32,H*0.62,-D/2+0.04],[0,H*0.62,-D/2+0.04],[W*0.32,H*0.62,-D/2+0.04],[-W*0.32,H*0.62,D/2-0.04],[W*0.32,H*0.62,D/2-0.04]].forEach(([x,y,z])=>{const w=new THREE.Mesh(new THREE.BoxGeometry(0.65,0.8,0.06),winm);w.position.set(x,y,z);wallGroup.add(w);});
-  const door=new THREE.Mesh(new THREE.BoxGeometry(0.5,1.05,0.08),new THREE.MeshLambertMaterial({color:0x7a5230}));
-  door.position.set(0,0.6,-D/2+0.04);wallGroup.add(door);
-  const stone=new THREE.Mesh(new THREE.BoxGeometry(W+0.02,0.65,0.2),new THREE.MeshLambertMaterial({color:0x807060}));
-  stone.position.set(0,0.32,-D/2-0.01);wallGroup.add(stone);
-  scene.add(wallGroup);
-  roofGroup=new THREE.Group();
-  const roofMat=new THREE.MeshLambertMaterial({color:0x2a2520,side:THREE.DoubleSide});
-  const ridge=W/2*mp;
-
-  // Left panel
-  const lGeo=new THREE.BufferGeometry();
-  lGeo.setAttribute('position',new THREE.BufferAttribute(new Float32Array([
-    -W/2-0.3,0,-D/2-0.3, 0,ridge,-D/2-0.3, 0,ridge,D/2+0.3,
-    -W/2-0.3,0,-D/2-0.3, 0,ridge,D/2+0.3, -W/2-0.3,0,D/2+0.3
-  ]),3));lGeo.computeVertexNormals();
-  const lPanel=new THREE.Mesh(lGeo,roofMat);lPanel.position.set(0,H,0);roofGroup.add(lPanel);
-
-  // Right panel
-  const rGeo=new THREE.BufferGeometry();
-  rGeo.setAttribute('position',new THREE.BufferAttribute(new Float32Array([
-    W/2+0.3,0,-D/2-0.3, 0,ridge,D/2+0.3, 0,ridge,-D/2-0.3,
-    W/2+0.3,0,-D/2-0.3, W/2+0.3,0,D/2+0.3, 0,ridge,D/2+0.3
-  ]),3));rGeo.computeVertexNormals();
-  const rPanel=new THREE.Mesh(rGeo,roofMat);rPanel.position.set(0,H,0);roofGroup.add(rPanel);
-
-  // Gable ends
-  const gMat=new THREE.MeshLambertMaterial({color:0xb0aaa0,side:THREE.DoubleSide});
-  [-D/2,D/2].forEach(z=>{
-    const gGeo=new THREE.BufferGeometry();
-    gGeo.setAttribute('position',new THREE.BufferAttribute(new Float32Array([-W/2,0,z, W/2,0,z, 0,ridge,z]),3));
-    gGeo.computeVertexNormals();
-    roofGroup.add(new THREE.Mesh(gGeo,gMat));
-  });
-  roofGroup.position.set(0,0,0);
-
-  // Porch roof
-  const pr=W/2*pp;
-  const ps=new THREE.Shape();ps.moveTo(-W/2-0.3,0);ps.lineTo(-W/2-0.3,pr*0.25);ps.lineTo(W/2+0.3,pr);ps.lineTo(W/2+0.3,0);ps.closePath();
-  const pg=new THREE.ExtrudeGeometry(ps,{depth:PD+0.25,bevelEnabled:false});
-  const pmesh=new THREE.Mesh(pg,new THREE.MeshLambertMaterial({color:0x2a2520,side:THREE.DoubleSide}));
-  pmesh.position.set(0,H,-D/2-PD+0.05);roofGroup.add(pmesh);
-  const postm=new THREE.MeshLambertMaterial({color:0xa07840});
-  [-W*0.38,-W*0.14,W*0.14,W*0.38].forEach(x=>{const p=new THREE.Mesh(new THREE.BoxGeometry(0.11,H,0.11),postm);p.position.set(x,H/2,-D/2-PD+0.1);roofGroup.add(p);});
-  scene.add(roofGroup);
-}
-function toggleRoof(){if(roofGroup){showRoof=!showRoof;roofGroup.visible=showRoof;if(renderer)renderer.render(scene,camera);}}
-function toggleWalls(){if(wallGroup){showWalls=!showWalls;wallGroup.visible=showWalls;if(renderer)renderer.render(scene,camera);}}
-function resetCam(){rotX=0.38;rotY=-0.52;camera.position.set(20,13,24);camera.lookAt(0,3,0);if(renderer)renderer.render(scene,camera);}
-</script>
 </body>
 </html>
