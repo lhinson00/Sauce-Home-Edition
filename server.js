@@ -418,7 +418,7 @@ app.post('/api/analyze', upload.single('drawing'), async (req, res) => {
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-opus-4-5',
+        model: 'claude-opus-4-6',
         max_tokens: 4096,
         messages
       })
@@ -434,6 +434,9 @@ app.post('/api/analyze', upload.single('drawing'), async (req, res) => {
     console.log('API response content types:', data.content?.map(b=>b.type));
     const rawText = data.content.map(b => b.text || '').join('');
     console.log('Raw text length:', rawText.length, 'Preview:', rawText.substring(0,200));
+    if (!rawText || rawText.length < 10) {
+      return res.status(500).json({ error: 'AI returned empty response. Try a higher resolution image.' });
+    }
 
     // Parse JSON from response
     let extracted;
