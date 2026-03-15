@@ -240,22 +240,17 @@ tr:hover td{background:#fafbfc;}
           </div>
         </div>
         <div class="field-row">
-          <span class="field-label">Post / rafter</span>
+          <span class="field-label">Timber spec</span>
           <div class="field-inputs">
-            <div class="seg" style="width:220px">
-              <button class="seg-btn on" onclick="setSeg(this,'timberSpec','STD')">4×6 rafters / 6×6 posts</button>
-              <button class="seg-btn" onclick="setSeg(this,'timberSpec','CYP')">Cypress</button>
+            <div class="seg" style="width:280px">
+              <button class="seg-btn on" onclick="setSeg(this,'timberSpec','STD')">2×6 rafters @ 2' OC</button>
+              <button class="seg-btn" onclick="setSeg(this,'timberSpec','CYP')">4×6 cypress @ 4' OC</button>
             </div>
           </div>
         </div>
         <div class="field-row">
-          <span class="field-label">Rafter spacing</span>
-          <div class="field-inputs">
-            <div class="seg" style="width:160px">
-              <button class="seg-btn on" onclick="setSeg(this,'rafterSpacing','24')">24" OC</button>
-              <button class="seg-btn" onclick="setSeg(this,'rafterSpacing','16')">16" OC</button>
-            </div>
-          </div>
+          <span class="field-label">Posts</span>
+          <div class="field-inputs"><span style="font-size:12px;font-weight:600;color:var(--navy)">8×8 Cypress — both specs</span></div>
         </div>
       </div>
     </div>
@@ -369,26 +364,6 @@ tr:hover td{background:#fafbfc;}
               <label style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--text);cursor:pointer">
                 <input type="checkbox" id="wRight" onchange="liveUpdate()" style="width:14px;height:14px;accent-color:var(--amber)"> Right
               </label>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Foundation -->
-    <div class="section">
-      <div class="sec-head">
-        <div class="sec-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="9" width="12" height="4" rx="1" stroke="white" stroke-width="1.5"/><path d="M4 9V5M7 9V3M10 9V6" stroke="#f5a623" stroke-width="1.5" stroke-linecap="round"/></svg></div>
-        <span class="sec-title">Foundation</span>
-      </div>
-      <div class="sec-body">
-        <div class="field-row">
-          <span class="field-label">Slab thickness</span>
-          <div class="field-inputs">
-            <div class="seg" style="width:160px">
-              <button class="seg-btn on" onclick="setSeg(this,'slabThk','4')">4"</button>
-              <button class="seg-btn" onclick="setSeg(this,'slabThk','5')">5"</button>
-              <button class="seg-btn" onclick="setSeg(this,'slabThk','6')">6"</button>
             </div>
           </div>
         </div>
@@ -558,18 +533,19 @@ function calculate() {
 
   // ── ROUGH TIMBER PORCH FRAMING ──
   const postSpacingFt = parseInt(V.postSpacing) || 10;
-  const rafterSpacingFt = parseInt(V.rafterSpacing) / 12; // convert to feet
   const isCypress = V.timberSpec === 'CYP';
-  const timberLabel = isCypress ? 'Cypress' : 'Southern Yellow Pine';
+  // STD = 2×6 rafters @ 2' OC | CYP = 4×6 rafters @ 4' OC | Posts always 8×8 cypress
+  const rafterSize = isCypress ? '4×6' : '2×6';
+  const rafterSpacingFt = isCypress ? 4 : 2;
+  const timberLabel = isCypress ? 'Cypress' : 'STD';
 
-  // Posts — 6×6, spaced along porch width
+  // Posts — 8×8 cypress always, spaced along porch width
   const postCount = porchDepth > 0 ? Math.ceil(porchWidth / postSpacingFt) + 1 : 0;
-  const postHeightFt = pH; // same as wall height
+  const postHeightFt = pH;
   const postLF = postCount * postHeightFt;
 
-  // Rafters — 4×6, spaced along porch width at rafterSpacing OC
+  // Rafters — size and spacing per spec, length = sloped run + overhang
   const rafterCount = porchDepth > 0 ? Math.ceil(porchWidth / rafterSpacingFt) + 1 : 0;
-  // Rafter length = porch depth / cos(pitch angle) + overhang
   const pitchAngle = Math.atan(parseInt(V.porchPitch) / 12);
   const rafterLengthFt = porchDepth > 0 ? Math.ceil(porchDepth / Math.cos(pitchAngle) + overhangFt + 0.5) : 0;
   const rafterStockLen = [8,10,12,14,16].find(l => l >= rafterLengthFt) || 16;
@@ -595,8 +571,24 @@ function calculate() {
   // ── ROOF FRAMING ──
   const trusses = Math.ceil(L / 2) + 1;
   const ridgeLF = Math.ceil(W * 1.1);
-  const purlinLF = Math.ceil(totalRoof / 2 * 1.1);
   const fasciaLF = Math.ceil(perim * 1.1);
+
+  // ── PURLINS — 2' OC along slope, 12' on gable ends, 16' fill ──
+  // Rows per slope = ceil(panel length in ft / 2), × 2 slopes
+  const purlinRowsPerSlope = Math.ceil(panel.decimal / 2);
+  const purlinRowsMain = purlinRowsPerSlope * 2;
+  // Each row: 2 sticks of 12' (one per gable end) + 16' fill for remaining span
+  const purlin12PerRow = 2;
+  const purlin16PerRow = Math.ceil(Math.max(0, L - 24) / 16); // remaining after 2×12'
+  const purlin12Main = purlinRowsMain * purlin12PerRow;
+  const purlin16Main = purlinRowsMain * purlin16PerRow;
+  const purlinMainLF = purlin12Main * 12 + purlin16Main * 16;
+
+  // Porch purlins — same logic, rows based on porch panel length
+  const purlinRowsPorch = porchDepth > 0 ? Math.ceil(porchPanel.decimal / 2) : 0;
+  const purlin12Porch = porchDepth > 0 ? purlinRowsPorch * 2 : 0;
+  const purlin16Porch = porchDepth > 0 ? purlinRowsPorch * Math.ceil(Math.max(0, porchWidth - 24) / 16) : 0;
+  const purlinPorchLF = purlin12Porch * 12 + purlin16Porch * 16;
 
   // ── ROOF SHEATHING + COVERING ──
   const roofOSBSheets = Math.ceil(totalRoof / 32 * 1.1);
@@ -757,13 +749,6 @@ function calculate() {
 
   // ── BUILD OUTPUT ──
   const categories = [
-    { name: 'FOUNDATION', items: [
-      { i:'Concrete — slab + edge beam', d:`${slabThk}" monolithic slab + thickened edge · ${totalSF.toLocaleString()} SF`, q:totalConc, u:'CY', lf:null },
-      { i:'Rebar — slab #4 @ 18" OC', d:'Both directions', q:rebarSlab.toLocaleString(), u:'LF', lf:null },
-      { i:'Rebar — edge beam (3) #5', d:'Continuous', q:rebarBeam, u:'LF', lf:null },
-      { i:'Vapor barrier — 6 mil poly', d:'Under slab', q:vaporSF.toLocaleString(), u:'SF', lf:null },
-      { i:'Gravel base', d:'4" compacted sub-base', q:gravelCY, u:'CY', lf:null },
-    ]},
     { name: 'EXTERIOR WALL FRAMING — 2×6 @ 16" OC', items: [
       { i:'Studs — 2×6 precut 104-5/8"', d:`${extLF} LF of exterior wall @ 16" OC`, q:extStuds, u:'EA', lf:null },
       { i:"Top plate — 2×6 × 16'", d:`Double top plate · ${extTopSticks*16} LF total · always 16' sticks`, q:extTopSticks, u:"PCS @ 16'", lf:extTopSticks*16 },
@@ -787,18 +772,25 @@ function calculate() {
         { i:"Bottom plate — 2×6 plumbing × 16'", d:`Single bottom plate · ${int2x6BotStks*16} LF · 16' sticks`, q:int2x6BotStks, u:"PCS @ 16'", lf:int2x6BotStks*16 },
       ] : []),
     ]},
-    ...(porchDepth > 0 ? [{ name: `PORCH — ROUGH TIMBER SYSTEM · ${timberLabel}`, items: [
-      { i:`Posts — 6×6 ${timberLabel}`, d:`${postCount} posts @ ${postSpacingFt}' OC · ${postHeightFt}' height · confirm post-to-slab connection`, q:postCount, u:'EA', lf:postLF },
-      { i:`Rafters — 4×6 ${timberLabel}`, d:`${rafterCount} rafters @ ${V.rafterSpacing}" OC · ${rafterLengthFt}' length · order ${rafterStockLen}' stock`, q:rafterCount, u:`EA @ ${rafterStockLen}'`, lf:rafterCount*rafterStockLen },
+    ...(porchDepth > 0 ? [{ name: `PORCH — ROUGH TIMBER SYSTEM · ${isCypress ? 'Full Cypress' : 'STD'}`, items: [
+      { i:`Posts — 8×8 Cypress`, d:`${postCount} posts @ ${postSpacingFt}' OC · ${postHeightFt}' height`, q:postCount, u:'EA', lf:postLF },
+      { i:`Rafters — ${rafterSize} ${isCypress ? 'Cypress' : '#2 SYP'}`, d:`${rafterCount} rafters @ ${rafterSpacingFt*12}" OC · ${rafterLengthFt}' length · order ${rafterStockLen}' stock`, q:rafterCount, u:`EA @ ${rafterStockLen}'`, lf:rafterCount*rafterStockLen },
       { i:`Header beam — ${headerBeamSize} ${timberLabel}`, d:`Runs ${porchWidth}' at wall · ${postSpacingFt}' post spacing · order 16' stock`, q:headerBeamPcs, u:"PCS @ 16'", lf:headerBeamLF },
       { i:'Ridge beam — 2×12 #2 SP', d:`Porch ridge · ${porchWidth}' + 10% waste`, q:porchRidgePcs, u:"PCS @ 16'", lf:porchRidgeLF },
       { i:'Fly rafters — 2×6 #2 SP', d:`Gable ends · ${flyRafterLen}' stock`, q:flyRafterPcs, u:`EA @ ${flyRafterLen}'`, lf:flyRafterPcs*flyRafterLen },
       { i:"Porch decking — 2×6 T&G #2 SP", d:`Solid tongue & groove · ${porchSF} SF + 10% waste`, q:porchDeckLF.toLocaleString(), u:'LF', lf:porchDeckLF },
+      ...(purlin12Porch > 0 ? [
+        { i:"Purlins — 2×4 × 12' #2 SP · porch", d:`Gable-end rows · 2 per row · ${purlinRowsPorch} rows`, q:purlin12Porch, u:"PCS @ 12'", lf:purlin12Porch*12 },
+      ] : []),
+      ...(purlin16Porch > 0 ? [
+        { i:"Purlins — 2×4 × 16' #2 SP · porch", d:`Fill rows · ${purlinRowsPorch} rows`, q:purlin16Porch, u:"PCS @ 16'", lf:purlin16Porch*16 },
+      ] : []),
     ]}] : []),
     { name: `ROOF FRAMING — ${V.pitch} PITCH`, items: [
       { i:'Trusses', d:`24" OC · ${L}' building length — confirm type with engineer`, q:trusses, u:'EA', lf:null },
       { i:'Ridge nailer — 2×12 #2 SP', d:`Building width ${W}' + 10%`, q:Math.ceil(W*1.1/16)+' sticks', u:`PCS @ 16'`, lf:ridgeLF },
-      { i:'Purlins — 2×4 #2 SP', d:'@ 24" OC on truss top chords', q:purlinLF.toLocaleString(), u:'LF', lf:purlinLF },
+      { i:'Purlins — 2×4 × 12\' #2 SP', d:`Gable-end rows · 2 per purlin row · ${purlinRowsMain} rows (${purlinRowsPerSlope}/slope)`, q:purlin12Main, u:"PCS @ 12'", lf:purlin12Main*12 },
+      { i:'Purlins — 2×4 × 16\' #2 SP', d:`Fill rows · ${purlin16PerRow} sticks/row · ${purlinRowsMain} rows`, q:purlin16Main, u:"PCS @ 16'", lf:purlin16Main*16 },
       { i:'Fascia — 2×6 #2 SP', d:'Eave perimeter + 10%', q:Math.ceil(fasciaLF/16), u:"PCS @ 16'", lf:fasciaLF },
     ]},
     { name: `ROOF PANELS — ${V.roofing} · Tuff-Rib 3' Coverage`, items: [
@@ -839,10 +831,6 @@ function calculate() {
         d:`Porch panel ${porchPanelLengthDisplay} ÷ 3 × ${porchPanelsPerSlope} panels`,
         q:porchSoffitCount, u:`PCS @ ${soffitPanelDisplay}`, lf:porchSoffitLF
       }] : []),
-    ]},
-    { name: 'INSULATION — OPEN-CELL SPRAY FOAM', items: [
-      { i:'Spray foam — walls', d:`Open-cell · 2×6 full cavity · R-20 · ${extLF} LF`, q:wallFoamBF.toLocaleString(), u:'BF', lf:null },
-      { i:'Spray foam — roof', d:`Open-cell · R-49 @ 13.2" depth · ${totalRoof.toLocaleString()} SF sloped`, q:roofFoamBF.toLocaleString(), u:'BF', lf:null },
     ]},
   ];
 
