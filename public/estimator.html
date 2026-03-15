@@ -208,12 +208,16 @@ tr:hover td{background:#fafbfc;}
     <div class="section">
       <div class="sec-head">
         <div class="sec-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="6" width="12" height="7" rx="1" stroke="white" stroke-width="1.5"/><path d="M3 6V4M11 6V4" stroke="#f5a623" stroke-width="1.5" stroke-linecap="round"/></svg></div>
-        <span class="sec-title">Porches</span>
+        <span class="sec-title">Porch — Rough Timber System</span>
       </div>
       <div class="sec-body">
         <div class="field-row">
-          <span class="field-label">Porch SF</span>
-          <div class="field-inputs"><input type="number" id="porchSF" value="0" min="0" max="2000" oninput="liveUpdate()"><span class="field-unit">SF</span><span class="field-unit" style="font-size:11px;color:var(--muted)">(enter 0 if none)</span></div>
+          <span class="field-label">Porch width</span>
+          <div class="field-inputs"><input type="number" id="porchWidth" value="56" min="0" max="120" oninput="liveUpdate()"><span class="field-unit">ft <span style="font-size:10px;color:var(--muted)">(matches house width)</span></span></div>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Porch depth</span>
+          <div class="field-inputs"><input type="number" id="porchDepth" value="8" min="0" max="30" oninput="liveUpdate()"><span class="field-unit">ft <span style="font-size:10px;color:var(--muted)">(0 if no porch)</span></span></div>
         </div>
         <div class="field-row">
           <span class="field-label">Porch pitch</span>
@@ -222,6 +226,34 @@ tr:hover td{background:#fafbfc;}
               <button class="seg-btn on" onclick="setSeg(this,'porchPitch','2:12')">2:12</button>
               <button class="seg-btn" onclick="setSeg(this,'porchPitch','3:12')">3:12</button>
               <button class="seg-btn" onclick="setSeg(this,'porchPitch','4:12')">4:12</button>
+            </div>
+          </div>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Post spacing</span>
+          <div class="field-inputs">
+            <div class="seg" style="width:200px">
+              <button class="seg-btn" onclick="setSeg(this,'postSpacing','8')">8'</button>
+              <button class="seg-btn on" onclick="setSeg(this,'postSpacing','10')">10'</button>
+              <button class="seg-btn" onclick="setSeg(this,'postSpacing','12')">12'</button>
+            </div>
+          </div>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Post / rafter</span>
+          <div class="field-inputs">
+            <div class="seg" style="width:220px">
+              <button class="seg-btn on" onclick="setSeg(this,'timberSpec','STD')">4×6 rafters / 6×6 posts</button>
+              <button class="seg-btn" onclick="setSeg(this,'timberSpec','CYP')">Cypress</button>
+            </div>
+          </div>
+        </div>
+        <div class="field-row">
+          <span class="field-label">Rafter spacing</span>
+          <div class="field-inputs">
+            <div class="seg" style="width:160px">
+              <button class="seg-btn on" onclick="setSeg(this,'rafterSpacing','24')">24" OC</button>
+              <button class="seg-btn" onclick="setSeg(this,'rafterSpacing','16')">16" OC</button>
             </div>
           </div>
         </div>
@@ -366,7 +398,8 @@ tr:hover td{background:#fafbfc;}
 // ── STATE ──
 const V = {
   plateH: '9', pitch: '6:12', overhang: '16', sheathing: 'OSB',
-  roofing: 'Tuff-Rib 29ga', porchPitch: '2:12', wallSheathing: 'OSB', slabThk: '4'
+  roofing: 'Tuff-Rib 29ga', porchPitch: '2:12', wallSheathing: 'OSB', slabThk: '4',
+  postSpacing: '10', timberSpec: 'STD', rafterSpacing: '24'
 };
 let lastResult = null;
 
@@ -411,7 +444,9 @@ function calculate() {
   const L = g('bLength') || 35;
   const pH = parseInt(V.plateH) || 9;
   const livSF = g('livingSF') || W * L;
-  const porchSF = g('porchSF') || 0;
+  const porchWidth = g('porchWidth') || W;
+  const porchDepth = g('porchDepth') || 0;
+  const porchSF = porchWidth * porchDepth;
   const totalSF = livSF + porchSF;
   const perim = (W + L) * 2;
   const extLF = g('extWallLF') || perim;
@@ -468,12 +503,47 @@ function calculate() {
   const int2x6BotStks = Math.ceil(plates16(plumbLF) * 1.05);
   const intDoorHdrPcs = Math.ceil(dInt * 2 / Math.floor(8 / 2.84) * 1.05); // (2) 2x6 headers cut from 8' stock
 
+  // ── ROUGH TIMBER PORCH FRAMING ──
+  const postSpacingFt = parseInt(V.postSpacing) || 10;
+  const rafterSpacingFt = parseInt(V.rafterSpacing) / 12; // convert to feet
+  const isCypress = V.timberSpec === 'CYP';
+  const timberLabel = isCypress ? 'Cypress' : 'Southern Yellow Pine';
+
+  // Posts — 6×6, spaced along porch width
+  const postCount = porchDepth > 0 ? Math.ceil(porchWidth / postSpacingFt) + 1 : 0;
+  const postHeightFt = pH; // same as wall height
+  const postLF = postCount * postHeightFt;
+
+  // Rafters — 4×6, spaced along porch width at rafterSpacing OC
+  const rafterCount = porchDepth > 0 ? Math.ceil(porchWidth / rafterSpacingFt) + 1 : 0;
+  // Rafter length = porch depth / cos(pitch angle) + overhang
+  const pitchAngle = Math.atan(parseInt(V.porchPitch) / 12);
+  const rafterLengthFt = porchDepth > 0 ? Math.ceil(porchDepth / Math.cos(pitchAngle) + overhangFt + 0.5) : 0;
+  const rafterStockLen = [8,10,12,14,16].find(l => l >= rafterLengthFt) || 16;
+
+  // Header beam — runs the width of the porch at wall connection
+  // Size depends on span between posts
+  const headerBeamSize = postSpacingFt <= 8 ? '4×8' : postSpacingFt <= 10 ? '4×10' : '4×12';
+  const headerBeamPcs = porchDepth > 0 ? Math.ceil(porchWidth / 16) + 1 : 0;
+  const headerBeamLF = porchDepth > 0 ? Math.ceil(porchWidth * 1.05) : 0;
+
+  // Ridge beam — 2×12 per schedule
+  const porchRidgeLF = porchDepth > 0 ? Math.ceil(porchWidth * 1.1) : 0;
+  const porchRidgePcs = Math.ceil(porchRidgeLF / 16);
+
+  // Fly rafters — 2×6 per elevation notes
+  const flyRafterPcs = porchDepth > 0 ? 4 : 0; // 2 per gable end × 2 ends
+  const flyRafterLen = [8,10,12].find(l => l >= rafterLengthFt) || 12;
+
+  // Porch decking — 2×6 T&G
+  const porchDeckLF = porchSF > 0 ? Math.ceil(porchSF / 0.833 * 1.1) : 0;
+  const porchDeckPcs = porchDeckLF > 0 ? Math.ceil(porchDeckLF / porchWidth) : 0; // pieces spanning the depth
+
   // ── ROOF FRAMING ──
   const trusses = Math.ceil(L / 2) + 1;
   const ridgeLF = Math.ceil(W * 1.1);
   const purlinLF = Math.ceil(totalRoof / 2 * 1.1);
   const fasciaLF = Math.ceil(perim * 1.1);
-  const porchDeckLF = porchSF > 0 ? Math.ceil(porchSF / 0.833 * 1.1) : 0;
 
   // ── ROOF SHEATHING + COVERING ──
   const roofOSBSheets = Math.ceil(totalRoof / 32 * 1.1);
@@ -524,6 +594,14 @@ function calculate() {
         { i:"Bottom plate — 2×6 plumbing × 16'", d:`Single bottom plate · ${int2x6BotStks*16} LF · 16' sticks`, q:int2x6BotStks, u:"PCS @ 16'", lf:int2x6BotStks*16 },
       ] : []),
     ]},
+    ...(porchDepth > 0 ? [{ name: `PORCH — ROUGH TIMBER SYSTEM · ${timberLabel}`, items: [
+      { i:`Posts — 6×6 ${timberLabel}`, d:`${postCount} posts @ ${postSpacingFt}' OC · ${postHeightFt}' height · confirm post-to-slab connection`, q:postCount, u:'EA', lf:postLF },
+      { i:`Rafters — 4×6 ${timberLabel}`, d:`${rafterCount} rafters @ ${V.rafterSpacing}" OC · ${rafterLengthFt}' length · order ${rafterStockLen}' stock`, q:rafterCount, u:`EA @ ${rafterStockLen}'`, lf:rafterCount*rafterStockLen },
+      { i:`Header beam — ${headerBeamSize} ${timberLabel}`, d:`Runs ${porchWidth}' at wall · ${postSpacingFt}' post spacing · order 16' stock`, q:headerBeamPcs, u:"PCS @ 16'", lf:headerBeamLF },
+      { i:'Ridge beam — 2×12 #2 SP', d:`Porch ridge · ${porchWidth}' + 10% waste`, q:porchRidgePcs, u:"PCS @ 16'", lf:porchRidgeLF },
+      { i:'Fly rafters — 2×6 #2 SP', d:`Gable ends · ${flyRafterLen}' stock`, q:flyRafterPcs, u:`EA @ ${flyRafterLen}'`, lf:flyRafterPcs*flyRafterLen },
+      { i:"Porch decking — 2×6 T&G #2 SP", d:`Solid tongue & groove · ${porchSF} SF + 10% waste`, q:porchDeckLF.toLocaleString(), u:'LF', lf:porchDeckLF },
+    ]}] : []),
     { name: `ROOF FRAMING — ${V.pitch} PITCH`, items: [
       { i:'Trusses', d:`24" OC · ${L}' building length — confirm type with engineer`, q:trusses, u:'EA', lf:null },
       { i:'Ridge nailer — 2×12 #2 SP', d:`Building width ${W}' + 10%`, q:Math.ceil(W*1.1/16)+' sticks', u:`PCS @ 16'`, lf:ridgeLF },
