@@ -131,11 +131,11 @@ tr:hover td{background:#fafbfc;}
       <div class="sec-body">
         <div class="field-row">
           <span class="field-label">Width</span>
-          <div class="field-inputs"><input type="number" id="bWidth" value="56" min="16" max="120" oninput="liveUpdate()"><span class="field-unit">ft</span></div>
+          <div class="field-inputs"><input type="number" id="bWidth" value="30" min="16" max="120" oninput="liveUpdate()"><span class="field-unit">ft</span></div>
         </div>
         <div class="field-row">
           <span class="field-label">Length</span>
-          <div class="field-inputs"><input type="number" id="bLength" value="35" min="16" max="120" oninput="liveUpdate()"><span class="field-unit">ft</span></div>
+          <div class="field-inputs"><input type="number" id="bLength" value="56" min="16" max="120" oninput="liveUpdate()"><span class="field-unit">ft</span></div>
         </div>
         <div class="field-row">
           <span class="field-label">Plate height</span>
@@ -213,7 +213,7 @@ tr:hover td{background:#fafbfc;}
       <div class="sec-body">
         <div class="field-row">
           <span class="field-label">Porch width</span>
-          <div class="field-inputs"><input type="number" id="porchWidth" value="56" min="0" max="120" oninput="liveUpdate()"><span class="field-unit">ft <span style="font-size:10px;color:var(--muted)">(matches house width)</span></span></div>
+          <div class="field-inputs"><input type="number" id="porchWidth" value="30" min="0" max="120" oninput="liveUpdate()"><span class="field-unit">ft <span style="font-size:10px;color:var(--muted)">(matches house width)</span></span></div>
         </div>
         <div class="field-row">
           <span class="field-label">Porch depth</span>
@@ -781,32 +781,32 @@ function calculate() {
       ...(V.sheathing==='ZIP'
         ? [{ i:'ZIP tape — roof', d:'Seam sealing', q:Math.ceil(totalRoof/100), u:'ROLLS', lf:null }]
         : [{ i:'Underlayment — synthetic', d:'Full sloped area', q:totalRoof.toLocaleString(), u:'SF', lf:null }]),
-      { i:`Main roof panels — ${panelLengthDisplay} each`, d:`(${W/2}' half-span + ${overhangFt.toFixed(2)}' OH) × ${V.pitch} = ${(panelRunFt*12).toFixed(2)}" → up to ${Math.ceil(panelRunFt*12)}" + 3" = ${panel.totalInches}" = ${panelLengthDisplay} · ${panelsPerSlope}/slope`, q:totalRoofPanels, u:`PCS @ ${panelLengthDisplay}`, lf:null },
+      { i:`Main roof panels — ${panelLengthDisplay} each`, d:`(${W/2}' half-span + ${overhangFt.toFixed(2)}' OH) × ${V.pitch} = ${(panelRunFt*12).toFixed(2)}" → up to ${Math.ceil(panelRunFt*12)}" + 3" = ${panel.totalInches}" = ${panelLengthDisplay} · ${panelsPerSlope}/slope`, q:totalRoofPanels, u:`PCS @ ${panelLengthDisplay}`, lf:Math.round(totalRoofPanels * panel.decimal) },
       ...(porchDepth > 0 ? [{
         i:`Porch panels — ${porchPanelLengthDisplay} each`,
         d:`(${porchDepth}' depth + ${overhangFt.toFixed(2)}' OH) × ${V.porchPitch} = ${(porchPanelRunFt*12).toFixed(2)}" → up to ${Math.ceil(porchPanelRunFt*12)}" + 3" = ${porchPanel.totalInches}" = ${porchPanelLengthDisplay} · ${porchPanelsPerSlope} panels`,
-        q:porchPanelsPerSlope, u:`PCS @ ${porchPanelLengthDisplay}`, lf:null
+        q:porchPanelsPerSlope, u:`PCS @ ${porchPanelLengthDisplay}`, lf:Math.round(porchPanelsPerSlope * porchPanel.decimal)
       }] : []),
-      { i:'Ridge cap — 10\' sticks', d:`${ridgeCapRunLF}' run (${L}' + OH each end) · 10% overlap`, q:ridgeCapPcs, u:"PCS @ 10'", lf:ridgeCapRunLF },
-      { i:'Rake trim — both gable ends', d:`${panelLengthDisplay} × 2 slopes × 2 ends + 10%`, q:rakeTrimPcs, u:"PCS @ 10'", lf:rakeTrimLF },
-      { i:'Eave trim / drip edge', d:`(${L}' + OH each end) × 2 slopes`, q:eaveTrimPcs, u:"PCS @ 10'", lf:eaveRunLF },
+      { i:'Ridge cap — 10\' sticks', d:`${ridgeCapRunLF}' run (${L}' + OH each end) · 10% overlap`, q:ridgeCapPcs, u:"PCS @ 10'", lf:ridgeCapPcs*10 },
+      { i:'Rake trim — both gable ends', d:`${panelLengthDisplay} × 2 slopes × 2 ends + 10%`, q:rakeTrimPcs, u:"PCS @ 10'", lf:rakeTrimPcs*10 },
+      { i:'Eave trim / drip edge', d:`(${L}' + OH each end) × 2 slopes`, q:eaveTrimPcs, u:"PCS @ 10'", lf:eaveTrimPcs*10 },
     ]},
     { name: 'WALL PANELS — Tuff-Rib 3\' Coverage', items: [
-      { i:`Eave wall panels — ${fmtHt(eaveWallLongPanelH)}`, d:`Front & back walls · ${L}' ÷ 3 = ${eaveWallLongCount} panels × 2 sides${frontBackWainH>0?' · reduced from '+pH+"' by "+frontBackWainH+"' wainscot":''}`, q:eaveWallLongCount*2, u:`PCS @ ${fmtHt(eaveWallLongPanelH)}`, lf:null },
+      { i:`Eave wall panels — ${fmtHt(eaveWallLongPanelH)}`, d:`Front & back walls · ${L}' ÷ 3 = ${eaveWallLongCount} panels × 2 sides${frontBackWainH>0?' · reduced from '+pH+"' by "+frontBackWainH+"' wainscot":''}`, q:eaveWallLongCount*2, u:`PCS @ ${fmtHt(eaveWallLongPanelH)}`, lf:Math.round(eaveWallLongCount*2 * eaveWallLongPanelH) },
       ...gableSchedule.map((p,i) => ({
         i: `Gable panel ${i+1} of ${gablePanelsPerHalf} — ${p.display}`,
         d: `${i===0 ? `Eave ${pH}' + ${gableFirstOffset}' offset${gableWainH>0?' − '+gableWainH+"' wainscot":''}` : `Panel ${i} + ${gableStep}' step`} · 4 pcs (2 per half × 2 ends)`,
         q: p.qty,
         u: `PCS @ ${p.display}`,
-        lf: null
+        lf: Math.round(p.qty * (p.totalInches / 12))
       })),
       ...(wainType === 'metal' ? [
-        { i:`Wainscot panels — ${wainH}'-0" (metal · different color)`, d:`${wainWalls.map(w=>w.name+' '+Math.ceil(w.len/3)+'pcs').join(' · ')} · same 3' Tuff-Rib`, q:wainWalls.reduce((a,w)=>a+Math.ceil(w.len/3),0), u:`PCS @ ${wainH}'-0"`, lf:totalWainLF },
+        { i:`Wainscot panels — ${wainH}'-0" (metal · different color)`, d:`${wainWalls.map(w=>w.name+' '+Math.ceil(w.len/3)+'pcs').join(' · ')} · same 3' Tuff-Rib`, q:wainWalls.reduce((a,w)=>a+Math.ceil(w.len/3),0), u:`PCS @ ${wainH}'-0"`, lf:Math.round(wainWalls.reduce((a,w)=>a+Math.ceil(w.len/3),0) * wainH) },
       ] : []),
       ...(wainType === 'stone' ? [
         { i:`Wainscot — stone ${wainH}'`, d:`${wainWalls.map(w=>w.name).join(' + ')} · mason scope · ${totalWainLF} LF × ${wainH}'`, q:totalWainSF, u:'SF', lf:totalWainLF },
       ] : []),
-      { i:'Corner trim', d:`4 corners × ${pH}' eave height + 10%`, q:cornerTrimPcs, u:"PCS @ 10'", lf:cornerTrimLF },
+      { i:'Corner trim', d:`4 corners × ${pH}' eave height + 10%`, q:cornerTrimPcs, u:"PCS @ 10'", lf:cornerTrimPcs*10 },
       { i:'Metal soffit', d:'Eave coverage — panel match', q:soffitSF, u:'SF', lf:null },
     ]},
     { name: 'INSULATION — OPEN-CELL SPRAY FOAM', items: [
