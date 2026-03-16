@@ -28,10 +28,9 @@ const upload = multer({
 });
 
 // ─────────────────────────────────────────────
-// PDF → JPEG conversion via pdftoppm
-// Returns array of base64 JPEG strings, one per page (up to maxPages)
+// PDF → JPEG conversion via pdftoppm + auto-rotate
 // ─────────────────────────────────────────────
-async function pdfToImages(pdfBuffer, maxPages = 6, dpi = 150) {
+async function pdfToImages(pdfBuffer, maxPages = 6, dpi = 200) {
   const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sauce-pdf-'));
   const tmpPdf = path.join(tmpDir, 'input.pdf');
   const outPrefix = path.join(tmpDir, 'page');
@@ -39,16 +38,10 @@ async function pdfToImages(pdfBuffer, maxPages = 6, dpi = 150) {
   try {
     fs.writeFileSync(tmpPdf, pdfBuffer);
 
-    // pdftoppm: convert up to maxPages pages to JPEG at given DPI
     await execFileAsync('pdftoppm', [
-      '-jpeg',
-      '-r', String(dpi),
-      '-l', String(maxPages),
-      tmpPdf,
-      outPrefix
+      '-jpeg', '-r', String(dpi), '-l', String(maxPages), tmpPdf, outPrefix
     ]);
 
-    // Collect generated page files, sorted
     const files = fs.readdirSync(tmpDir)
       .filter(f => f.startsWith('page') && f.endsWith('.jpg'))
       .sort()
@@ -56,12 +49,26 @@ async function pdfToImages(pdfBuffer, maxPages = 6, dpi = 150) {
 
     if (files.length === 0) throw new Error('pdftoppm produced no output images');
 
-    return files.map(f => {
-      const buf = fs.readFileSync(path.join(tmpDir, f));
-      return buf.toString('base64');
-    });
+    const results = [];
+    for (const f of files) {
+      const imgPath = path.join(tmpDir, f);
+      try {
+        // Check dimensions — if portrait (height > width by 20%), rotate 90° to landscape
+        const { stdout } = await execFileAsync('identify', ['-format', '%w %h', imgPath]);
+        const [w, h] = stdout.trim().split(' ').map(Number);
+        if (h > w * 1.2) {
+          const rotPath = path.join(tmpDir, 'rot_' + f);
+          await execFileAsync('convert', [imgPath, '-rotate', '90', rotPath]);
+          results.push(fs.readFileSync(rotPath).toString('base64'));
+        } else {
+          results.push(fs.readFileSync(imgPath).toString('base64'));
+        }
+      } catch {
+        results.push(fs.readFileSync(imgPath).toString('base64'));
+      }
+    }
+    return results;
   } finally {
-    // Clean up temp files
     try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch {}
   }
 }
@@ -637,16 +644,60 @@ app.post('/api/analyze', upload.single('drawing'), async (req, res) => {
       contentBlocks = [{ type: 'image', source: { type: 'base64', media_type: validType, data: base64Data } }];
     }
 
-    // Add extraction prompt after all image blocks
-    contentBlocks.push({ type: 'text', text: EXTRACTION_PROMPT });
-
-    const messages = [{ role: 'user', content: contentBlocks }];
-
     const headers = {
       'Content-Type': 'application/json',
       'x-api-key': apiKey,
       'anthropic-version': '2023-06-01'
     };
+
+    // ── CALL 1: Chain-of-thought wall measurement pass ──
+    // Ask Claude to narrate every wall segment out loud before producing JSON.
+    // This forces explicit spatial reasoning instead of guessing totals.
+    const measurePrompt = `You are reading a residential floor plan. Before doing anything else, I need you to carefully trace and measure every wall on this plan.
+
+Work through the plan systematically:
+
+1. EXTERIOR WALLS — trace the full perimeter. List each wall segment with its dimension string. Example: "North wall: 58'-0". East wall: 38'-0"..." Sum them for total ext_wall_linear_ft.
+
+2. INTERIOR WALLS — go room by room. For every interior wall, state the room, the wall direction, and the dimension. Example: "Master bedroom / south wall (shared with hallway): 15'-4". Master bedroom / east wall: 12'-0"..." Sum everything for total int_wall_linear_ft.
+
+3. PLUMBING WALLS — identify every wall directly adjacent to a toilet, tub, shower, sink, washer, or water heater. List each one with its length.
+
+4. SQUARE FOOTAGE — read the SqFt schedule or title block directly. State the exact number shown for living area and porch area.
+
+5. KEY DIMENSIONS — state building width, building depth, plate height, porch width, porch depth, roof pitch.
+
+6. DOOR & WINDOW SCHEDULE — read every line of the schedule if present. List mark, count, size, header.
+
+Be precise. Read every dimension string you can see. Do not estimate.`;
+
+    const call1Response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 3000,
+        messages: [{ role: 'user', content: [...contentBlocks, { type: 'text', text: measurePrompt }] }]
+      })
+    });
+
+    if (!call1Response.ok) {
+      const err = await call1Response.text();
+      console.error('Call 1 API error:', err);
+      return res.status(500).json({ error: `API error: ${err}` });
+    }
+
+    const call1Data = await call1Response.json();
+    const measurement_narration = call1Data.content.map(b => b.text || '').join('');
+    console.log('Call 1 narration length:', measurement_narration.length);
+    console.log('Narration preview:', measurement_narration.substring(0, 300));
+
+    // ── CALL 2: Convert narration + images into final JSON ──
+    const call2Messages = [
+      { role: 'user', content: [...contentBlocks, { type: 'text', text: measurePrompt }] },
+      { role: 'assistant', content: measurement_narration },
+      { role: 'user', content: [{ type: 'text', text: EXTRACTION_PROMPT }] }
+    ];
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -654,20 +705,20 @@ app.post('/api/analyze', upload.single('drawing'), async (req, res) => {
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
         max_tokens: 4096,
-        messages
+        messages: call2Messages
       })
     });
 
     if (!response.ok) {
       const err = await response.text();
-      console.error('Anthropic API error:', err);
+      console.error('Call 2 API error:', err);
       return res.status(500).json({ error: `API error: ${err}` });
     }
 
     const data = await response.json();
-    console.log('API response content types:', data.content?.map(b=>b.type));
+    console.log('Call 2 response types:', data.content?.map(b=>b.type));
     const rawText = data.content.map(b => b.text || '').join('');
-    console.log('Raw text length:', rawText.length, 'Preview:', rawText.substring(0,200));
+    console.log('Raw JSON length:', rawText.length, 'Preview:', rawText.substring(0,200));
     if (!rawText || rawText.length < 10) {
       return res.status(500).json({ error: 'AI returned empty response. Try a higher resolution image.' });
     }
