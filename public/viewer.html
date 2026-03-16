@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sauce Estimator — Plan Viewer</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<style>
+:root{
+  --navy:#1a2332;--navy2:#212d3d;--amber:#f5a623;--amber2:#f7b94a;
+  --teal:#2dd4aa;--off:#f0f2f5;--border:#e2e5ea;--muted:#6b7280;--muted2:#9ca3af;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',sans-serif;background:var(--off);color:var(--navy);min-height:100vh;}
+
+/* NAV */
+.nav{background:var(--navy);height:52px;display:flex;align-items:center;padding:0 16px;position:sticky;top:0;z-index:100;}
+.nav-mark{width:32px;height:32px;background:var(--amber);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--navy);margin-right:10px;flex-shrink:0;}
+.nav-name{font-size:13px;font-weight:700;color:#fff;}
+.nav-sub{font-size:10px;font-weight:600;color:var(--amber);letter-spacing:.5px;text-transform:uppercase;}
+.nav-sp{flex:1;}
+.nav-btn{background:transparent;border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.7);padding:5px 14px;border-radius:5px;font-size:12px;font-weight:500;cursor:pointer;margin-left:8px;transition:all .15s;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center;}
+.nav-btn:hover{background:rgba(255,255,255,.08);color:#fff;}
+.nav-btn.amber{background:var(--amber);border-color:var(--amber);color:var(--navy);font-weight:700;}
+
+/* UPLOAD ZONE */
+.upload-wrap{max-width:680px;margin:60px auto;padding:0 20px;}
+.upload-card{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.06);}
+.upload-head{padding:24px 28px 20px;border-bottom:1px solid var(--border);}
+.upload-title{font-size:20px;font-weight:700;color:var(--navy);margin-bottom:4px;}
+.upload-sub{font-size:13px;color:var(--muted);}
+.upload-body{padding:28px;}
+.dz{border:2px dashed var(--border);border-radius:10px;padding:48px 24px;text-align:center;cursor:pointer;transition:all .2s;position:relative;background:var(--off);}
+.dz:hover,.dz.over{border-color:var(--amber);background:#fffbf2;}
+.dz input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.dz-icon{width:52px;height:52px;background:var(--navy);border-radius:10px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;}
+.dz h3{font-size:15px;font-weight:600;color:var(--navy);margin-bottom:6px;}
+.dz p{font-size:13px;color:var(--muted);}
+.fmts{display:flex;gap:6px;justify-content:center;margin-top:12px;}
+.fmt{font-size:10px;font-weight:600;letter-spacing:.5px;padding:3px 8px;border-radius:4px;background:#e8eaed;color:var(--muted);text-transform:uppercase;}
+
+/* VIEWER LAYOUT */
+.viewer-wrap{display:none;height:calc(100vh - 52px);}
+.viewer-wrap.active{display:flex;}
+
+/* SIDEBAR */
+.sidebar{width:280px;flex-shrink:0;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+.sidebar-head{padding:14px 16px;border-bottom:1px solid var(--border);background:var(--navy);}
+.sidebar-filename{font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sidebar-meta{font-size:11px;color:rgba(255,255,255,.5);margin-top:2px;}
+.sidebar-actions{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;gap:8px;}
+.btn{padding:7px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:all .15s;display:inline-flex;align-items:center;gap:6px;}
+.btn-primary{background:var(--amber);color:var(--navy);}
+.btn-primary:hover{background:var(--amber2);}
+.btn-outline{background:#fff;color:var(--navy);border:1px solid var(--border);}
+.btn-outline:hover{background:var(--off);}
+.btn-sm{padding:5px 10px;font-size:11px;}
+
+/* PAGE THUMBNAILS */
+.thumbs{flex:1;overflow-y:auto;padding:12px;}
+.thumb-item{border-radius:6px;overflow:hidden;margin-bottom:10px;cursor:pointer;border:2px solid transparent;transition:all .15s;}
+.thumb-item.active{border-color:var(--amber);}
+.thumb-item:hover{border-color:var(--navy2);}
+.thumb-canvas{width:100%;display:block;background:#f8f8f8;}
+.thumb-label{padding:6px 8px;font-size:11px;font-weight:500;color:var(--muted);background:#fff;border-top:1px solid var(--border);}
+
+/* MAIN CANVAS AREA */
+.canvas-area{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#525659;}
+.canvas-toolbar{height:44px;background:var(--navy2);display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0;}
+.toolbar-label{font-size:11px;font-weight:600;color:rgba(255,255,255,.5);letter-spacing:.5px;text-transform:uppercase;}
+.toolbar-val{font-size:13px;font-weight:600;color:#fff;}
+.toolbar-sep{width:1px;height:20px;background:rgba(255,255,255,.12);}
+.zoom-btns{display:flex;gap:4px;}
+.zoom-btn{width:28px;height:28px;border-radius:4px;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.7);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.zoom-btn:hover{background:rgba(255,255,255,.1);color:#fff;}
+.page-nav{display:flex;align-items:center;gap:8px;margin-left:auto;}
+.page-btn{width:28px;height:28px;border-radius:4px;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.7);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.page-btn:hover{background:rgba(255,255,255,.1);color:#fff;}
+.page-btn:disabled{opacity:.3;cursor:default;}
+.page-info{font-size:12px;color:rgba(255,255,255,.6);}
+
+.canvas-scroll{flex:1;overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:20px;}
+#pdfCanvas{box-shadow:0 4px 24px rgba(0,0,0,.4);background:#fff;display:block;cursor:crosshair;}
+
+/* STATUS BAR */
+.status-bar{height:28px;background:var(--navy);display:flex;align-items:center;padding:0 14px;gap:16px;flex-shrink:0;}
+.status-item{font-size:11px;color:rgba(255,255,255,.5);}
+.status-item span{color:rgba(255,255,255,.85);font-weight:500;}
+
+/* LOADING */
+.loading{position:absolute;inset:0;background:rgba(82,86,89,.8);display:flex;align-items:center;justify-content:center;z-index:10;}
+.loading-inner{background:#fff;border-radius:10px;padding:24px 32px;text-align:center;}
+.spin{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--amber);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:13px;font-weight:500;color:var(--navy);}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-mark">SE</div>
+  <div style="margin-right:16px">
+    <div class="nav-name">Sauce Estimator</div>
+    <div class="nav-sub">Home Edition</div>
+  </div>
+  <div style="width:1px;height:28px;background:rgba(255,255,255,.12);margin:0 12px"></div>
+  <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.5);letter-spacing:.3px;text-transform:uppercase">Plan Viewer</div>
+  <div class="nav-sp"></div>
+  <a href="/estimator.html" class="nav-btn">Quick Estimate</a>
+  <a href="/" class="nav-btn amber">Dashboard</a>
+</nav>
+
+<!-- UPLOAD SCREEN -->
+<div id="uploadScreen">
+  <div class="upload-wrap">
+    <div class="upload-card">
+      <div class="upload-head">
+        <div class="upload-title">Open a Plan Set</div>
+        <div class="upload-sub">Upload a PDF plan set to view it at full resolution</div>
+      </div>
+      <div class="upload-body">
+        <div class="dz" id="dropzone">
+          <input type="file" id="fileInput" accept=".pdf,image/jpeg,image/png,image/webp">
+          <div class="dz-icon">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+              <path d="M11 2v12M6 7l5-5 5 5" stroke="#f5a623" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M2 15v3a2 2 0 002 2h14a2 2 0 002-2v-3" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h3>Drop your plan here</h3>
+          <p>or click to browse</p>
+          <div class="fmts">
+            <span class="fmt">PDF</span>
+            <span class="fmt">JPG</span>
+            <span class="fmt">PNG</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VIEWER SCREEN -->
+<div class="viewer-wrap" id="viewerScreen">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-head">
+      <div class="sidebar-filename" id="sidebarFilename">—</div>
+      <div class="sidebar-meta" id="sidebarMeta">—</div>
+    </div>
+    <div class="sidebar-actions">
+      <button class="btn btn-outline btn-sm" onclick="document.getElementById('fileInput2').click()">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v7M2 5l4-4 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M1 9v1a1 1 0 001 1h8a1 1 0 001-1V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Open New
+      </button>
+      <input type="file" id="fileInput2" accept=".pdf,image/jpeg,image/png" style="display:none">
+    </div>
+    <div class="thumbs" id="thumbsContainer"></div>
+  </div>
+
+  <!-- MAIN CANVAS -->
+  <div class="canvas-area" style="position:relative">
+    <div class="canvas-toolbar">
+      <span class="toolbar-label">Zoom</span>
+      <div class="zoom-btns">
+        <button class="zoom-btn" onclick="adjustZoom(-0.25)" title="Zoom out">−</button>
+        <button class="zoom-btn" onclick="setZoom(1.0)" title="Fit" style="font-size:10px;width:36px">FIT</button>
+        <button class="zoom-btn" onclick="adjustZoom(0.25)" title="Zoom in">+</button>
+      </div>
+      <span class="toolbar-val" id="zoomLabel">100%</span>
+      <div class="toolbar-sep"></div>
+      <span class="toolbar-label">Page</span>
+      <div class="page-nav">
+        <button class="page-btn" id="prevBtn" onclick="changePage(-1)">‹</button>
+        <span class="page-info" id="pageInfo">1 / 1</span>
+        <button class="page-btn" id="nextBtn" onclick="changePage(1)">›</button>
+      </div>
+    </div>
+
+    <div class="canvas-scroll" id="canvasScroll">
+      <canvas id="pdfCanvas"></canvas>
+    </div>
+
+    <div class="status-bar">
+      <div class="status-item">Sheet: <span id="statusSheet">—</span></div>
+      <div class="status-item">Size: <span id="statusSize">—</span></div>
+      <div class="status-item" id="statusMsg">Ready</div>
+    </div>
+
+    <div class="loading" id="loadingOverlay" style="display:none">
+      <div class="loading-inner">
+        <div class="spin"></div>
+        <div class="loading-text" id="loadingText">Loading plan...</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+// Set PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+let pdfDoc = null;
+let currentPage = 1;
+let totalPages = 1;
+let currentZoom = 1.0;
+let baseScale = 1.0;
+let filename = '';
+
+// ── FILE INPUT HANDLERS ──
+document.getElementById('fileInput').addEventListener('change', e => handleFile(e.target.files[0]));
+document.getElementById('fileInput2').addEventListener('change', e => handleFile(e.target.files[0]));
+
+// ── DRAG AND DROP ──
+const dz = document.getElementById('dropzone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('over'));
+dz.addEventListener('drop', e => {
+  e.preventDefault();
+  dz.classList.remove('over');
+  const file = e.dataTransfer.files[0];
+  if (file) handleFile(file);
+});
+
+async function handleFile(file) {
+  if (!file) return;
+  filename = file.name;
+  showLoading('Loading ' + file.name + '...');
+
+  const reader = new FileReader();
+  reader.onload = async (e) => {
+    try {
+      if (file.type === 'application/pdf') {
+        await loadPDF(e.target.result);
+      } else {
+        await loadImage(e.target.result, file);
+      }
+    } catch (err) {
+      hideLoading();
+      alert('Could not open file: ' + err.message);
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+async function loadPDF(arrayBuffer) {
+  const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
+  pdfDoc = await loadingTask.promise;
+  totalPages = pdfDoc.numPages;
+  currentPage = 1;
+
+  // Update UI
+  document.getElementById('sidebarFilename').textContent = filename;
+  document.getElementById('sidebarMeta').textContent = totalPages + ' page' + (totalPages > 1 ? 's' : '');
+  document.getElementById('statusSheet').textContent = filename;
+
+  // Build thumbnails
+  await buildThumbnails();
+
+  // Render first page
+  await renderPage(1);
+
+  showViewer();
+  hideLoading();
+}
+
+async function loadImage(dataURL, file) {
+  // For image files, show in canvas directly
+  const img = new Image();
+  img.onload = () => {
+    const canvas = document.getElementById('pdfCanvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    totalPages = 1;
+    currentPage = 1;
+    document.getElementById('sidebarFilename').textContent = filename;
+    document.getElementById('sidebarMeta').textContent = '1 page';
+    document.getElementById('pageInfo').textContent = '1 / 1';
+    document.getElementById('statusSheet').textContent = filename;
+    document.getElementById('statusSize').textContent = img.width + ' × ' + img.height + 'px';
+    buildImageThumb(dataURL);
+    showViewer();
+    hideLoading();
+    fitToWindow();
+  };
+  img.src = dataURL;
+}
+
+async function buildThumbnails() {
+  const container = document.getElementById('thumbsContainer');
+  container.innerHTML = '';
+
+  for (let i = 1; i <= totalPages; i++) {
+    const page = await pdfDoc.getPage(i);
+    const viewport = page.getViewport({ scale: 0.2 });
+    const canvas = document.createElement('canvas');
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+    canvas.className = 'thumb-canvas';
+    const ctx = canvas.getContext('2d');
+    await page.render({ canvasContext: ctx, viewport }).promise;
+
+    const item = document.createElement('div');
+    item.className = 'thumb-item' + (i === 1 ? ' active' : '');
+    item.dataset.page = i;
+    item.innerHTML = `<div class="thumb-label">Page ${i}</div>`;
+    item.insertBefore(canvas, item.firstChild);
+    item.addEventListener('click', () => goToPage(i));
+    container.appendChild(item);
+  }
+}
+
+function buildImageThumb(dataURL) {
+  const container = document.getElementById('thumbsContainer');
+  container.innerHTML = '';
+  const img = document.createElement('img');
+  img.src = dataURL;
+  img.style.cssText = 'width:100%;display:block;border-radius:4px;';
+  const item = document.createElement('div');
+  item.className = 'thumb-item active';
+  item.appendChild(img);
+  item.innerHTML += '<div class="thumb-label">Page 1</div>';
+  container.appendChild(item);
+}
+
+async function renderPage(pageNum) {
+  if (!pdfDoc) return;
+  showLoading('Rendering page ' + pageNum + '...');
+
+  const page = await pdfDoc.getPage(pageNum);
+
+  // Calculate base scale to fill the viewport width reasonably
+  const scrollArea = document.getElementById('canvasScroll');
+  const availW = scrollArea.clientWidth - 40;
+  const availH = scrollArea.clientHeight - 40;
+  const nativeVp = page.getViewport({ scale: 1.0 });
+  baseScale = Math.min(availW / nativeVp.width, availH / nativeVp.height, 2.0);
+
+  const scale = baseScale * currentZoom;
+  const viewport = page.getViewport({ scale });
+
+  const canvas = document.getElementById('pdfCanvas');
+  canvas.width = viewport.width;
+  canvas.height = viewport.height;
+
+  const ctx = canvas.getContext('2d');
+  await page.render({ canvasContext: ctx, viewport }).promise;
+
+  // Update UI
+  document.getElementById('pageInfo').textContent = pageNum + ' / ' + totalPages;
+  document.getElementById('prevBtn').disabled = pageNum <= 1;
+  document.getElementById('nextBtn').disabled = pageNum >= totalPages;
+  document.getElementById('zoomLabel').textContent = Math.round(currentZoom * 100) + '%';
+  document.getElementById('statusSize').textContent =
+    Math.round(nativeVp.width / 72 * 12) + '" × ' + Math.round(nativeVp.height / 72 * 12) + '"';
+
+  // Update thumb highlight
+  document.querySelectorAll('.thumb-item').forEach(t => {
+    t.classList.toggle('active', parseInt(t.dataset.page) === pageNum);
+  });
+
+  hideLoading();
+}
+
+function goToPage(n) {
+  if (n < 1 || n > totalPages) return;
+  currentPage = n;
+  renderPage(n);
+  // Scroll thumb into view
+  const thumb = document.querySelector(`.thumb-item[data-page="${n}"]`);
+  if (thumb) thumb.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function changePage(delta) { goToPage(currentPage + delta); }
+
+function adjustZoom(delta) {
+  currentZoom = Math.max(0.25, Math.min(4.0, currentZoom + delta));
+  renderPage(currentPage);
+}
+
+function setZoom(z) {
+  currentZoom = z;
+  renderPage(currentPage);
+}
+
+function fitToWindow() {
+  currentZoom = 1.0;
+  renderPage(currentPage);
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  if (!pdfDoc) return;
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') changePage(1);
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') changePage(-1);
+  if (e.key === '+' || e.key === '=') adjustZoom(0.25);
+  if (e.key === '-') adjustZoom(-0.25);
+  if (e.key === '0') setZoom(1.0);
+});
+
+function showViewer() {
+  document.getElementById('uploadScreen').style.display = 'none';
+  document.getElementById('viewerScreen').classList.add('active');
+}
+
+function showLoading(msg) {
+  document.getElementById('loadingText').textContent = msg || 'Loading...';
+  document.getElementById('loadingOverlay').style.display = 'flex';
+}
+
+function hideLoading() {
+  document.getElementById('loadingOverlay').style.display = 'none';
+}
+</script>
+</body>
+</html>
