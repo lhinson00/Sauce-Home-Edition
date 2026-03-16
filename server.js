@@ -144,7 +144,15 @@ function runRulesEngine(extracted) {
   // ── DERIVED DIMENSIONS ──
   const perim = (W + L) * 2;
   const extLF = ext_wall_linear_ft || perim;
-  const intLF = int_wall_linear_ft || Math.round(living_sf * 0.22);
+  // Sanity check: if extracted int_wall_linear_ft is >= ext_wall_linear_ft,
+  // Claude almost certainly included exterior walls in the count — fall back to formula
+  const intLFraw = int_wall_linear_ft || 0;
+  const intLF = (intLFraw > 0 && intLFraw < extLF * 0.9)
+    ? intLFraw
+    : Math.round(livSF * 0.14); // ~14% of living SF is a conservative true-partition estimate
+  if (intLFraw >= extLF * 0.9 && intLFraw > 0) {
+    results.flags.push({ level: 'warning', message: `Extracted interior wall LF (${intLFraw}) appears to include exterior walls — recalculated from living SF. Verify interior wall count.` });
+  }
   const plumbLF = plumbing_wall_linear_ft || 0;
   const blockingLF = blocking_lf || (int_t_intersections > 0 ? int_t_intersections * 3 : Math.ceil(intLF * 0.2));
   const livSF = living_sf || W * L;
@@ -412,7 +420,7 @@ STEP 3 — BUILDING DIMENSIONS (read from exterior dimension strings)
 STEP 4 — WALL LINEAR FOOTAGE (trace every wall — do not estimate)
 ═══════════════════════════════════════════
 - ext_wall_linear_ft: Trace the entire exterior perimeter of the main building on the floor plan. Sum every exterior dimension string. For a simple rectangle this equals (width + depth) × 2. For L-shape or complex footprint, sum all exterior wall segments. Include garage walls if attached.
-- int_wall_linear_ft: Trace EVERY interior wall line visible on the floor plan. Sum the length of every wall segment: bedroom walls, bathroom walls, hallway walls, closet walls, kitchen walls, utility room walls, all partition walls. Read dimension strings where shown. Where dimensions are not shown, scale from nearby dimensioned walls. A 1,500 SF house typically has 280-380 LF of interior walls. A 2,000 SF house typically has 360-480 LF. A 2,500 SF house typically has 440-580 LF. If your sum is far outside these ranges, recount.
+- int_wall_linear_ft: Count ONLY true interior partition walls — walls that have living space on BOTH sides. DO NOT include exterior walls, even if they form the boundary of a room. An exterior wall is any wall on the outside perimeter of the building. Interior partitions are: walls between rooms, closet walls, hallway walls, bathroom partition walls, kitchen walls that separate rooms. For each partition wall, read its dimension string and add it. Do not double-count — each wall segment counts once. A 1,500 SF house typically has 150-220 LF of true interior partitions. A 2,000 SF house: 180-280 LF. A 2,500 SF house: 220-340 LF.
 - plumbing_wall_linear_ft: Identify every wall adjacent to plumbing fixtures: all bathroom walls containing or backing toilet/tub/shower/sink, kitchen wet wall, laundry room walls, water heater closet. These must be framed as 2×6. Sum their lengths separately.
 - ext_wall_net_sf: ext_wall_linear_ft × plate_height_ft × 0.85 (15% deduct for openings). Calculate this yourself from those two values.
 
@@ -659,7 +667,7 @@ Work through the plan systematically:
 
 1. EXTERIOR WALLS — trace the full perimeter. List each wall segment with its dimension string. Example: "North wall: 58'-0". East wall: 38'-0"..." Sum them for total ext_wall_linear_ft.
 
-2. INTERIOR WALLS — go room by room. For every interior wall, state the room, the wall direction, and the dimension. Example: "Master bedroom / south wall (shared with hallway): 15'-4". Master bedroom / east wall: 12'-0"..." Sum everything for total int_wall_linear_ft.
+2. INTERIOR PARTITION WALLS ONLY — count walls that have rooms on BOTH sides. Do NOT count exterior walls even if they are a room boundary. Go room by room and list only the walls shared between two interior spaces. Example: "Wall between master bedroom and master bath: 12'-0". Wall between hallway and bedroom 2: 11'-5"..." Never count the same wall twice. Sum for int_wall_linear_ft.
 
 3. PLUMBING WALLS — identify every wall directly adjacent to a toilet, tub, shower, sink, washer, or water heater. List each one with its length.
 
