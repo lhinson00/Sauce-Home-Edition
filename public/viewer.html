@@ -215,7 +215,10 @@ body{font-family:'Inter',sans-serif;background:var(--off);color:var(--navy);min-
     </div>
 
     <div class="canvas-scroll" id="canvasScroll">
-      <canvas id="pdfCanvas"></canvas>
+      <div style="position:relative;display:inline-block;">
+        <canvas id="pdfCanvas"></canvas>
+        <svg id="scaleOverlay" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;"></svg>
+      </div>
     </div>
 
     <div class="status-bar">
@@ -230,8 +233,6 @@ body{font-family:'Inter',sans-serif;background:var(--off);color:var(--navy);min-
         <div class="loading-text" id="loadingText">Loading plan...</div>
       </div>
     </div>
-
-    <svg id="scaleOverlay"></svg>
 
   </div>
 
@@ -590,17 +591,14 @@ function clearScaleOverlay() {
   scaleLineEl = null; scaleDot1 = null; scaleDot2 = null;
 }
 
-// Convert mouse event on scroll area to canvas coordinates
+// Convert mouse event to canvas pixel coords
+// SVG overlay sits directly on top of canvas so same coordinates for both
 function getCanvasPoint(e) {
   const canvas = document.getElementById('pdfCanvas');
   const rect = canvas.getBoundingClientRect();
-  return {
-    x: e.clientX - rect.left,
-    y: e.clientY - rect.top,
-    // position relative to scroll container for SVG overlay
-    svgX: e.clientX - scroll.getBoundingClientRect().left + scroll.scrollLeft,
-    svgY: e.clientY - scroll.getBoundingClientRect().top + scroll.scrollTop
-  };
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  return { x, y, svgX: x, svgY: y };
 }
 
 // Draw dot on SVG overlay
