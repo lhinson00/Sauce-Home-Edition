@@ -128,6 +128,37 @@ body{font-family:'Inter',sans-serif;background:var(--off);color:var(--navy);min-
 .measure-chip.ext{background:rgba(59,110,212,.2);border:1px solid rgba(59,110,212,.4);color:#7aa4f5;}
 .measure-chip.int{background:rgba(167,92,212,.2);border:1px solid rgba(167,92,212,.4);color:#c89cf5;}
 .measure-chip.plumb{background:rgba(212,150,59,.2);border:1px solid rgba(212,150,59,.4);color:#f5c87a;}
+
+/* SCHEDULE PANEL */
+.schedule-panel{position:fixed;top:0;right:0;width:420px;height:100vh;background:#fff;border-left:1px solid var(--border);z-index:150;display:flex;flex-direction:column;box-shadow:-4px 0 24px rgba(0,0,0,.12);transform:translateX(100%);transition:transform .25s ease;}
+.schedule-panel.open{transform:translateX(0);}
+.sp-head{padding:16px 18px;border-bottom:1px solid var(--border);background:var(--navy);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.sp-title{font-size:14px;font-weight:700;color:#fff;}
+.sp-close{width:28px;height:28px;border-radius:4px;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.7);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.sp-close:hover{background:rgba(255,255,255,.1);color:#fff;}
+.sp-body{flex:1;overflow-y:auto;padding:16px;}
+.sp-section{margin-bottom:20px;}
+.sp-section-title{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.sp-table{width:100%;border-collapse:collapse;font-size:12px;}
+.sp-table th{text-align:left;padding:5px 8px;font-size:10px;font-weight:600;color:var(--muted);background:var(--off);border-bottom:1px solid var(--border);}
+.sp-table td{padding:6px 8px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.sp-table tr:last-child td{border-bottom:none;}
+.sp-table input{width:100%;border:1px solid var(--border);border-radius:4px;padding:3px 6px;font-size:12px;font-family:inherit;}
+.sp-table input:focus{outline:none;border-color:var(--amber);}
+.sp-footer{padding:14px 18px;border-top:1px solid var(--border);display:flex;gap:10px;flex-shrink:0;}
+.sp-btn{flex:1;padding:10px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:all .15s;}
+.sp-btn-primary{background:var(--amber);color:var(--navy);}
+.sp-btn-primary:hover{background:var(--amber2);}
+.sp-btn-cancel{background:var(--off);color:var(--muted);border:1px solid var(--border);}
+.sp-loading{padding:40px;text-align:center;}
+.sp-spin{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--amber);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;}
+.sp-load-text{font-size:13px;color:var(--muted);}
+.sp-field{margin-bottom:12px;}
+.sp-label{font-size:11px;font-weight:600;color:var(--navy);margin-bottom:4px;display:block;}
+.sp-input{width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:5px;font-size:13px;font-family:inherit;}
+.sp-input:focus{outline:none;border-color:var(--amber);}
+.sp-row{display:flex;gap:10px;}
+.sp-row .sp-field{flex:1;}
 </style>
 </head>
 <body>
@@ -235,6 +266,11 @@ body{font-family:'Inter',sans-serif;background:var(--off);color:var(--navy);min-
         <div class="measure-chip int" id="intTotal" style="display:none">INT <span id="intLF">0</span> LF</div>
         <div class="measure-chip plumb" id="plumbTotal" style="display:none">PLB <span id="plumbLF">0</span> LF</div>
       </div>
+      <div class="toolbar-sep"></div>
+      <button class="tool-btn" id="readBtn" onclick="readSchedules()" title="Read door, window and truss schedules with AI">
+        <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><rect x="1" y="1" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M3 4h5M3 6h5M3 8h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Read Schedules
+      </button>
       <div class="toolbar-sep"></div>
       <span class="toolbar-label">Page</span>
       <div class="page-nav">
@@ -1010,15 +1046,186 @@ function undoLastSegment() {
   document.getElementById('statusMsg').textContent = 'Last segment removed';
 }
 
-// Expose totals for use by estimator later
-function getWallMeasurements() {
-  return {
-    ext_wall_linear_ft: parseFloat(getWallTotal('ext').toFixed(1)),
-    int_wall_linear_ft: parseFloat(getWallTotal('int').toFixed(1)),
-    plumbing_wall_linear_ft: parseFloat(getWallTotal('plumb').toFixed(1))
-  };
+// ── SCHEDULE READER ──
+let scheduleData = null;
+
+function closeSchedulePanel() {
+  document.getElementById('schedulePanel').classList.remove('open');
 }
 
+async function readSchedules() {
+  // Capture current canvas as base64 JPEG
+  const canvas = document.getElementById('pdfCanvas');
+  const imageData = canvas.toDataURL('image/jpeg', 0.95).split(',')[1];
+
+  // Open panel and show loading
+  document.getElementById('schedulePanel').classList.add('open');
+  document.getElementById('spLoading').style.display = '';
+  document.getElementById('spContent').innerHTML = '';
+  document.getElementById('spFooter').style.display = 'none';
+  document.getElementById('readBtn').classList.add('active');
+
+  try {
+    const response = await fetch('/api/read-schedules', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: imageData })
+    });
+
+    const data = await response.json();
+    if (data.error) throw new Error(data.error);
+
+    scheduleData = data;
+    renderSchedulePanel(data);
+
+  } catch (err) {
+    document.getElementById('spLoading').style.display = 'none';
+    document.getElementById('spContent').innerHTML =
+      `<div style="padding:20px;color:#ef4444;font-size:13px;">Error: ${err.message}</div>`;
+  }
+
+  document.getElementById('readBtn').classList.remove('active');
+}
+
+function renderSchedulePanel(data) {
+  document.getElementById('spLoading').style.display = 'none';
+
+  let html = '';
+
+  // Building info
+  html += `<div class="sp-section">
+    <div class="sp-section-title">Building Info</div>
+    <div class="sp-row">
+      <div class="sp-field"><label class="sp-label">Living SF</label>
+        <input class="sp-input" id="sp_living_sf" type="number" value="${data.living_sf || ''}"></div>
+      <div class="sp-field"><label class="sp-label">Porch SF</label>
+        <input class="sp-input" id="sp_porch_sf" type="number" value="${data.porch_sf || ''}"></div>
+    </div>
+    <div class="sp-row">
+      <div class="sp-field"><label class="sp-label">Plate Height (ft)</label>
+        <input class="sp-input" id="sp_plate_ht" type="number" value="${data.plate_height_ft || 9}"></div>
+      <div class="sp-field"><label class="sp-label">Roof Pitch</label>
+        <input class="sp-input" id="sp_pitch" type="text" value="${data.structural_roof_pitch || '6:12'}"></div>
+    </div>
+    <div class="sp-row">
+      <div class="sp-field"><label class="sp-label">Porch Pitch</label>
+        <input class="sp-input" id="sp_porch_pitch" type="text" value="${data.porch_pitch || '2:12'}"></div>
+      <div class="sp-field"><label class="sp-label">Overhang (in)</label>
+        <input class="sp-input" id="sp_overhang" type="number" value="${data.eave_overhang_in || 16}"></div>
+    </div>
+  </div>`;
+
+  // Door schedule
+  if (data.doors && data.doors.length > 0) {
+    html += `<div class="sp-section">
+      <div class="sp-section-title">Door Schedule (${data.doors.length} types · ${data.doors.reduce((a,d)=>a+(d.count||1),0)} total)</div>
+      <table class="sp-table">
+        <thead><tr><th>Mark</th><th>Qty</th><th>Size</th><th>Header</th><th>Ext?</th></tr></thead>
+        <tbody>`;
+    data.doors.forEach((d, i) => {
+      html += `<tr>
+        <td>${d.mark || '—'}</td>
+        <td><input type="number" value="${d.count || 1}" min="0" style="width:40px" data-door="${i}" data-field="count"></td>
+        <td>${d.rough_opening_width_ft || '?'}' × ${d.rough_opening_height_ft || '?'}'</td>
+        <td>${d.header || '—'}</td>
+        <td>${d.is_exterior ? '✓' : ''}</td>
+      </tr>`;
+    });
+    html += `</tbody></table></div>`;
+  }
+
+  // Window schedule
+  if (data.windows && data.windows.length > 0) {
+    html += `<div class="sp-section">
+      <div class="sp-section-title">Window Schedule (${data.windows.length} types · ${data.windows.reduce((a,w)=>a+(w.count||1),0)} total)</div>
+      <table class="sp-table">
+        <thead><tr><th>Mark</th><th>Qty</th><th>Size</th><th>Header</th></tr></thead>
+        <tbody>`;
+    data.windows.forEach((w, i) => {
+      html += `<tr>
+        <td>${w.mark || '—'}</td>
+        <td><input type="number" value="${w.count || 1}" min="0" style="width:40px" data-win="${i}" data-field="count"></td>
+        <td>${w.rough_opening_width_ft || '?'}' × ${w.rough_opening_height_ft || '?'}'</td>
+        <td>${w.header || '—'}</td>
+      </tr>`;
+    });
+    html += `</tbody></table></div>`;
+  }
+
+  // Truss schedule
+  if (data.trusses && data.trusses.length > 0) {
+    html += `<div class="sp-section">
+      <div class="sp-section-title">Truss Schedule</div>
+      <table class="sp-table">
+        <thead><tr><th>Mark</th><th>Type</th><th>Count</th></tr></thead>
+        <tbody>`;
+    data.trusses.forEach((t, i) => {
+      html += `<tr>
+        <td>${t.mark || '—'}</td>
+        <td>${t.type || '—'}</td>
+        <td><input type="number" value="${t.count || 0}" min="0" style="width:50px" data-truss="${i}" data-field="count"></td>
+      </tr>`;
+    });
+    html += `</tbody></table></div>`;
+  }
+
+  // Notes
+  if (data.notes && data.notes.length > 0) {
+    html += `<div class="sp-section">
+      <div class="sp-section-title">Notes</div>
+      ${data.notes.map(n => `<div style="font-size:12px;color:var(--muted);padding:4px 0;border-bottom:1px solid var(--border)">${n}</div>`).join('')}
+    </div>`;
+  }
+
+  document.getElementById('spContent').innerHTML = html;
+  document.getElementById('spFooter').style.display = 'flex';
+}
+
+function sendToEstimator() {
+  if (!scheduleData) return;
+
+  // Collect any edits from the form
+  const walls = getWallMeasurements();
+
+  const params = new URLSearchParams({
+    living_sf: document.getElementById('sp_living_sf')?.value || scheduleData.living_sf || '',
+    porch_sf: document.getElementById('sp_porch_sf')?.value || scheduleData.porch_sf || '',
+    plate_ht: document.getElementById('sp_plate_ht')?.value || 9,
+    pitch: document.getElementById('sp_pitch')?.value || '6:12',
+    porch_pitch: document.getElementById('sp_porch_pitch')?.value || '2:12',
+    overhang: document.getElementById('sp_overhang')?.value || 16,
+    ext_lf: walls.ext_wall_linear_ft || '',
+    int_lf: walls.int_wall_linear_ft || '',
+    plumb_lf: walls.plumbing_wall_linear_ft || '',
+    doors: JSON.stringify(scheduleData.doors || []),
+    windows: JSON.stringify(scheduleData.windows || []),
+    trusses: JSON.stringify(scheduleData.trusses || [])
+  });
+
+  window.open('/estimator.html?' + params.toString(), '_blank');
+}
+
+
+
 </script>
+
+<!-- SCHEDULE PANEL -->
+<div class="schedule-panel" id="schedulePanel">
+  <div class="sp-head">
+    <div class="sp-title">Schedule Reader</div>
+    <button class="sp-close" onclick="closeSchedulePanel()">×</button>
+  </div>
+  <div class="sp-body" id="spBody">
+    <div class="sp-loading" id="spLoading" style="display:none">
+      <div class="sp-spin"></div>
+      <div class="sp-load-text">Reading schedules...</div>
+    </div>
+    <div id="spContent"></div>
+  </div>
+  <div class="sp-footer" id="spFooter" style="display:none">
+    <button class="sp-btn sp-btn-cancel" onclick="closeSchedulePanel()">Close</button>
+    <button class="sp-btn sp-btn-primary" onclick="sendToEstimator()">Send to Estimator →</button>
+  </div>
+</div>
 </body>
 </html>
