@@ -5,6 +5,10 @@ const fetch = require('node-fetch');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
+const { execFile } = require('child_process');
+const { promisify } = require('util');
+const execFileAsync = promisify(execFile);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -13,15 +17,54 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// File upload — store in memory, max 20MB
+// File upload — store in memory, max 50MB
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 20 * 1024 * 1024 },
+  limits: { fileSize: 50 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const allowed = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf'];
     cb(null, allowed.includes(file.mimetype));
   }
 });
+
+// ─────────────────────────────────────────────
+// PDF → JPEG conversion via pdftoppm
+// Returns array of base64 JPEG strings, one per page (up to maxPages)
+// ─────────────────────────────────────────────
+async function pdfToImages(pdfBuffer, maxPages = 6, dpi = 150) {
+  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sauce-pdf-'));
+  const tmpPdf = path.join(tmpDir, 'input.pdf');
+  const outPrefix = path.join(tmpDir, 'page');
+
+  try {
+    fs.writeFileSync(tmpPdf, pdfBuffer);
+
+    // pdftoppm: convert up to maxPages pages to JPEG at given DPI
+    await execFileAsync('pdftoppm', [
+      '-jpeg',
+      '-r', String(dpi),
+      '-l', String(maxPages),
+      tmpPdf,
+      outPrefix
+    ]);
+
+    // Collect generated page files, sorted
+    const files = fs.readdirSync(tmpDir)
+      .filter(f => f.startsWith('page') && f.endsWith('.jpg'))
+      .sort()
+      .slice(0, maxPages);
+
+    if (files.length === 0) throw new Error('pdftoppm produced no output images');
+
+    return files.map(f => {
+      const buf = fs.readFileSync(path.join(tmpDir, f));
+      return buf.toString('base64');
+    });
+  } finally {
+    // Clean up temp files
+    try { fs.rmSync(tmpDir, { recursive: true, force: true }); } catch {}
+  }
+}
 
 // ─────────────────────────────────────────────
 // ASSEMBLY RULES ENGINE
@@ -461,48 +504,45 @@ app.post('/api/analyze', upload.single('drawing'), async (req, res) => {
 
     const fileBuffer = req.file.buffer;
     const mimeType = req.file.mimetype;
-    const base64Data = fileBuffer.toString('base64');
 
-    // Build message — images go as image type, PDFs need special handling
-    let contentBlock;
+    // Build content blocks — PDFs get converted to images first
+    let contentBlocks = [];
+
     if (mimeType === 'application/pdf') {
-      // Send PDF as document type with beta header
-      contentBlock = {
-        type: 'document',
-        source: {
-          type: 'base64',
-          media_type: 'application/pdf',
-          data: base64Data
-        }
-      };
-    } else {
-      // PNG, JPG, WEBP — send as image
-      const validImageType = ['image/jpeg','image/png','image/gif','image/webp'].includes(mimeType)
-        ? mimeType : 'image/jpeg';
-      contentBlock = {
+      console.log(`PDF upload: ${req.file.originalname} — ${Math.round(fileBuffer.length/1024)}KB`);
+      let pageImages;
+      try {
+        pageImages = await pdfToImages(fileBuffer, 6, 150);
+        console.log(`Converted PDF to ${pageImages.length} page images`);
+      } catch (convErr) {
+        console.error('PDF conversion error:', convErr.message);
+        return res.status(500).json({
+          error: `Could not convert PDF to images: ${convErr.message}. Try uploading as JPG/PNG instead.`
+        });
+      }
+      // Send each page as a separate image block
+      contentBlocks = pageImages.map((b64, i) => ({
         type: 'image',
-        source: {
-          type: 'base64',
-          media_type: validImageType,
-          data: base64Data
-        }
-      };
+        source: { type: 'base64', media_type: 'image/jpeg', data: b64 }
+      }));
+    } else {
+      // Direct image upload
+      const validType = ['image/jpeg','image/png','image/gif','image/webp'].includes(mimeType)
+        ? mimeType : 'image/jpeg';
+      const base64Data = fileBuffer.toString('base64');
+      contentBlocks = [{ type: 'image', source: { type: 'base64', media_type: validType, data: base64Data } }];
     }
 
-    const messages = [{
-      role: 'user',
-      content: [contentBlock, { type: 'text', text: EXTRACTION_PROMPT }]
-    }];
+    // Add extraction prompt after all image blocks
+    contentBlocks.push({ type: 'text', text: EXTRACTION_PROMPT });
 
-    // PDF requires beta header
+    const messages = [{ role: 'user', content: contentBlocks }];
+
     const headers = {
       'Content-Type': 'application/json',
       'x-api-key': apiKey,
       'anthropic-version': '2023-06-01'
     };
-    if (mimeType === 'application/pdf') {
-      headers['anthropic-beta'] = 'pdfs-2024-09-25';
-    }
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
