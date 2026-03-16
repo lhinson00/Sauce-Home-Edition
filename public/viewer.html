@@ -120,6 +120,14 @@ body{font-family:'Inter',sans-serif;background:var(--off);color:var(--navy);min-
 
 /* SCALE LINE OVERLAY */
 #scaleOverlay{position:absolute;top:44px;left:0;right:0;bottom:28px;pointer-events:none;z-index:5;overflow:visible;}
+
+/* WALL TOOL */
+.tool-sep{width:1px;height:20px;background:rgba(255,255,255,.12);margin:0 4px;}
+.measure-totals{display:flex;align-items:center;gap:10px;margin-left:4px;}
+.measure-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:5px;font-size:11px;font-weight:700;}
+.measure-chip.ext{background:rgba(59,110,212,.2);border:1px solid rgba(59,110,212,.4);color:#7aa4f5;}
+.measure-chip.int{background:rgba(167,92,212,.2);border:1px solid rgba(167,92,212,.4);color:#c89cf5;}
+.measure-chip.plumb{background:rgba(212,150,59,.2);border:1px solid rgba(212,150,59,.4);color:#f5c87a;}
 </style>
 </head>
 <body>
@@ -206,6 +214,28 @@ body{font-family:'Inter',sans-serif;background:var(--off);color:var(--navy);min-
         <span id="scaleLabel">Scale set</span>
       </div>
       <div class="toolbar-sep"></div>
+      <button class="tool-btn" id="extWallBtn" onclick="activateWallTool('ext')" title="Trace exterior walls">
+        <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><rect x="1" y="1" width="9" height="9" rx="1" stroke="currentColor" stroke-width="1.5"/></svg>
+        Ext Walls
+      </button>
+      <button class="tool-btn" id="intWallBtn" onclick="activateWallTool('int')" title="Trace interior walls">
+        <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M5.5 1v9M1 5.5h4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Int Walls
+      </button>
+      <button class="tool-btn" id="plumbWallBtn" onclick="activateWallTool('plumb')" title="Trace plumbing walls">
+        <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M3 1v9M8 1v9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Plumb
+      </button>
+      <button class="tool-btn" id="undoWallBtn" onclick="undoLastSegment()" title="Undo last segment" style="opacity:.6">
+        <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1 4h5a4 4 0 010 8H3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M1 4l3-3M1 4l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Undo
+      </button>
+      <div class="measure-totals">
+        <div class="measure-chip ext" id="extTotal" style="display:none">EXT <span id="extLF">0</span> LF</div>
+        <div class="measure-chip int" id="intTotal" style="display:none">INT <span id="intLF">0</span> LF</div>
+        <div class="measure-chip plumb" id="plumbTotal" style="display:none">PLB <span id="plumbLF">0</span> LF</div>
+      </div>
+      <div class="toolbar-sep"></div>
       <span class="toolbar-label">Page</span>
       <div class="page-nav">
         <button class="page-btn" id="prevBtn" onclick="changePage(-1)">‹</button>
@@ -218,6 +248,7 @@ body{font-family:'Inter',sans-serif;background:var(--off);color:var(--navy);min-
       <div style="position:relative;display:inline-block;">
         <canvas id="pdfCanvas"></canvas>
         <svg id="scaleOverlay" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;"></svg>
+        <svg id="wallOverlay" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;"></svg>
       </div>
     </div>
 
@@ -446,9 +477,10 @@ async function renderPage(pageNum) {
     t.classList.toggle('active', parseInt(t.dataset.page) === pageNum);
   });
 
-  // Redraw scale overlay at new canvas size
+  // Redraw scale and wall overlays at new canvas size
   updateScaleForZoom();
   redrawScaleOverlay();
+  redrawWallOverlay();
 
   hideLoading();
 }
@@ -728,12 +760,255 @@ function confirmScale() {
   console.log(`Scale: fracPerFoot=${fracPerFoot.toFixed(6)}, px/ft=${scalePixelsPerFoot.toFixed(2)}`);
 }
 
-// Recalculate pixels-per-foot after zoom changes (canvas width changes)
-function updateScaleForZoom() {
-  const fracPerFoot = parseFloat(scroll.dataset.fracPerFoot);
-  if (!fracPerFoot) return;
+// ── WALL TRACING TOOL ──
+const WALL_COLORS = { ext: '#3b6fd4', int: '#a75cd4', plumb: '#d4963b' };
+const WALL_LABELS = { ext: 'EXT', int: 'INT', plumb: 'PLB' };
+
+let wallMode = null; // 'ext', 'int', 'plumb', or null
+let wallSegments = []; // [{type, fx1, fy1, fx2, fy2, ft}]
+let wallPendingStart = null; // {fx, fy} — first click waiting for second
+let wallPreviewLine = null;
+
+// Totals
+function getWallTotal(type) {
+  return wallSegments
+    .filter(s => s.type === type)
+    .reduce((sum, s) => sum + s.ft, 0);
+}
+
+function updateWallTotals() {
+  ['ext','int','plumb'].forEach(type => {
+    const total = getWallTotal(type);
+    const chip = document.getElementById(type + 'Total');
+    const lf = document.getElementById(type + 'LF');
+    chip.style.display = total > 0 ? 'flex' : 'none';
+    lf.textContent = total.toFixed(1);
+  });
+}
+
+function activateWallTool(type) {
+  if (!scalePixelsPerFoot) {
+    alert('Set the scale first before tracing walls.');
+    return;
+  }
+  if (wallMode === type) {
+    // Deactivate
+    wallMode = null;
+    wallPendingStart = null;
+    clearWallPreview();
+    scroll.style.cursor = '';
+    document.getElementById('statusMsg').textContent = 'Ready';
+  } else {
+    wallMode = type;
+    scaleMode = false;
+    wallPendingStart = null;
+    clearWallPreview();
+    scroll.style.cursor = 'crosshair';
+    document.getElementById('statusMsg').textContent =
+      `${WALL_LABELS[type]} wall mode — click start point of wall segment`;
+  }
+  // Update button states
+  ['ext','int','plumb'].forEach(t => {
+    document.getElementById(t + 'WallBtn').classList.toggle('active', wallMode === t);
+  });
+}
+
+function clearWallPreview() {
+  const svg = document.getElementById('wallOverlay');
+  const prev = svg.querySelector('#wallPreview');
+  if (prev) svg.removeChild(prev);
+  wallPreviewLine = null;
+}
+
+// Convert fractional coords to current canvas pixels
+function fToPx(fx, fy) {
   const canvas = document.getElementById('pdfCanvas');
-  scalePixelsPerFoot = canvas.width * fracPerFoot;
+  return { x: fx * canvas.width, y: fy * canvas.height };
+}
+
+// Convert canvas pixel coords to fractional
+function pxToF(x, y) {
+  const canvas = document.getElementById('pdfCanvas');
+  return { fx: x / canvas.width, fy: y / canvas.height };
+}
+
+// Get feet from two fractional points
+function fracToFeet(fx1, fy1, fx2, fy2) {
+  const canvas = document.getElementById('pdfCanvas');
+  const px1 = fToPx(fx1, fy1);
+  const px2 = fToPx(fx2, fy2);
+  const pixDist = Math.sqrt(Math.pow(px2.x-px1.x,2) + Math.pow(px2.y-px1.y,2));
+  return pixDist / scalePixelsPerFoot;
+}
+
+// Draw all confirmed wall segments
+function redrawWallOverlay() {
+  const svg = document.getElementById('wallOverlay');
+  const canvas = document.getElementById('pdfCanvas');
+  svg.setAttribute('width', canvas.width);
+  svg.setAttribute('height', canvas.height);
+
+  // Keep preview line if exists, remove all others
+  const preview = svg.querySelector('#wallPreview');
+  while (svg.firstChild && svg.firstChild !== preview) svg.removeChild(svg.firstChild);
+  while (svg.lastChild && svg.lastChild !== preview) svg.removeChild(svg.lastChild);
+  if (preview) svg.removeChild(preview);
+
+  // Draw confirmed segments
+  wallSegments.forEach((seg, idx) => {
+    const p1 = fToPx(seg.fx1, seg.fy1);
+    const p2 = fToPx(seg.fx2, seg.fy2);
+    const color = WALL_COLORS[seg.type];
+
+    // Line
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', p1.x); line.setAttribute('y1', p1.y);
+    line.setAttribute('x2', p2.x); line.setAttribute('y2', p2.y);
+    line.setAttribute('stroke', color);
+    line.setAttribute('stroke-width', 3);
+    line.setAttribute('stroke-linecap', 'round');
+    line.setAttribute('opacity', '0.85');
+    svg.appendChild(line);
+
+    // Midpoint label
+    const mx = (p1.x + p2.x) / 2;
+    const my = (p1.y + p2.y) / 2 - 8;
+    const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    label.setAttribute('x', mx); label.setAttribute('y', my);
+    label.setAttribute('text-anchor', 'middle');
+    label.setAttribute('font-size', '11');
+    label.setAttribute('font-weight', '700');
+    label.setAttribute('fill', color);
+    label.setAttribute('stroke', '#fff');
+    label.setAttribute('stroke-width', '3');
+    label.setAttribute('paint-order', 'stroke');
+    label.textContent = seg.ft.toFixed(1) + "'";
+    svg.appendChild(label);
+
+    // Start dot
+    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    dot.setAttribute('cx', p1.x); dot.setAttribute('cy', p1.y);
+    dot.setAttribute('r', 4); dot.setAttribute('fill', color);
+    dot.setAttribute('stroke', '#fff'); dot.setAttribute('stroke-width', 1.5);
+    svg.appendChild(dot);
+  });
+
+  // Re-add preview on top
+  if (preview) svg.appendChild(preview);
+}
+
+// Mouse move — show preview line while in wall mode after first click
+scroll.addEventListener('mousemove', e => {
+  if (!wallMode || !wallPendingStart) return;
+  const canvas = document.getElementById('pdfCanvas');
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+
+  const svg = document.getElementById('wallOverlay');
+  let prev = svg.querySelector('#wallPreview');
+  if (!prev) {
+    prev = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    prev.setAttribute('id', 'wallPreview');
+    svg.appendChild(prev);
+  }
+  prev.innerHTML = '';
+
+  const p1 = fToPx(wallPendingStart.fx, wallPendingStart.fy);
+  const color = WALL_COLORS[wallMode];
+
+  // Preview line
+  const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  line.setAttribute('x1', p1.x); line.setAttribute('y1', p1.y);
+  line.setAttribute('x2', x); line.setAttribute('y2', y);
+  line.setAttribute('stroke', color);
+  line.setAttribute('stroke-width', 2);
+  line.setAttribute('stroke-dasharray', '6 3');
+  line.setAttribute('opacity', '0.7');
+  prev.appendChild(line);
+
+  // Live distance
+  const { fx, fy } = pxToF(x, y);
+  const ft = fracToFeet(wallPendingStart.fx, wallPendingStart.fy, fx, fy);
+  const mx = (p1.x + x) / 2, my = (p1.y + y) / 2 - 8;
+  const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  label.setAttribute('x', mx); label.setAttribute('y', my);
+  label.setAttribute('text-anchor', 'middle');
+  label.setAttribute('font-size', '11');
+  label.setAttribute('font-weight', '700');
+  label.setAttribute('fill', color);
+  label.setAttribute('stroke', '#fff');
+  label.setAttribute('stroke-width', '3');
+  label.setAttribute('paint-order', 'stroke');
+  label.textContent = ft.toFixed(1) + "'";
+  prev.appendChild(label);
+});
+
+// Click — handle wall segment start/end
+scroll.addEventListener('click', e => {
+  if (!wallMode) return;
+  const canvas = document.getElementById('pdfCanvas');
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  const { fx, fy } = pxToF(x, y);
+
+  if (!wallPendingStart) {
+    // First click — set start point
+    wallPendingStart = { fx, fy };
+    document.getElementById('statusMsg').textContent =
+      `${WALL_LABELS[wallMode]} — click end point (${getWallTotal(wallMode).toFixed(1)}' so far)`;
+  } else {
+    // Second click — complete segment
+    const ft = fracToFeet(wallPendingStart.fx, wallPendingStart.fy, fx, fy);
+    if (ft > 0.1) {
+      wallSegments.push({
+        type: wallMode,
+        fx1: wallPendingStart.fx, fy1: wallPendingStart.fy,
+        fx2: fx, fy2: fy,
+        ft
+      });
+      updateWallTotals();
+      redrawWallOverlay();
+
+      const total = getWallTotal(wallMode);
+      document.getElementById('statusMsg').textContent =
+        `${WALL_LABELS[wallMode]} +${ft.toFixed(1)}' = ${total.toFixed(1)}' total — click next start point`;
+    }
+    // Reset to allow chaining — next click starts a new segment
+    // Start new segment from where we just ended (chain mode)
+    wallPendingStart = { fx, fy };
+    clearWallPreview();
+  }
+});
+
+// Right click — cancel current segment without completing
+scroll.addEventListener('contextmenu', e => {
+  if (!wallMode) return;
+  e.preventDefault();
+  wallPendingStart = null;
+  clearWallPreview();
+  document.getElementById('statusMsg').textContent =
+    `${WALL_LABELS[wallMode]} mode — click start point`;
+});
+
+function undoLastSegment() {
+  if (wallSegments.length === 0) return;
+  wallSegments.pop();
+  wallPendingStart = null;
+  clearWallPreview();
+  updateWallTotals();
+  redrawWallOverlay();
+  document.getElementById('statusMsg').textContent = 'Last segment removed';
+}
+
+// Expose totals for use by estimator later
+function getWallMeasurements() {
+  return {
+    ext_wall_linear_ft: parseFloat(getWallTotal('ext').toFixed(1)),
+    int_wall_linear_ft: parseFloat(getWallTotal('int').toFixed(1)),
+    plumbing_wall_linear_ft: parseFloat(getWallTotal('plumb').toFixed(1))
+  };
 }
 
 </script>
