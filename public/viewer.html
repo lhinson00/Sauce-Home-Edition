@@ -323,6 +323,14 @@ let currentZoom = 1.0;
 let baseScale = 1.0;
 let filename = '';
 
+// Recalculate pixels-per-foot after zoom (canvas width changes)
+function updateScaleForZoom() {
+  const fracPerFoot = parseFloat(scroll.dataset.fracPerFoot);
+  if (!fracPerFoot) return;
+  const canvas = document.getElementById('pdfCanvas');
+  scalePixelsPerFoot = canvas.width * fracPerFoot;
+}
+
 // ── FILE INPUT HANDLERS ──
 document.getElementById('fileInput').addEventListener('change', e => handleFile(e.target.files[0]));
 document.getElementById('fileInput2').addEventListener('change', e => handleFile(e.target.files[0]));
@@ -478,9 +486,9 @@ async function renderPage(pageNum) {
   });
 
   // Redraw scale and wall overlays at new canvas size
-  updateScaleForZoom();
-  redrawScaleOverlay();
-  redrawWallOverlay();
+  if (typeof updateScaleForZoom === 'function') updateScaleForZoom();
+  if (typeof redrawScaleOverlay === 'function') redrawScaleOverlay();
+  if (typeof redrawWallOverlay === 'function') redrawWallOverlay();
 
   hideLoading();
 }
