@@ -613,6 +613,90 @@ ABSOLUTE RULES:
 // API ROUTES
 // ─────────────────────────────────────────────
 
+// Read schedules from a plan image (canvas capture)
+app.post('/api/read-schedules', express.json({ limit: '20mb' }), async (req, res) => {
+  try {
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) return res.status(500).json({ error: 'API key not configured' });
+
+    const { image } = req.body;
+    if (!image) return res.status(400).json({ error: 'No image provided' });
+
+    const prompt = `You are reading a residential construction plan. Your ONLY job is to read the schedules and labeled values on this page. Do not measure or estimate anything.
+
+Read and return ONLY what you can see explicitly written:
+
+1. DOOR SCHEDULE — read every row exactly as written
+2. WINDOW SCHEDULE — read every row exactly as written  
+3. TRUSS/FRAMING SCHEDULE — read every row exactly as written
+4. SQFT SCHEDULE — read labeled SF values (living area, porch, etc.)
+5. ROOF PITCH — read from elevation or framing plan pitch triangle
+6. PLATE HEIGHT — read from elevation ("TOP OF WALL", "WALL HEIGHT", "PLATE HT")
+7. PORCH PITCH — read from porch framing or elevation
+
+Return ONLY valid JSON, no markdown:
+{
+  "living_sf": null,
+  "porch_sf": null,
+  "plate_height_ft": null,
+  "structural_roof_pitch": null,
+  "porch_pitch": null,
+  "eave_overhang_in": null,
+  "doors": [{"mark":"D01","count":1,"rough_opening_width_ft":3.0,"rough_opening_height_ft":6.83,"description":"","header":"(2) 2x12","is_exterior":true}],
+  "windows": [{"mark":"W01","count":1,"rough_opening_width_ft":3.0,"rough_opening_height_ft":5.5,"description":"","header":"(2) 2x10","area_sf":16.5}],
+  "trusses": [{"mark":"TR1","type":"flat bottom","count":12,"spacing_in":24,"description":""}],
+  "notes": []
+}`;
+
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 3000,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: image } },
+            { type: 'text', text: prompt }
+          ]
+        }]
+      })
+    });
+
+    if (!response.ok) {
+      const err = await response.text();
+      return res.status(500).json({ error: `API error: ${err}` });
+    }
+
+    const data = await response.json();
+    const rawText = data.content.map(b => b.text || '').join('');
+
+    let parsed;
+    try {
+      const clean = rawText.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+      parsed = JSON.parse(clean);
+    } catch {
+      const first = rawText.indexOf('{');
+      const last = rawText.lastIndexOf('}');
+      if (first !== -1 && last !== -1) {
+        parsed = JSON.parse(rawText.substring(first, last + 1));
+      } else {
+        return res.status(500).json({ error: 'Could not parse schedule data', raw: rawText.substring(0, 200) });
+      }
+    }
+
+    res.json(parsed);
+  } catch (err) {
+    console.error('read-schedules error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Analyze drawing
 app.post('/api/analyze', upload.single('drawing'), async (req, res) => {
   try {
