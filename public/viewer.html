@@ -94,6 +94,32 @@ body{font-family:'Inter',sans-serif;background:var(--off);color:var(--navy);min-
 .spin{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--amber);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-text{font-size:13px;font-weight:500;color:var(--navy);}
+
+/* SCALE TOOL */
+.tool-btn{padding:6px 12px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.65);font-family:inherit;transition:all .15s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}
+.tool-btn:hover{background:rgba(255,255,255,.1);color:#fff;}
+.tool-btn.active{background:var(--amber);border-color:var(--amber);color:var(--navy);}
+.tool-btn.set{background:#10b981;border-color:#10b981;color:#fff;}
+.scale-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);border-radius:5px;padding:4px 10px;font-size:11px;font-weight:600;color:#10b981;}
+
+/* SCALE MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;display:flex;align-items:center;justify-content:center;}
+.modal{background:#fff;border-radius:12px;padding:28px;width:340px;box-shadow:0 8px 40px rgba(0,0,0,.3);}
+.modal-title{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:6px;}
+.modal-sub{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.5;}
+.modal-field{margin-bottom:16px;}
+.modal-label{font-size:12px;font-weight:600;color:var(--navy);margin-bottom:6px;display:block;}
+.modal-input{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:6px;font-size:14px;font-family:inherit;color:var(--navy);transition:border .15s;}
+.modal-input:focus{outline:none;border-color:var(--amber);}
+.modal-row{display:flex;gap:8px;}
+.modal-btn{flex:1;padding:10px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:all .15s;}
+.modal-btn-primary{background:var(--amber);color:var(--navy);}
+.modal-btn-primary:hover{background:var(--amber2);}
+.modal-btn-cancel{background:var(--off);color:var(--muted);border:1px solid var(--border);}
+.modal-btn-cancel:hover{background:var(--border);}
+
+/* SCALE LINE OVERLAY */
+#scaleOverlay{position:absolute;top:44px;left:0;right:0;bottom:28px;pointer-events:none;z-index:5;overflow:visible;}
 </style>
 </head>
 <body>
@@ -171,6 +197,15 @@ body{font-family:'Inter',sans-serif;background:var(--off);color:var(--navy);min-
       </div>
       <span class="toolbar-val" id="zoomLabel">100%</span>
       <div class="toolbar-sep"></div>
+      <button class="tool-btn" id="scaleBtn" onclick="startScaleTool()">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 6h10M1 3l2 3-2 3M11 3l-2 3 2 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Set Scale
+      </button>
+      <div class="scale-badge" id="scaleBadge" style="display:none">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 5l1 1 2-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span id="scaleLabel">Scale set</span>
+      </div>
+      <div class="toolbar-sep"></div>
       <span class="toolbar-label">Page</span>
       <div class="page-nav">
         <button class="page-btn" id="prevBtn" onclick="changePage(-1)">‹</button>
@@ -195,10 +230,55 @@ body{font-family:'Inter',sans-serif;background:var(--off);color:var(--navy);min-
         <div class="loading-text" id="loadingText">Loading plan...</div>
       </div>
     </div>
+
+    <svg id="scaleOverlay"></svg>
+
   </div>
 
 </div>
 
+
+    <svg id="scaleOverlay"></svg>
+
+  </div>
+</div>
+
+<!-- SCALE MODAL -->
+<div class="modal-overlay" id="scaleModal" style="display:none">
+  <div class="modal">
+    <div class="modal-title">Set Plan Scale</div>
+    <div class="modal-sub">Click two points on a known dimension line on the plan, then enter the real-world distance between them.</div>
+    <div id="scaleStep1">
+      <div style="background:#fff8ee;border:1px solid #f5dba0;border-radius:6px;padding:12px 14px;font-size:12px;color:#92610a;margin-bottom:16px;">
+        <strong>Step 1:</strong> Close this dialog, then click the first point on a dimension line. The dialog will reappear after both points are clicked.
+      </div>
+      <div class="modal-row">
+        <button class="modal-btn modal-btn-primary" onclick="beginPickPoints()">Start Picking Points</button>
+        <button class="modal-btn modal-btn-cancel" onclick="cancelScale()">Cancel</button>
+      </div>
+    </div>
+    <div id="scaleStep2" style="display:none">
+      <div style="background:#f0faf5;border:1px solid #a8dfc2;border-radius:6px;padding:12px 14px;font-size:12px;color:#1a6640;margin-bottom:16px;" id="scalePixelInfo">
+        Measured pixel distance: — px
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">What is the real distance between those two points?</label>
+        <input type="number" class="modal-input" id="scaleDistInput" placeholder="e.g. 30" min="0.1" step="0.1">
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Unit</label>
+        <select class="modal-input" id="scaleUnitInput">
+          <option value="ft">Feet</option>
+          <option value="in">Inches</option>
+        </select>
+      </div>
+      <div class="modal-row">
+        <button class="modal-btn modal-btn-primary" onclick="confirmScale()">Confirm Scale</button>
+        <button class="modal-btn modal-btn-cancel" onclick="cancelScale()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
 // Set PDF.js worker
@@ -471,7 +551,148 @@ function showLoading(msg) {
 
 function hideLoading() {
   document.getElementById('loadingOverlay').style.display = 'none';
+}// ── SCALE TOOL ──
+let scaleMode = false;
+let scalePoints = [];
+let scalePixelsPerFoot = null;
+let scaleLineEl = null;
+let scaleDot1 = null, scaleDot2 = null;
+
+function startScaleTool() {
+  document.getElementById('scaleModal').style.display = 'flex';
+  document.getElementById('scaleStep1').style.display = '';
+  document.getElementById('scaleStep2').style.display = 'none';
 }
+
+function beginPickPoints() {
+  document.getElementById('scaleModal').style.display = 'none';
+  scaleMode = true;
+  scalePoints = [];
+  clearScaleOverlay();
+  scroll.style.cursor = 'crosshair';
+  document.getElementById('statusMsg').textContent = 'Click point 1 on a known dimension line';
+  document.getElementById('scaleBtn').classList.add('active');
+}
+
+function cancelScale() {
+  scaleMode = false;
+  scalePoints = [];
+  clearScaleOverlay();
+  document.getElementById('scaleModal').style.display = 'none';
+  scroll.style.cursor = '';
+  document.getElementById('scaleBtn').classList.remove('active');
+  document.getElementById('statusMsg').textContent = 'Ready';
+}
+
+function clearScaleOverlay() {
+  const svg = document.getElementById('scaleOverlay');
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+  scaleLineEl = null; scaleDot1 = null; scaleDot2 = null;
+}
+
+// Convert mouse event on scroll area to canvas coordinates
+function getCanvasPoint(e) {
+  const canvas = document.getElementById('pdfCanvas');
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: e.clientX - rect.left,
+    y: e.clientY - rect.top,
+    // position relative to scroll container for SVG overlay
+    svgX: e.clientX - scroll.getBoundingClientRect().left + scroll.scrollLeft,
+    svgY: e.clientY - scroll.getBoundingClientRect().top + scroll.scrollTop
+  };
+}
+
+// Draw dot on SVG overlay
+function drawDot(svgX, svgY, color) {
+  const svg = document.getElementById('scaleOverlay');
+  const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+  circle.setAttribute('cx', svgX);
+  circle.setAttribute('cy', svgY);
+  circle.setAttribute('r', 6);
+  circle.setAttribute('fill', color);
+  circle.setAttribute('stroke', '#fff');
+  circle.setAttribute('stroke-width', 2);
+  svg.appendChild(circle);
+  return circle;
+}
+
+// Draw line between two SVG points
+function drawScaleLine(x1, y1, x2, y2) {
+  const svg = document.getElementById('scaleOverlay');
+  if (scaleLineEl) svg.removeChild(scaleLineEl);
+  const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+  line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+  line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+  line.setAttribute('stroke', '#f5a623');
+  line.setAttribute('stroke-width', 2);
+  line.setAttribute('stroke-dasharray', '6 3');
+  svg.appendChild(line);
+  scaleLineEl = line;
+}
+
+// Handle canvas clicks for scale picking
+scroll.addEventListener('click', e => {
+  if (!scaleMode) return;
+  const pt = getCanvasPoint(e);
+
+  if (scalePoints.length === 0) {
+    // First point
+    scalePoints.push(pt);
+    scaleDot1 = drawDot(pt.svgX, pt.svgY, '#f5a623');
+    document.getElementById('statusMsg').textContent = 'Click point 2 on the same dimension line';
+
+  } else if (scalePoints.length === 1) {
+    // Second point
+    scalePoints.push(pt);
+    scaleDot2 = drawDot(pt.svgX, pt.svgY, '#f5a623');
+    drawScaleLine(scalePoints[0].svgX, scalePoints[0].svgY, pt.svgX, pt.svgY);
+
+    // Calculate pixel distance on canvas
+    const dx = pt.x - scalePoints[0].x;
+    const dy = pt.y - scalePoints[0].y;
+    const pixelDist = Math.sqrt(dx*dx + dy*dy);
+
+    // Show modal step 2
+    scaleMode = false;
+    scroll.style.cursor = '';
+    document.getElementById('scalePixelInfo').textContent =
+      `Measured: ${Math.round(pixelDist)} pixels between your two points`;
+    document.getElementById('scaleModal').style.display = 'flex';
+    document.getElementById('scaleStep1').style.display = 'none';
+    document.getElementById('scaleStep2').style.display = '';
+    document.getElementById('scaleDistInput').focus();
+
+    // Store pixel distance for confirmation
+    scroll.dataset.pixelDist = pixelDist;
+    document.getElementById('statusMsg').textContent = 'Enter the real distance in the dialog';
+  }
+});
+
+function confirmScale() {
+  const dist = parseFloat(document.getElementById('scaleDistInput').value);
+  const unit = document.getElementById('scaleUnitInput').value;
+  if (!dist || dist <= 0) {
+    document.getElementById('scaleDistInput').focus();
+    return;
+  }
+  const distFt = unit === 'in' ? dist / 12 : dist;
+  const pixelDist = parseFloat(scroll.dataset.pixelDist);
+  scalePixelsPerFoot = pixelDist / distFt;
+
+  // Update UI
+  document.getElementById('scaleModal').style.display = 'none';
+  document.getElementById('scaleBtn').classList.remove('active');
+  document.getElementById('scaleBtn').classList.add('set');
+  document.getElementById('scaleBadge').style.display = 'flex';
+  document.getElementById('scaleLabel').textContent =
+    `1" = ${(scalePixelsPerFoot / 12).toFixed(1)}px`;
+  document.getElementById('statusMsg').textContent =
+    `Scale set — ${dist}${unit === 'ft' ? "'" : '"'} = ${Math.round(pixelDist)}px · ${scalePixelsPerFoot.toFixed(1)} px/ft`;
+
+  console.log(`Scale: ${scalePixelsPerFoot.toFixed(2)} pixels per foot`);
+}
+
 </script>
 </body>
 </html>
