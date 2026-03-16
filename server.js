@@ -731,28 +731,68 @@ Be precise. Read every dimension string you can see. Do not estimate.`;
       return res.status(500).json({ error: 'AI returned empty response. Try a higher resolution image.' });
     }
 
-    // Parse JSON from response — extract the JSON object regardless of surrounding markdown
+    // Parse JSON from response — robust extraction regardless of markdown wrapping
     let extracted;
+    let parseError = null;
+
+    // Strategy 1: strip markdown fences
     try {
-      // Strategy 1: strip markdown fences and parse directly
-      let clean = rawText.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
-      // Strategy 2: if that fails, find the first { and last } and extract just that
+      const clean = rawText.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+      extracted = JSON.parse(clean);
+    } catch (e1) {
+      parseError = e1.message;
+    }
+
+    // Strategy 2: find first { and last } and extract just that substring
+    if (!extracted) {
       try {
-        extracted = JSON.parse(clean);
-      } catch {
         const first = rawText.indexOf('{');
         const last = rawText.lastIndexOf('}');
         if (first !== -1 && last !== -1 && last > first) {
-          clean = rawText.substring(first, last + 1);
-          extracted = JSON.parse(clean);
-        } else {
-          throw new Error('No JSON object found in response');
+          extracted = JSON.parse(rawText.substring(first, last + 1));
         }
+      } catch (e2) {
+        parseError = e2.message;
       }
-    } catch (e) {
-      console.error('JSON parse error:', e.message, 'Raw:', rawText.substring(0, 300));
+    }
 
-      return res.status(500).json({ error: 'Could not parse drawing data — the AI response was not valid JSON. Try a clearer image.', raw: rawText.substring(0, 300) });
+    // Strategy 3: ask Claude to fix the malformed JSON
+    if (!extracted) {
+      try {
+        console.log('Strategies 1+2 failed, asking Claude to repair JSON...');
+        const repairResponse = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-6',
+            max_tokens: 4096,
+            messages: [{
+              role: 'user',
+              content: `The following text is supposed to be a valid JSON object but has a syntax error. Fix it and return ONLY the corrected JSON with no markdown, no explanation, nothing else:\n\n${rawText.substring(0, 8000)}`
+            }]
+          })
+        });
+        if (repairResponse.ok) {
+          const repairData = await repairResponse.json();
+          const repairText = repairData.content.map(b => b.text || '').join('').trim();
+          const first = repairText.indexOf('{');
+          const last = repairText.lastIndexOf('}');
+          if (first !== -1 && last !== -1) {
+            extracted = JSON.parse(repairText.substring(first, last + 1));
+            console.log('JSON repair succeeded');
+          }
+        }
+      } catch (e3) {
+        parseError = e3.message;
+      }
+    }
+
+    if (!extracted) {
+      console.error('All JSON parse strategies failed:', parseError, 'Raw:', rawText.substring(0, 400));
+      return res.status(500).json({
+        error: 'Could not parse drawing data — the AI response was not valid JSON. Try a clearer image.',
+        raw: rawText.substring(0, 300)
+      });
     }
 
     // Run rules engine
