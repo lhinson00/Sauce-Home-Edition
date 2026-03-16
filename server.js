@@ -67,7 +67,7 @@ async function pdfToImages(pdfBuffer, maxPages = 6, dpi = 150) {
 }
 
 // ─────────────────────────────────────────────
-// ASSEMBLY RULES ENGINE
+// ASSEMBLY RULES ENGINE — mirrors estimator.html logic exactly
 // ─────────────────────────────────────────────
 
 function runRulesEngine(extracted) {
@@ -76,335 +76,277 @@ function runRulesEngine(extracted) {
   const {
     living_sf = 0,
     porch_sf = 0,
-    building_width_ft = 0,
-    building_depth_ft = 0,
-    plate_height_ft = 9,
-    structural_roof_pitch = '6:12',
+    building_width_ft: W = 0,
+    building_depth_ft: L = 0,
+    plate_height_ft: pH = 9,
+    structural_roof_pitch: pitch = '6:12',
     ceiling_pitch = null,
     porch_pitch = '2:12',
     ext_wall_linear_ft = 0,
     int_wall_linear_ft = 0,
     plumbing_wall_linear_ft = 0,
-    exterior_corners = 4,
-    int_t_intersections = 0,
     doors = [],
     windows = [],
     trusses = [],
-    rough_timber = [],
     sheathing_type = 'OSB',
     roofing_type = 'Tuff-Rib 29ga',
     eave_overhang_in = 16,
-    roof_area_main_sf = 0,
-    roof_area_porch_sf = 0,
-    foundation_type = 'monolithic_slab',
-    slab_thickness_in = 4
+    post_size = '8x8',
+    porch_timber_spec = 'STD'
   } = extracted;
 
-  // Flag if ceiling pitch differs from structural pitch
-  if (ceiling_pitch && ceiling_pitch !== structural_roof_pitch) {
+  if (ceiling_pitch && ceiling_pitch !== pitch) {
     results.flags.push({
       level: 'warning',
-      message: `Floor plan shows ${ceiling_pitch} ceiling pitch (interior vault). Structural roof pitch from elevation is ${structural_roof_pitch}. All sheathing and roofing quantities calculated at ${structural_roof_pitch}. Confirm with engineer before ordering.`
+      message: `Floor plan shows ${ceiling_pitch} ceiling pitch (interior vault). Structural pitch is ${pitch}. All quantities calculated at ${pitch}. Confirm with engineer.`
     });
   }
 
-  // Pitch multiplier table
-  const pitchMultipliers = {
-    '2:12': 1.014, '3:12': 1.031, '4:12': 1.054, '5:12': 1.083,
-    '6:12': 1.118, '7:12': 1.158, '8:12': 1.202, '10:12': 1.302, '12:12': 1.414
-  };
-
-  const mainMult = pitchMultipliers[structural_roof_pitch] || 1.118;
-  const porchMult = pitchMultipliers[porch_pitch] || 1.014;
+  // ── PITCH MULTIPLIERS ──
+  const PM = {'2:12':1.014,'3:12':1.031,'4:12':1.054,'5:12':1.083,'6:12':1.118,'7:12':1.158,'8:12':1.202,'10:12':1.302,'12:12':1.414};
+  const pitchMult = PM[pitch] || 1.118;
+  const porchMult = PM[porch_pitch] || 1.014;
   const overhangFt = eave_overhang_in / 12;
 
-  // Calculate actual sloped roof areas
-  const mainFootprint = building_width_ft * building_depth_ft;
-  const mainWithOverhang = mainFootprint + (building_width_ft * overhangFt * 2) + (building_depth_ft * overhangFt * 2);
-  const mainSlopedSF = Math.round(mainWithOverhang * mainMult);
-  const porchWithOverhang = porch_sf + (building_width_ft * overhangFt);
-  const porchSlopedSF = Math.round(porchWithOverhang * porchMult);
-  const totalSlopedSF = mainSlopedSF + porchSlopedSF;
-
-  const totalSlabSF = living_sf + porch_sf;
-  const perimeterLF = (building_width_ft + building_depth_ft) * 2;
-  const netWallSF = (ext_wall_linear_ft * plate_height_ft) * 0.85; // ~15% deducted for openings
-
-  // ─── FOUNDATION ───
-  const slabThicknessFt = slab_thickness_in / 12;
-  const slabCY = Math.ceil((totalSlabSF * slabThicknessFt / 27) * 1.1);
-  const edgeBeamCY = Math.ceil((perimeterLF * 1.0 * 1.5 / 27) * 1.1);
-  const totalConcreteCY = slabCY + edgeBeamCY;
-  const rebarSlabLF = Math.ceil((totalSlabSF / 1.5) * 2 * 1.1);
-  const rebarBeamLF = Math.ceil(perimeterLF * 3 * 1.1);
-  const vaporBarrierSF = Math.ceil(totalSlabSF * 1.15);
-  const gravelCY = Math.ceil(totalSlabSF * (4/12) / 27);
-
-  results.categories.push({
-    name: 'Foundation',
-    color: '#2E4057',
-    items: [
-      { item: 'Concrete — slab + edge beam', description: `Monolithic ${slab_thickness_in}" slab + thickened edge`, qty: totalConcreteCY, unit: 'CY', confidence: 'high' },
-      { item: 'Rebar — slab field', description: '#4 @ 18" OC both directions', qty: rebarSlabLF.toLocaleString(), unit: 'LF', confidence: 'high' },
-      { item: 'Rebar — edge beam', description: '(3) #5 continuous', qty: rebarBeamLF, unit: 'LF', confidence: 'high' },
-      { item: 'Vapor barrier', description: '6 mil poly under slab', qty: vaporBarrierSF.toLocaleString(), unit: 'SF', confidence: 'high' },
-      { item: 'Gravel base', description: '4" compacted sub-base', qty: gravelCY, unit: 'CY', confidence: 'high' },
-    ]
-  });
-
-  // ─── PIECE COUNT HELPERS ───
-  // Plates are always 16' lumber — how many 16' sticks to cover a linear footage
+  // ── HELPERS ──
   function plates16(lf) { return Math.ceil(lf / 16); }
-  // How many pieces of a given standard length cover a linear footage
-  function pieces(lf, stdLen) { return Math.ceil(lf / stdLen); }
-  // Best standard length for a given span (round up to next standard: 8,10,12,14,16,18,20)
-  function bestLength(spanFt) {
-    const stds = [8,10,12,14,16,18,20];
-    return stds.find(l => l >= spanFt + 0.5) || 20;
-  }
-  // Header piece count — headers are doubled, cut from stock
-  function headerPieces(roWidthFt, stockLen) {
-    const headerLen = roWidthFt + 0.5; // 6" bearing total
-    const perStick = Math.floor(stockLen / headerLen);
-    return Math.ceil(2 / perStick); // doubled header = 2 pieces
+  function bestLen(span) { return [8,10,12,14,16,18,20].find(l => l >= span + 0.5) || 20; }
+  function fmtHt(h) { const ft=Math.floor(h),inches=Math.round((h-ft)*12); return inches===0?`${ft}\'-0"`:`${ft}\'-${inches}"`; }
+  function panelLength(runFt) {
+    const exactInches = runFt * 12;
+    const roundedInches = Math.ceil(exactInches);
+    const finalInches = roundedInches + 3;
+    const ft = Math.floor(finalInches / 12);
+    const inches = finalInches % 12;
+    return { ft, inches, totalInches: finalInches, display: inches===0?`${ft}\'-0"`:`${ft}\'-${inches}"`, decimal: finalInches/12 };
   }
 
-  // ─── EXTERIOR WALL FRAMING ───
-  const extWallLF = ext_wall_linear_ft || perimeterLF;
-  const extStudCount = Math.ceil((extWallLF / 1.333) + exterior_corners * 3);
+  // ── DERIVED DIMENSIONS ──
+  const perim = (W + L) * 2;
+  const extLF = ext_wall_linear_ft || perim;
+  const intLF = int_wall_linear_ft || Math.round(living_sf * 0.18);
+  const plumbLF = plumbing_wall_linear_ft || 0;
+  const livSF = living_sf || W * L;
+  const porchWidth = W;
+  const porchDepth = porch_sf > 0 ? Math.round(porch_sf / W) : 0;
 
-  // Plates — always 16' lumber
-  const extTopPlateSticks = Math.ceil(plates16(extWallLF * 2) * 1.05); // double top plate, 5% lap waste
-  const extBotPlateSticks = Math.ceil(plates16(extWallLF) * 1.05);     // single bottom plate
-  const extTopPlateLF = extTopPlateSticks * 16;
-  const extBotPlateLF = extBotPlateSticks * 16;
+  // ── ROOF AREAS ──
+  const mainFlat = (W + overhangFt*2) * (L + overhangFt*2);
+  const mainSloped = Math.round(mainFlat * pitchMult);
+  const porchFlat = porch_sf > 0 ? porch_sf + (W * overhangFt) : 0;
+  const porchSloped = Math.round(porchFlat * porchMult);
+  const totalRoof = mainSloped + porchSloped;
 
-  // OSB sheathing — 4x8 sheets
-  const wallSheathingSheets = Math.ceil((extWallLF * plate_height_ft / 32) * 1.1);
+  // ── DOOR / WINDOW COUNTS ──
+  const dExt = doors.filter(d => d.is_exterior).reduce((a,d) => a + (d.count||1), 0);
+  const dInt = doors.filter(d => !d.is_exterior).reduce((a,d) => a + (d.count||1), 0);
+  const totalDoors = dExt + dInt;
+  const totalWindows = windows.reduce((a,w) => a + (w.count||1), 0);
+  const wStd = totalWindows;
 
-  const houseWrapSF = Math.ceil(extWallLF * plate_height_ft * 1.15);
+  // ── EXT WALL FRAMING ──
+  const extStuds = Math.ceil(extLF * 1.12);
+  const extTopSticks = Math.ceil(plates16(extLF * 2) * 1.05);
+  const extBotSticks = Math.ceil(plates16(extLF) * 1.05);
+  const wallOSBSheets = Math.ceil(extLF * pH / 32 * 1.1);
+  const houseWrapSF = Math.ceil(extLF * pH * 1.15);
+  const extDoorHdrLen = dExt * 3.5;
+  const extDoorHdrStk = bestLen(3.5);
+  const extDoorHdrPcs = Math.ceil(extDoorHdrLen * 2 / extDoorHdrStk * 1.1);
+  const winHdrLen = wStd * 3.5;
+  const winHdrPcs = Math.ceil(winHdrLen * 2 / 10 * 1.1);
 
-  // Headers — calculate piece counts by size
-  const headerItems = {};
-  const headerPieceCounts = {};
-  ;[...doors, ...windows].forEach(item => {
-    const hdr = item.header || '(2) 2x6';
-    const roW = item.rough_opening_width_ft || 3;
-    const len = roW + 0.5;
-    if (!headerItems[hdr]) { headerItems[hdr] = 0; headerPieceCounts[hdr] = { lf:0, pcs:0, size:'', stockLen:0 }; }
-    headerItems[hdr] += len;
-    // Determine stock length and piece count
-    const sizeMatch = hdr.match(/2x(\d+)/);
-    const nomDepth = sizeMatch ? parseInt(sizeMatch[1]) : 6;
-    const stockLen = bestLength(len * 2); // order stock that cuts two headers
-    headerPieceCounts[hdr].lf += len * 2; // doubled header
-    headerPieceCounts[hdr].pcs += Math.ceil((len * 2) / stockLen);
-    headerPieceCounts[hdr].size = `2×${nomDepth}`;
-    headerPieceCounts[hdr].stockLen = stockLen;
-  });
+  results.categories.push({ name: 'EXTERIOR WALL FRAMING — 2×6 @ 16" OC', items: [
+    { item:'Studs — 2×6 precut 104-5/8"', description:`${extLF} LF exterior wall @ 16" OC`, qty:extStuds, unit:'EA', lf:null, confidence:'high' },
+    { item:"Top plate — 2×6 × 16'", description:`Double top plate · ${extTopSticks*16} LF · always 16' sticks`, qty:extTopSticks, unit:"PCS @ 16'", lf:extTopSticks*16, confidence:'high' },
+    { item:"Bottom plate — 2×6 PT × 16'", description:`Single PT sill · ${extBotSticks*16} LF · always 16' sticks`, qty:extBotSticks, unit:"PCS @ 16'", lf:extBotSticks*16, confidence:'high' },
+    { item:'Headers — (2) 2×12 ext. doors', description:`${dExt} ext. door(s) · doubled · ${extDoorHdrStk}' stock`, qty:extDoorHdrPcs, unit:`PCS @ ${extDoorHdrStk}'`, lf:Math.ceil(extDoorHdrLen*2), confidence:'high' },
+    { item:'Headers — (2) 2×10 windows', description:`${totalWindows} window(s) · doubled · 10' stock`, qty:winHdrPcs, unit:"PCS @ 10'", lf:Math.ceil(winHdrLen*2), confidence:'high' },
+    { item:`Wall sheathing — ${sheathing_type} 7/16" 4×8`, description:`${extLF} LF × ${pH}' plate height + 10% waste`, qty:wallOSBSheets, unit:'SHEETS', lf:null, confidence:'high' },
+    ...(sheathing_type==='ZIP'
+      ? [{ item:'ZIP tape', description:'1 roll per 100 LF seams', qty:Math.ceil(extLF/100), unit:'ROLLS', lf:null, confidence:'high' }]
+      : [{ item:'House wrap', description:'Per wall SF + 15% overlap', qty:houseWrapSF.toLocaleString(), unit:'SF', lf:null, confidence:'high' }]),
+  ]});
 
-  const extFramingItems = [
-    {
-      item: 'Studs — 2×6 exterior',
-      description: `104-5/8" precut sticks @ 16" OC · ${extWallLF} LF of wall`,
-      qty: extStudCount,
-      unit: 'EA',
-      lf: null,
-      confidence: 'high'
-    },
-    {
-      item: 'Top plate — 2×6 × 16\'',
-      description: `Double top plate · ${extTopPlateLF} LF total · always order 16' sticks`,
-      qty: extTopPlateSticks,
-      unit: 'PCS @ 16\'',
-      lf: extTopPlateLF,
-      confidence: 'high'
-    },
-    {
-      item: 'Bottom plate — 2×6 PT × 16\'',
-      description: `Single PT sill · ${extBotPlateLF} LF total · always order 16' sticks`,
-      qty: extBotPlateSticks,
-      unit: 'PCS @ 16\'',
-      lf: extBotPlateLF,
-      confidence: 'high'
-    },
+  // ── ROOF FRAMING ──
+  const totalTrusses = Math.ceil(L / 2) + 1;
+  const ridgeLF = Math.ceil(W * 1.1);
+  const fasciaLF = Math.ceil(perim * 1.1);
+
+  // Panel lengths needed for purlin rows
+  const halfSpan = W / 2;
+  const panelRunFt = (halfSpan + overhangFt) * pitchMult;
+  const panel = panelLength(panelRunFt);
+
+  const purlinRowsPerSlope = Math.ceil(panel.decimal / 2);
+  const purlinRowsMain = purlinRowsPerSlope * 2;
+  const purlin12Main = purlinRowsMain * 2;
+  const purlin16Main = purlinRowsMain * Math.ceil(Math.max(0, L - 24) / 16);
+
+  const porchPanelRunFt = porchDepth > 0 ? (porchDepth + overhangFt) * porchMult : 0;
+  const porchPanel = porchDepth > 0 ? panelLength(porchPanelRunFt) : null;
+  const purlinRowsPorch = porchDepth > 0 ? Math.ceil(porchPanel.decimal / 2) : 0;
+  const purlin12Porch = porchDepth > 0 ? purlinRowsPorch * 2 : 0;
+  const purlin16Porch = porchDepth > 0 ? purlinRowsPorch * Math.ceil(Math.max(0, porchWidth - 24) / 16) : 0;
+
+  const roofFramingItems = [
+    { item:'Trusses', description:`24" OC · ${L}' building length — confirm type with engineer`, qty:totalTrusses, unit:'EA', lf:null, confidence:'high' },
+    { item:'Ridge nailer — 2×12 #2 SP', description:`Building width ${W}' + 10%`, qty:Math.ceil(W*1.1/16)+' sticks', unit:"PCS @ 16'", lf:ridgeLF, confidence:'high' },
+    { item:"Purlins — 2×4 × 12' #2 SP", description:`Gable-end rows · 2 per row · ${purlinRowsMain} rows (${purlinRowsPerSlope}/slope)`, qty:purlin12Main, unit:"PCS @ 12'", lf:purlin12Main*12, confidence:'high' },
+    { item:"Purlins — 2×4 × 16' #2 SP", description:`Fill rows · ${purlinRowsMain} rows`, qty:purlin16Main, unit:"PCS @ 16'", lf:purlin16Main*16, confidence:'high' },
+    { item:'Fascia — 2×6 #2 SP', description:'Eave perimeter + 10%', qty:Math.ceil(fasciaLF/16), unit:"PCS @ 16'", lf:fasciaLF, confidence:'high' },
   ];
+  results.categories.push({ name: `ROOF FRAMING — ${pitch} PITCH`, items: roofFramingItems });
 
-  Object.entries(headerPieceCounts).forEach(([hdr, data]) => {
-    extFramingItems.push({
-      item: `Headers — ${hdr}`,
-      description: `Doubled · cut from ${data.stockLen}' stock · ${Math.ceil(data.lf)} LF total`,
-      qty: Math.ceil(data.pcs * 1.1),
-      unit: `PCS @ ${data.stockLen}'`,
-      lf: Math.ceil(data.lf),
-      confidence: 'high'
-    });
-  });
+  // ── INTERIOR WALL FRAMING ──
+  const intStuds = Math.ceil(intLF * 1.12);
+  const plumbStuds = Math.ceil(plumbLF * 1.12);
+  const int2x4TopStks = Math.ceil(plates16(intLF * 2) * 1.05);
+  const int2x4BotStks = Math.ceil(plates16(intLF) * 1.05);
+  const int2x6TopStks = Math.ceil(plates16(plumbLF * 2) * 1.05);
+  const int2x6BotStks = Math.ceil(plates16(plumbLF) * 1.05);
+  const intDoorHdrPcs = Math.ceil(dInt * 2 / Math.floor(8 / 2.84) * 1.05);
 
-  if (sheathing_type === 'ZIP') {
-    extFramingItems.push({ item: 'Wall sheathing — ZIP System 4×8', description: `${extWallLF} LF wall × ${plate_height_ft}' ht + 10% waste`, qty: wallSheathingSheets, unit: 'SHEETS', lf: null, confidence: 'high' });
-    extFramingItems.push({ item: 'ZIP tape', description: '1 roll per 100 LF of seams', qty: Math.ceil(extWallLF / 100), unit: 'ROLLS', lf: null, confidence: 'high' });
-  } else {
-    extFramingItems.push({ item: 'Wall sheathing — OSB 7/16" 4×8', description: `${extWallLF} LF wall × ${plate_height_ft}' ht + 10% waste`, qty: wallSheathingSheets, unit: 'SHEETS', lf: null, confidence: 'high' });
-    extFramingItems.push({ item: 'House wrap', description: 'Per wall SF + 15% overlap', qty: houseWrapSF.toLocaleString(), unit: 'SF', lf: null, confidence: 'high' });
+  results.categories.push({ name: 'INTERIOR WALL FRAMING', items: [
+    { item:'Studs — 2×4 precut 92-5/8"', description:`${intLF} LF interior wall @ 16" OC`, qty:intStuds, unit:'EA', lf:null, confidence:'medium' },
+    { item:"Top plate — 2×4 × 16'", description:`Double top plate · ${int2x4TopStks*16} LF · always 16' sticks`, qty:int2x4TopStks, unit:"PCS @ 16'", lf:int2x4TopStks*16, confidence:'high' },
+    { item:"Bottom plate — 2×4 × 16'", description:`Single bottom plate · ${int2x4BotStks*16} LF · always 16' sticks`, qty:int2x4BotStks, unit:"PCS @ 16'", lf:int2x4BotStks*16, confidence:'high' },
+    { item:"Headers — (2) 2×6 int. doors", description:`${dInt} interior door(s) · cut from 8' stock`, qty:intDoorHdrPcs, unit:"PCS @ 8'", lf:Math.ceil(dInt*2.84*2), confidence:'high' },
+    { item:'Ladder blocking — 2×4', description:'T-intersections throughout', qty:Math.ceil(intLF*0.15), unit:'LF', lf:Math.ceil(intLF*0.15), confidence:'medium' },
+    ...(plumbLF > 0 ? [
+      { item:'Studs — 2×6 plumbing walls', description:`${plumbLF} LF wet walls @ 16" OC`, qty:plumbStuds, unit:'EA', lf:null, confidence:'medium' },
+      { item:"Top plate — 2×6 plumbing × 16'", description:`Double top plate · ${int2x6TopStks*16} LF · 16' sticks`, qty:int2x6TopStks, unit:"PCS @ 16'", lf:int2x6TopStks*16, confidence:'medium' },
+      { item:"Bottom plate — 2×6 plumbing × 16'", description:`Single bottom plate · ${int2x6BotStks*16} LF · 16' sticks`, qty:int2x6BotStks, unit:"PCS @ 16'", lf:int2x6BotStks*16, confidence:'medium' },
+    ] : []),
+  ]});
+
+  // ── PORCH FRAMING ──
+  if (porchDepth > 0) {
+    const isCypress = porch_timber_spec === 'CYP';
+    const rafterSize = isCypress ? '4×6' : '2×6';
+    const rafterSpacingFt = isCypress ? 4 : 2;
+    const postSizeLabel = (post_size || '8x8').replace('x','×') + ' Cypress';
+    const postSpacingFt = 10;
+    const postCount = Math.ceil(porchWidth / postSpacingFt) + 1;
+    const postLF = postCount * pH;
+    const pitchAngle = Math.atan(parseInt(porch_pitch) / 12);
+    const rafterCount = Math.ceil(porchWidth / rafterSpacingFt) + 1;
+    const rafterLengthFt = Math.ceil(porchDepth / Math.cos(pitchAngle) + overhangFt + 0.5);
+    const rafterStockLen = [8,10,12,14,16].find(l => l >= rafterLengthFt) || 16;
+    const headerBeamSize = postSizeLabel.split(' ')[0];
+    const headerBeamPcs = Math.ceil(porchWidth / postSpacingFt) + 1;
+    const headerBeamLF = Math.ceil(porchWidth * 1.05);
+    const porchRidgeLF = Math.ceil(porchWidth * 1.1);
+    const porchRidgePcs = Math.ceil(porchRidgeLF / 16);
+    const flyRafterLen = [8,10,12].find(l => l >= rafterLengthFt) || 12;
+    const porchDeckSlopedDepth = porchDepth / Math.cos(pitchAngle);
+    const porchDeckBoards = Math.ceil((porchWidth / (5.5/12)) * 1.1);
+    const porchDeckLF = Math.ceil(porchDeckSlopedDepth * porchWidth / (5.5/12) * 1.1);
+    const porchDeckBoardLen = [8,10,12,14,16].find(l => l >= Math.ceil(porchDeckSlopedDepth + 0.5)) || 16;
+
+    results.categories.push({ name: `PORCH FRAMING — ${isCypress?'CYPRESS TIMBER':'STD TIMBER'} · ${postSizeLabel} POSTS`, items: [
+      { item:`Posts — ${postSizeLabel}`, description:`${postCount} posts @ ${postSpacingFt}' OC · ${pH}' height`, qty:postCount, unit:'EA', lf:postLF, confidence:'high' },
+      { item:`Rafters — ${rafterSize} ${isCypress?'Cypress':'#2 SYP'}`, description:`${rafterCount} rafters @ ${rafterSpacingFt*12}" OC · ${rafterLengthFt}' length · order ${rafterStockLen}' stock`, qty:rafterCount, unit:`EA @ ${rafterStockLen}'`, lf:rafterCount*rafterStockLen, confidence:'high' },
+      { item:`Header beam — ${headerBeamSize} ${isCypress?'Cypress':'SYP'}`, description:`${headerBeamPcs} pcs · one per bay · ${postSpacingFt}' spacing · order ${postSpacingFt}' stock`, qty:headerBeamPcs, unit:`EA @ ${postSpacingFt}'`, lf:headerBeamLF, confidence:'high' },
+      { item:'Ridge beam — 2×12 #2 SP', description:`Porch ridge · ${porchWidth}' + 10% waste`, qty:porchRidgePcs, unit:"PCS @ 16'", lf:porchRidgeLF, confidence:'high' },
+      { item:'Fly rafters — 2×6 #2 SP', description:`Gable ends · ${flyRafterLen}' stock`, qty:4, unit:`EA @ ${flyRafterLen}'`, lf:4*flyRafterLen, confidence:'high' },
+      { item:'Porch decking — 2×6 T&G #2 SP', description:`${porchDeckBoards} boards × ${porchDeckBoardLen}' stock · sloped depth ${porchDeckSlopedDepth.toFixed(2)}' · 5.5" true width`, qty:porchDeckBoards, unit:`EA @ ${porchDeckBoardLen}'`, lf:porchDeckLF, confidence:'high' },
+      ...(purlin12Porch > 0 ? [{ item:"Purlins — 2×4 × 12' #2 SP · porch", description:`Gable-end rows · ${purlinRowsPorch} rows`, qty:purlin12Porch, unit:"PCS @ 12'", lf:purlin12Porch*12, confidence:'high' }] : []),
+      ...(purlin16Porch > 0 ? [{ item:"Purlins — 2×4 × 16' #2 SP · porch", description:`Fill rows · ${purlinRowsPorch} rows`, qty:purlin16Porch, unit:"PCS @ 16'", lf:purlin16Porch*16, confidence:'high' }] : []),
+    ]});
   }
 
-  results.categories.push({ name: 'Exterior Wall Framing — 2×6 @ 16" OC', color: '#1F4E79', items: extFramingItems });
+  // ── ROOF METAL ──
+  const roofOSBSheets = Math.ceil(totalRoof / 32 * 1.1);
+  const panelsPerSlope = Math.ceil((L + overhangFt*2) / 3);
+  const totalRoofPanels = panelsPerSlope * 2;
+  const panelLengthDisplay = panel.display;
+  const porchPanelsPerSlope = porchDepth > 0 ? Math.ceil((L + overhangFt*2) / 3) : 0;
+  const ridgeCapRunLF = Math.ceil(L + overhangFt*2);
+  const ridgeCapPcs = Math.ceil(ridgeCapRunLF / 10 * 1.1);
+  const rakeTrimLF = Math.ceil(panel.decimal * 2 * 2 * 1.1);
+  const rakeTrimPcs = Math.ceil(rakeTrimLF / 10);
+  const eaveTrimPcs = Math.ceil((L + overhangFt*2) * 2 / 10 * 1.05);
 
-  // ─── INTERIOR WALL FRAMING ───
-  const intWallLF = int_wall_linear_ft || 0;
-  const plumbWallLF = plumbing_wall_linear_ft || 0;
-  const intStudCount = Math.ceil(intWallLF / 1.333);
-  const plumbStudCount = Math.ceil(plumbWallLF / 1.333);
-
-  // Interior plates — always 16' lumber
-  const int2x4TopSticks = Math.ceil(plates16(intWallLF * 2) * 1.05);
-  const int2x4BotSticks = Math.ceil(plates16(intWallLF) * 1.05);
-  const int2x6TopSticks = Math.ceil(plates16(plumbWallLF * 2) * 1.05);
-  const int2x6BotSticks = Math.ceil(plates16(plumbWallLF) * 1.05);
-  const int2x4PlateLF = (int2x4TopSticks + int2x4BotSticks) * 16;
-  const int2x6PlateLF = (int2x6TopSticks + int2x6BotSticks) * 16;
-  const ladderBlockingLF = Math.ceil(int_t_intersections * 3.5) || Math.ceil(intWallLF * 0.15);
-
-  if (plumbWallLF > 0) {
-    results.flags.push({
-      level: 'info',
-      message: `${plumbWallLF} LF of plumbing walls detected. Framed as 2×6 @ 16" OC. Confirm all wet wall locations before ordering.`
-    });
-  }
-
-  results.categories.push({
-    name: 'Interior Wall Framing',
-    color: '#2E5984',
-    items: [
-      { item: 'Studs — 2×4 standard', description: `92-5/8" precut @ 16" OC · ${intWallLF} LF of wall`, qty: intStudCount, unit: 'EA', lf: null, confidence: 'high' },
-      { item: 'Studs — 2×6 plumbing walls', description: `92-5/8" precut @ 16" OC · ${plumbWallLF} LF of wet walls`, qty: plumbStudCount, unit: 'EA', lf: null, confidence: 'medium' },
-      { item: 'Top plate — 2×4 × 16\'', description: `Double top plate · ${int2x4TopSticks*16} LF · always 16' sticks`, qty: int2x4TopSticks, unit: 'PCS @ 16\'', lf: int2x4TopSticks*16, confidence: 'high' },
-      { item: 'Bottom plate — 2×4 × 16\'', description: `Single bottom plate · ${int2x4BotSticks*16} LF · always 16' sticks`, qty: int2x4BotSticks, unit: 'PCS @ 16\'', lf: int2x4BotSticks*16, confidence: 'high' },
-      ...(plumbWallLF > 0 ? [
-        { item: 'Top plate — 2×6 plumbing × 16\'', description: `Double top plate · ${int2x6TopSticks*16} LF · always 16' sticks`, qty: int2x6TopSticks, unit: 'PCS @ 16\'', lf: int2x6TopSticks*16, confidence: 'medium' },
-        { item: 'Bottom plate — 2×6 plumbing × 16\'', description: `Single bottom plate · ${int2x6BotSticks*16} LF · always 16' sticks`, qty: int2x6BotSticks, unit: 'PCS @ 16\'', lf: int2x6BotSticks*16, confidence: 'medium' },
-      ] : []),
-      { item: 'Ladder blocking — 2×4', description: 'Flat at T-intersections', qty: ladderBlockingLF, unit: 'LF', lf: ladderBlockingLF, confidence: 'medium' },
-    ]
-  });
-
-  // ─── ROOF FRAMING ───
-  const roofFramingItems = [];
-  const buildingLen = building_depth_ft || building_width_ft || 40;
-  const buildingSpan = building_width_ft || building_depth_ft || 56;
-
-  if (trusses && trusses.length > 0) {
-    trusses.forEach(t => {
-      const qty = t.count || Math.ceil(buildingLen / 2) + 1;
-      roofFramingItems.push({ item: `${t.type} (${t.mark})`, description: t.description || '24" OC spacing', qty, unit: 'EA', confidence: 'high' });
-    });
-  } else {
-    // Calculate from building length — one truss every 2ft at 24" OC
-    const totalTrusses = Math.ceil(buildingLen / 2) + 1;
-    roofFramingItems.push({ item: 'Trusses', description: `24" OC · ${buildingLen}' building length · confirm type`, qty: totalTrusses, unit: 'EA', confidence: 'medium' });
-  }
-
-  if (rough_timber.length > 0) {
-    rough_timber.forEach(r => {
-      roofFramingItems.push({ item: `Rough timber ${r.size} (${r.mark})`, description: r.description || 'Per framing schedule', qty: r.count, unit: 'EA', confidence: 'high' });
-    });
-  }
-
-  const ridgeNailerLF = Math.ceil(building_width_ft * 1.1);
-  const purlinLF = Math.ceil((mainSlopedSF / 2) * 1.1);
-  const porchDeckLF = Math.ceil((porch_sf / 0.833) * 1.1);
-  const fasciaLF = Math.ceil(perimeterLF * 1.1);
-
-  roofFramingItems.push(
-    { item: 'Ridge nailer — 2×12 #2 SP', description: 'Building length + 10% waste', qty: ridgeNailerLF, unit: 'LF', confidence: 'high' },
-    { item: 'Purlins — 2×4 #2 SP', description: '@ 24" OC on truss top chords', qty: purlinLF.toLocaleString(), unit: 'LF', confidence: 'high' },
-    { item: 'Porch decking — 2×6 T&G', description: 'Solid decking + 10% waste', qty: porchDeckLF, unit: 'LF', confidence: 'high' },
-    { item: 'Fascia — 2×6 #2 SP', description: 'Eave perimeter + 10%', qty: fasciaLF, unit: 'LF', confidence: 'high' }
-  );
-
-  results.categories.push({ name: 'Roof Framing', color: '#4A2040', items: roofFramingItems });
-
-  // ─── ROOF SHEATHING + COVERING ───
-  const roofSheathSheets = Math.ceil((totalSlopedSF / 32) * 1.1);
-  const metalRoofingLF = Math.ceil((totalSlopedSF / 3) * 1.1);
-  const ridgeCapLF = Math.ceil(building_width_ft * 1.1);
-  const eavesTrimLF = Math.ceil(perimeterLF * 1.1);
-
-  const roofCoverItems = [
-    { item: `Roof sheathing — ${sheathing_type === 'ZIP' ? 'ZIP System' : 'OSB 7/16"'}`, description: `${totalSlopedSF.toLocaleString()} SF sloped + 10% waste`, qty: roofSheathSheets, unit: 'SHEETS', confidence: 'high' },
+  const roofMetalItems = [
+    { item:`Roof sheathing — ${sheathing_type} 7/16" 4×8`, description:`${totalRoof.toLocaleString()} SF sloped area + 10%`, qty:roofOSBSheets, unit:'SHEETS', lf:null, confidence:'high' },
+    ...(sheathing_type==='ZIP'
+      ? [{ item:'ZIP tape — roof', description:'Seam sealing', qty:Math.ceil(totalRoof/100), unit:'ROLLS', lf:null, confidence:'high' }]
+      : [{ item:'Underlayment — synthetic', description:'Full sloped area', qty:totalRoof.toLocaleString(), unit:'SF', lf:null, confidence:'high' }]),
+    { item:`Main roof panels — ${panelLengthDisplay} each`, description:`(${W/2}' half-span + ${overhangFt.toFixed(2)}' OH) × ${pitch} = ${panel.totalInches}" = ${panelLengthDisplay} · ${panelsPerSlope}/slope`, qty:totalRoofPanels, unit:`PCS @ ${panelLengthDisplay}`, lf:Math.round(totalRoofPanels*panel.decimal), confidence:'high' },
+    ...(porchDepth > 0 && porchPanel ? [{ item:`Porch panels — ${porchPanel.display} each`, description:`(${porchDepth}' depth + ${overhangFt.toFixed(2)}' OH) × ${porch_pitch} · ${porchPanelsPerSlope} panels`, qty:porchPanelsPerSlope, unit:`PCS @ ${porchPanel.display}`, lf:Math.round(porchPanelsPerSlope*porchPanel.decimal), confidence:'high' }] : []),
+    { item:"Ridge cap — 10' sticks", description:`${ridgeCapRunLF}' run · 10% overlap`, qty:ridgeCapPcs, unit:"PCS @ 10'", lf:ridgeCapPcs*10, confidence:'high' },
+    { item:'Rake trim — both gable ends', description:`${panelLengthDisplay} × 2 slopes × 2 ends + 10%`, qty:rakeTrimPcs, unit:"PCS @ 10'", lf:rakeTrimPcs*10, confidence:'high' },
+    { item:'Eave trim / drip edge', description:`(${L}' + OH each end) × 2 slopes`, qty:eaveTrimPcs, unit:"PCS @ 10'", lf:eaveTrimPcs*10, confidence:'high' },
   ];
+  results.categories.push({ name: `ROOF METAL — ${roofing_type} · Tuff-Rib 3' Coverage`, items: roofMetalItems });
 
-  if (sheathing_type !== 'ZIP') {
-    roofCoverItems.push({ item: 'Underlayment — synthetic', description: 'Full roof area', qty: totalSlopedSF.toLocaleString(), unit: 'SF', confidence: 'high' });
-  } else {
-    roofCoverItems.push({ item: 'ZIP tape — roof', description: 'Seam sealing', qty: Math.ceil(totalSlopedSF / 100), unit: 'ROLLS', confidence: 'high' });
+  // ── WALL METAL ──
+  const gableFirstOffset = {'4:12':2.0,'6:12':2.5,'8:12':3.0,'10:12':4.0}[pitch] || 2.5;
+  const pitchNum = parseInt(pitch.split(':')[0]);
+  const gableStep = (pitchNum / 12) * 3;
+  const eaveWallLongCount = Math.ceil(L / 3);
+  const eaveWallLongPanelH = pH;
+  const gablePanelsPerHalf = Math.ceil((W / 2) / 3);
+  const gableSchedule = [];
+  for (let i = 0; i < gablePanelsPerHalf; i++) {
+    const heightFt = pH + gableFirstOffset + (gableStep * i);
+    const totalInches = Math.ceil(heightFt * 12);
+    const ft = Math.floor(totalInches / 12);
+    const inches = totalInches % 12;
+    const display = inches===0?`${ft}\'-0"`:`${ft}\'-${inches}"`;
+    gableSchedule.push({ heightFt, totalInches, display, qty: 4 });
   }
+  const cornerTrimLF = Math.ceil(4 * pH * 1.1);
+  const cornerTrimPcs = Math.ceil(cornerTrimLF / 10);
+  const soffitPanelIn = eave_overhang_in + 1;
+  const soffitPanelFt = Math.floor(soffitPanelIn / 12);
+  const soffitPanelRem = soffitPanelIn % 12;
+  const soffitPanelDisplay = soffitPanelRem===0?`${soffitPanelFt}\'-0"`:`${soffitPanelFt}\'-${soffitPanelRem}"`;
+  const soffitPanelDecimal = soffitPanelIn / 12;
+  const eaveSoffitCount = Math.ceil((L + overhangFt*2) / 3) * 2;
+  const eaveSoffitLF = Math.round(eaveSoffitCount * soffitPanelDecimal);
+  const gableSoffitPerHalf = Math.ceil(panel.decimal / 3);
+  const gableSoffitCount = gableSoffitPerHalf * 4;
+  const gableSoffitLF = Math.round(gableSoffitCount * soffitPanelDecimal);
+  const porchSoffitCount = (porchDepth > 0 && porchPanel) ? Math.ceil(porchPanel.decimal / 3) * porchPanelsPerSlope : 0;
+  const porchSoffitLF = Math.round(porchSoffitCount * soffitPanelDecimal);
 
-  roofCoverItems.push(
-    { item: `Metal roofing — ${roofing_type}`, description: '3\' coverage panels + 10% waste', qty: metalRoofingLF.toLocaleString(), unit: 'LF', confidence: 'high' },
-    { item: 'Ridge cap — metal', description: 'Main ridge + 10%', qty: ridgeCapLF, unit: 'LF', confidence: 'high' },
-    { item: 'Eave trim / drip edge', description: 'Eave perimeter + 10%', qty: eavesTrimLF, unit: 'LF', confidence: 'high' }
-  );
+  const wallMetalItems = [
+    { item:`Eave wall panels — ${fmtHt(eaveWallLongPanelH)}`, description:`Front & back walls · ${L}' ÷ 3 = ${eaveWallLongCount} panels × 2 sides`, qty:eaveWallLongCount*2, unit:`PCS @ ${fmtHt(eaveWallLongPanelH)}`, lf:Math.round(eaveWallLongCount*2*eaveWallLongPanelH), confidence:'high' },
+    ...gableSchedule.map((p,i) => ({
+      item:`Gable panel ${i+1} of ${gablePanelsPerHalf} — ${p.display}`,
+      description:`${i===0?`Eave ${pH}' + ${gableFirstOffset}' offset`:`Panel ${i} + ${gableStep.toFixed(2)}' step`} · 4 pcs (2 per half × 2 ends)`,
+      qty:p.qty, unit:`PCS @ ${p.display}`, lf:Math.round(p.qty*(p.totalInches/12)), confidence:'high'
+    })),
+    { item:'Corner trim', description:`4 corners × ${pH}' eave height + 10%`, qty:cornerTrimPcs, unit:"PCS @ 10'", lf:cornerTrimPcs*10, confidence:'high' },
+    { item:`Soffit panels — ${soffitPanelDisplay} · eave walls`, description:`(${L}' + OH each end) ÷ 3 × 2 eave sides`, qty:eaveSoffitCount, unit:`PCS @ ${soffitPanelDisplay}`, lf:eaveSoffitLF, confidence:'high' },
+    { item:`Soffit panels — ${soffitPanelDisplay} · gable ends`, description:`Roof panel ${panelLengthDisplay} ÷ 3 = ${gableSoffitPerHalf}/half × 4`, qty:gableSoffitCount, unit:`PCS @ ${soffitPanelDisplay}`, lf:gableSoffitLF, confidence:'high' },
+    ...(porchDepth > 0 && porchPanel ? [{ item:`Soffit panels — ${soffitPanelDisplay} · porch`, description:`Porch panel ÷ 3 × ${porchPanelsPerSlope} panels`, qty:porchSoffitCount, unit:`PCS @ ${soffitPanelDisplay}`, lf:porchSoffitLF, confidence:'high' }] : []),
+  ];
+  results.categories.push({ name: "WALL METAL — Tuff-Rib 3' Coverage", items: wallMetalItems });
 
-  results.categories.push({ name: 'Roof Sheathing + Covering', color: '#3A2010', items: roofCoverItems });
-
-  // ─── EXTERIOR SIDING + FINISHES ───
-  const sidingLF = Math.ceil((netWallSF / 3) * 1.1);
-  const soffitSF = Math.ceil(perimeterLF * overhangFt);
-  const cornerTrimLF = Math.ceil(exterior_corners * plate_height_ft * 1.1);
-  const openingTrimLF = Math.ceil([...doors, ...windows].reduce((acc, o) => {
-    const w = o.rough_opening_width_ft || 3;
-    const h = o.rough_opening_height_ft || 6.67;
-    return acc + (w + h) * 2;
-  }, 0) * 1.1);
-
-  results.categories.push({
-    name: 'Exterior Siding + Finishes',
-    color: '#1A4030',
-    items: [
-      { item: 'Metal siding — Tuff-Rib 29ga', description: '3\' panels, net wall area + 10%', qty: sidingLF.toLocaleString(), unit: 'LF', confidence: 'high' },
-      { item: 'Metal soffit', description: 'Panel match — eave coverage', qty: soffitSF, unit: 'SF', confidence: 'medium' },
-      { item: 'Corner trim', description: 'All exterior corners', qty: cornerTrimLF, unit: 'LF', confidence: 'high' },
-      { item: 'Window / door trim', description: 'All opening perimeters', qty: openingTrimLF || 'Per schedule', unit: 'LF', confidence: 'high' },
-    ]
-  });
-
-  // ─── INSULATION ───
-  const wallFoamBF = Math.ceil(netWallSF * 5.5 * 1.1);
-  const roofFoamBF = Math.ceil(totalSlopedSF * 13.2 * 1.1);
-
-  results.categories.push({
-    name: 'Insulation — Open-Cell Spray Foam',
-    color: '#1A3A2A',
-    items: [
-      { item: 'Spray foam — walls', description: 'Open-cell, 2×6 full cavity, R-20', qty: wallFoamBF.toLocaleString(), unit: 'BF', confidence: 'high' },
-      { item: 'Spray foam — roof', description: 'Open-cell, R-49 @ 13.2" depth', qty: roofFoamBF.toLocaleString(), unit: 'BF', confidence: 'high' },
-    ]
-  });
-
-  // SUMMARY
+  // ── SUMMARY ──
   results.summary = {
-    living_sf,
+    living_sf: livSF,
     porch_sf,
-    total_slab_sf: totalSlabSF,
-    main_sloped_sf: mainSlopedSF,
-    porch_sloped_sf: porchSlopedSF,
-    total_sloped_sf: totalSlopedSF,
-    building_dimensions: `${building_width_ft}' × ${building_depth_ft}'`,
-    plate_height: `${plate_height_ft}'-0"`,
-    structural_roof_pitch,
+    total_slab_sf: livSF + porch_sf,
+    main_sloped_sf: mainSloped,
+    porch_sloped_sf: porchSloped,
+    total_sloped_sf: totalRoof,
+    building_dimensions: `${W}' × ${L}'`,
+    plate_height: `${pH}'-0"`,
+    structural_roof_pitch: pitch,
     porch_pitch,
-    total_doors: doors.length,
-    total_windows: windows.length,
-    total_glazing_sf: windows.reduce((a, w) => a + (w.area_sf || 0), 0),
+    total_doors: totalDoors,
+    total_windows: totalWindows,
+    total_glazing_sf: windows.reduce((a,w) => a+(w.area_sf||0), 0),
     sheathing_type,
-    foundation_type
+    foundation_type: 'monolithic_slab'
   };
 
   return results;
 }
-
 // ─────────────────────────────────────────────
 // EXTRACTION PROMPT
 // ─────────────────────────────────────────────
