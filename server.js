@@ -76,23 +76,36 @@ function runRulesEngine(extracted) {
   const {
     living_sf = 0,
     porch_sf = 0,
+    porch_width_ft = 0,
+    porch_depth_ft = 0,
     building_width_ft: W = 0,
     building_depth_ft: L = 0,
     plate_height_ft: pH = 9,
     structural_roof_pitch: pitch = '6:12',
     ceiling_pitch = null,
     porch_pitch = '2:12',
+    eave_overhang_in = 16,
     ext_wall_linear_ft = 0,
     int_wall_linear_ft = 0,
     plumbing_wall_linear_ft = 0,
+    blocking_lf = 0,
+    int_t_intersections = 0,
     doors = [],
     windows = [],
     trusses = [],
     sheathing_type = 'OSB',
     roofing_type = 'Tuff-Rib 29ga',
-    eave_overhang_in = 16,
     post_size = '8x8',
-    porch_timber_spec = 'STD'
+    post_spacing_ft = 10,
+    porch_timber_spec = 'STD',
+    wainscot_type = null,
+    wainscot_height_ft = 0,
+    wainscot_walls = null,
+    has_gable_popup = false,
+    gable_popup_width_ft = null,
+    gable_popup_pitch = null,
+    foundation_type = 'monolithic_slab',
+    slab_thickness_in = 4
   } = extracted;
 
   if (ceiling_pitch && ceiling_pitch !== pitch) {
@@ -124,16 +137,21 @@ function runRulesEngine(extracted) {
   // ── DERIVED DIMENSIONS ──
   const perim = (W + L) * 2;
   const extLF = ext_wall_linear_ft || perim;
-  const intLF = int_wall_linear_ft || Math.round(living_sf * 0.18);
+  const intLF = int_wall_linear_ft || Math.round(living_sf * 0.22);
   const plumbLF = plumbing_wall_linear_ft || 0;
+  const blockingLF = blocking_lf || (int_t_intersections > 0 ? int_t_intersections * 3 : Math.ceil(intLF * 0.2));
   const livSF = living_sf || W * L;
-  const porchWidth = W;
-  const porchDepth = porch_sf > 0 ? Math.round(porch_sf / W) : 0;
+
+  // Use extracted porch dimensions if available, otherwise infer from porch_sf
+  const porchWidth = porch_width_ft || W;
+  const porchDepth = porch_depth_ft || (porch_sf > 0 ? Math.round(porch_sf / (porch_width_ft || W)) : 0);
+  const porchSF = porch_sf || (porchWidth * porchDepth);
+  const postSpacingFt = post_spacing_ft || 10;
 
   // ── ROOF AREAS ──
   const mainFlat = (W + overhangFt*2) * (L + overhangFt*2);
   const mainSloped = Math.round(mainFlat * pitchMult);
-  const porchFlat = porch_sf > 0 ? porch_sf + (W * overhangFt) : 0;
+  const porchFlat = porchSF > 0 ? porchSF + (porchWidth * overhangFt) : 0;
   const porchSloped = Math.round(porchFlat * porchMult);
   const totalRoof = mainSloped + porchSloped;
 
@@ -212,7 +230,7 @@ function runRulesEngine(extracted) {
     { item:"Top plate — 2×4 × 16'", description:`Double top plate · ${int2x4TopStks*16} LF · always 16' sticks`, qty:int2x4TopStks, unit:"PCS @ 16'", lf:int2x4TopStks*16, confidence:'high' },
     { item:"Bottom plate — 2×4 × 16'", description:`Single bottom plate · ${int2x4BotStks*16} LF · always 16' sticks`, qty:int2x4BotStks, unit:"PCS @ 16'", lf:int2x4BotStks*16, confidence:'high' },
     { item:"Headers — (2) 2×6 int. doors", description:`${dInt} interior door(s) · cut from 8' stock`, qty:intDoorHdrPcs, unit:"PCS @ 8'", lf:Math.ceil(dInt*2.84*2), confidence:'high' },
-    { item:'Ladder blocking — 2×4', description:'T-intersections throughout', qty:Math.ceil(intLF*0.15), unit:'LF', lf:Math.ceil(intLF*0.15), confidence:'medium' },
+    { item:'Ladder blocking — 2×4', description:'T-intersections throughout', qty:blockingLF, unit:'LF', lf:blockingLF, confidence:'medium' },
     ...(plumbLF > 0 ? [
       { item:'Studs — 2×6 plumbing walls', description:`${plumbLF} LF wet walls @ 16" OC`, qty:plumbStuds, unit:'EA', lf:null, confidence:'medium' },
       { item:"Top plate — 2×6 plumbing × 16'", description:`Double top plate · ${int2x6TopStks*16} LF · 16' sticks`, qty:int2x6TopStks, unit:"PCS @ 16'", lf:int2x6TopStks*16, confidence:'medium' },
@@ -226,7 +244,6 @@ function runRulesEngine(extracted) {
     const rafterSize = isCypress ? '4×6' : '2×6';
     const rafterSpacingFt = isCypress ? 4 : 2;
     const postSizeLabel = (post_size || '8x8').replace('x','×') + ' Cypress';
-    const postSpacingFt = 10;
     const postCount = Math.ceil(porchWidth / postSpacingFt) + 1;
     const postLF = postCount * pH;
     const pitchAngle = Math.atan(parseInt(porch_pitch) / 12);
@@ -329,8 +346,8 @@ function runRulesEngine(extracted) {
   // ── SUMMARY ──
   results.summary = {
     living_sf: livSF,
-    porch_sf,
-    total_slab_sf: livSF + porch_sf,
+    porch_sf: porchSF,
+    total_slab_sf: livSF + porchSF,
     main_sloped_sf: mainSloped,
     porch_sloped_sf: porchSloped,
     total_sloped_sf: totalRoof,
@@ -338,11 +355,17 @@ function runRulesEngine(extracted) {
     plate_height: `${pH}'-0"`,
     structural_roof_pitch: pitch,
     porch_pitch,
+    ext_wall_lf: extLF,
+    int_wall_lf: intLF,
+    plumb_wall_lf: plumbLF,
+    blocking_lf: blockingLF,
     total_doors: totalDoors,
     total_windows: totalWindows,
     total_glazing_sf: windows.reduce((a,w) => a+(w.area_sf||0), 0),
     sheathing_type,
-    foundation_type: 'monolithic_slab'
+    foundation_type,
+    wainscot_type: wainscot_type || 'none',
+    has_gable_popup
   };
 
   return results;
@@ -351,86 +374,225 @@ function runRulesEngine(extracted) {
 // EXTRACTION PROMPT
 // ─────────────────────────────────────────────
 
-const EXTRACTION_PROMPT = `You are an expert at reading architectural and structural drawings for residential construction. Analyze this floor plan and return ONLY a valid JSON object with no other text, markdown, or explanation.
+const EXTRACTION_PROMPT = `You are a licensed general contractor and expert construction estimator. You are reading a residential plan set to produce a complete material takeoff. You will receive one or more pages — floor plan, elevations, framing plans, roof plan, sections, schedules, and notes. Read EVERY page thoroughly before responding.
 
-Extract every value you can find. Use null for fields you cannot read. Be precise with numbers.
+Return ONLY a valid JSON object. No markdown, no explanation, no text outside the JSON.
 
-Return this exact JSON structure:
+═══════════════════════════════════════════
+STEP 1 — IDENTIFY EVERY PAGE YOU CAN SEE
+═══════════════════════════════════════════
+Before extracting, note which sheets are present: floor plan, foundation plan, roof framing plan, truss layout, front/rear/side elevations, wall sections, door schedule, window schedule, finish schedule, general notes. Read all of them.
+
+═══════════════════════════════════════════
+STEP 2 — SQUARE FOOTAGE (read directly, do not calculate unless no callout exists)
+═══════════════════════════════════════════
+- living_sf: Look in the title block, general notes, or room schedule for a labeled "LIVING AREA", "CONDITIONED SPACE", "HEATED AREA", or "TOTAL LIVING SF" callout. Use that number exactly. If not labeled, sum individual room SF callouts shown inside each room. Only use width × depth as absolute last resort. NEVER include porch, garage, or utility areas in this number.
+- porch_sf: Look for "FRONT PORCH", "REAR PORCH", "COVERED PORCH", or "PORCH" with an SF label or dimensions. Calculate as porch_width × porch_depth from dimension strings. If multiple porches exist, sum them. Never include in living_sf.
+- garage_sf: Look for "GARAGE" label with SF or dimensions. Calculate if needed. Set to 0 if no garage.
+- total_conditioned_sf: living_sf only — never include porch or garage.
+
+═══════════════════════════════════════════
+STEP 3 — BUILDING DIMENSIONS (read from exterior dimension strings)
+═══════════════════════════════════════════
+- building_width_ft: The overall outside-to-outside horizontal dimension of the main building footprint. Read the largest continuous horizontal dimension string on the floor plan exterior. Do NOT include porch.
+- building_depth_ft: The overall outside-to-outside vertical dimension. Read the largest continuous vertical dimension string. Do NOT include porch.
+- plate_height_ft: Look on elevations for "WALL HEIGHT", "PLATE HT", or "TOP OF PLATE" dimension. Also check general notes or sections. Typically 8, 9, 10, or 12 feet.
+- ridge_height_ft: Read from elevation — "RIDGE HEIGHT" dimension if shown.
+- porch_width_ft: Read the dimension string along the porch face (parallel to house front). Usually equals building_width_ft but may be less.
+- porch_depth_ft: Read the dimension string showing porch depth (perpendicular to house). Typically 8-12 feet.
+
+═══════════════════════════════════════════
+STEP 4 — WALL LINEAR FOOTAGE (trace every wall — do not estimate)
+═══════════════════════════════════════════
+- ext_wall_linear_ft: Trace the entire exterior perimeter of the main building on the floor plan. Sum every exterior dimension string. For a simple rectangle this equals (width + depth) × 2. For L-shape or complex footprint, sum all exterior wall segments. Include garage walls if attached.
+- int_wall_linear_ft: Trace EVERY interior wall line visible on the floor plan. Sum the length of every wall segment: bedroom walls, bathroom walls, hallway walls, closet walls, kitchen walls, utility room walls, all partition walls. Read dimension strings where shown. Where dimensions are not shown, scale from nearby dimensioned walls. A 1,500 SF house typically has 280-380 LF of interior walls. A 2,000 SF house typically has 360-480 LF. A 2,500 SF house typically has 440-580 LF. If your sum is far outside these ranges, recount.
+- plumbing_wall_linear_ft: Identify every wall adjacent to plumbing fixtures: all bathroom walls containing or backing toilet/tub/shower/sink, kitchen wet wall, laundry room walls, water heater closet. These must be framed as 2×6. Sum their lengths separately.
+- ext_wall_net_sf: ext_wall_linear_ft × plate_height_ft × 0.85 (15% deduct for openings). Calculate this yourself from those two values.
+
+═══════════════════════════════════════════
+STEP 5 — INTERIOR WALL DETAILS
+═══════════════════════════════════════════
+- int_t_intersections: Count every place where an interior wall meets another wall at a T (not a corner). Count carefully on the floor plan. Typically 12-30 for a standard home.
+- int_corner_count: Count every interior corner (L-intersection of two interior walls).
+- blocking_lf: int_t_intersections × 3 LF per intersection. If blocking is explicitly called out in notes or sections, use that value instead.
+- double_top_plate_lf: ext_wall_linear_ft × 2 (double top plate on all exterior walls) + int_wall_linear_ft × 2.
+
+═══════════════════════════════════════════
+STEP 6 — ROOF SYSTEM (read from roof framing plan and elevations)
+═══════════════════════════════════════════
+- structural_roof_pitch: Read from the roof framing plan or elevation — look for the pitch triangle symbol (rise over run). This is the STRUCTURAL pitch of the main roof. Never use a ceiling vault note for this field. Format as "X:12".
+- ceiling_pitch: If the floor plan shows a "VAULT", "CATHEDRAL", or "X:12 PITCH VAULT" ceiling note in any room, record that pitch here. Set to null if no vault or same as structural.
+- porch_pitch: Read porch roof pitch from elevations or porch framing plan. Typically 2:12, 3:12, or 4:12. Format as "X:12".
+- eave_overhang_in: Read from elevation or roof framing plan — the horizontal overhang distance in inches. Look for dimension from face of wall to fascia. Typically 12, 16, or 24 inches.
+- roof_type: "gable", "hip", "shed", or "combination". Read from roof plan or elevation.
+- has_gable_popup: true if a gable dormer or pop-out is shown on the porch or main roof, false otherwise.
+- gable_popup_width_ft: Width of gable pop-out if present. Read from framing plan or elevation.
+- gable_popup_pitch: Pitch of gable pop-out if present. Typically 8:12 or steeper.
+
+═══════════════════════════════════════════
+STEP 7 — PORCH FRAMING (read from porch framing plan, elevations, and notes)
+═══════════════════════════════════════════
+- post_size: Read from porch framing notes or elevation callouts. Look for "6×6 ROUGH TIMBER", "8×8 CYPRESS", "10×10 POST", etc. Default "8x8" if not found.
+- post_spacing_ft: Read post spacing from porch plan dimension strings or elevation. Typically 8, 10, or 12 feet.
+- porch_timber_spec: "CYP" if cypress is specified anywhere in porch notes, "STD" otherwise.
+- porch_rafter_size: Read rafter size from porch framing notes. Look for "2×6", "4×6", "2×8" with "RAFTER" or "TIMBER" label.
+- porch_rafter_spacing_in: Read OC spacing for porch rafters. Typically 24" or 48".
+- header_beam_size: Read header/beam size at top of posts from porch framing notes. Look for "4×8", "4×10", "4×12" beam callout.
+
+═══════════════════════════════════════════
+STEP 8 — DOORS (read door schedule and floor plan symbols)
+═══════════════════════════════════════════
+If a door schedule is present, read every line. If not, count symbols on floor plan.
+For each door type, record:
+- mark: Door mark/tag (D01, D02, etc.)
+- count: How many of this type
+- rough_opening_width_ft: RO width in feet (e.g., 3'-2" = 3.17)
+- rough_opening_height_ft: RO height in feet (e.g., 6'-10" = 6.83)
+- description: Door type description from schedule
+- header: Header size callout if shown (e.g., "(2) 2×12")
+- is_exterior: true if exterior door, false if interior
+- is_double: true if double door or french doors
+
+═══════════════════════════════════════════
+STEP 9 — WINDOWS (read window schedule and floor plan symbols)
+═══════════════════════════════════════════
+For each window type:
+- mark: Window mark (W01, W02, etc.)
+- count: How many of this type
+- rough_opening_width_ft: RO width in feet
+- rough_opening_height_ft: RO height in feet
+- description: Window type from schedule
+- header: Header size if shown
+- area_sf: rough_opening_width_ft × rough_opening_height_ft (calculate)
+- is_egress: true if bedroom or egress window
+
+═══════════════════════════════════════════
+STEP 10 — TRUSSES (read truss schedule or framing plan)
+═══════════════════════════════════════════
+For each truss type:
+- mark: Truss mark
+- type: Truss type (gable, flat bottom, scissor, hip, valley, etc.)
+- count: Quantity
+- spacing_in: OC spacing (typically 24)
+- span_ft: Truss span if shown
+- description: Any additional notes
+
+═══════════════════════════════════════════
+STEP 11 — ROUGH TIMBER (read from framing schedules and elevation callouts)
+═══════════════════════════════════════════
+For each timber member:
+- mark: Reference mark (R1, R2, etc.)
+- size: Actual size (4×6, 6×6, 8×8, 2×12, LVL, etc.)
+- count: Quantity
+- length_ft: Length if shown
+- description: Location and purpose (porch rafter, ridge beam, valley, king post, strut, etc.)
+
+═══════════════════════════════════════════
+STEP 12 — FOUNDATION (read from foundation plan and sections)
+═══════════════════════════════════════════
+- foundation_type: "monolithic_slab", "stem_wall", or "pier_beam"
+- slab_thickness_in: Read from sections or foundation notes. Typically 4, 5, or 6 inches.
+- thickened_edge_depth_in: Read from foundation section. Typically 12-18 inches.
+- rebar_slab: Rebar spec for slab field if shown (e.g., "#4 @ 18 OC")
+- rebar_beam: Rebar spec for edge beam if shown (e.g., "(3) #5 continuous")
+- vapor_barrier: true if called out, false if not mentioned.
+- gravel_base_in: Gravel sub-base thickness in inches if specified.
+
+═══════════════════════════════════════════
+STEP 13 — MATERIALS AND SPECS (read from general notes, wall sections, material schedule)
+═══════════════════════════════════════════
+- sheathing_type: Look for "OSB", "ZIP System", "ZIP", "oriented strand board" in wall sections or notes. Default "OSB".
+- roofing_type: Look for roofing material callout. Default "Tuff-Rib 29ga".
+- insulation_walls: Wall insulation spec if shown (e.g., "R-20 open cell spray foam", "R-21 batt").
+- insulation_roof: Roof insulation spec if shown (e.g., "R-49 open cell spray foam").
+- wainscot_type: "stone", "brick", "metal", or null. Look for wainscot callout on elevations.
+- wainscot_height_ft: Wainscot height in feet if shown. Typically 3 or 4 feet.
+- wainscot_walls: Which walls have wainscot — "front", "rear", "left", "right", or "all".
+- exterior_finish: Primary exterior wall finish (metal panel, hardie, vinyl, etc.).
+
+═══════════════════════════════════════════
+STEP 14 — ROOMS AND SPACES (read room labels and dimensions from floor plan)
+═══════════════════════════════════════════
+List every labeled room with its dimensions if shown:
+- rooms: array of { name, width_ft, depth_ft, sf } for each room
+
+═══════════════════════════════════════════
+STEP 15 — FLAGS AND NOTES
+═══════════════════════════════════════════
+- notes: Array of strings for anything that needs field verification, any discrepancies found between sheets, any items that were estimated rather than read directly, and any special conditions noted on the drawings.
+
+═══════════════════════════════════════════
+JSON OUTPUT — return this complete structure:
+═══════════════════════════════════════════
 {
-  "project_name": "string or null",
-  "sheet_info": "string or null",
-  "living_sf": number,
-  "porch_sf": number,
-  "building_width_ft": number,
-  "building_depth_ft": number,
-  "plate_height_ft": number,
-  "structural_roof_pitch": "X:12 string",
-  "ceiling_pitch": "X:12 string or null if same as structural",
-  "porch_pitch": "X:12 string or null",
-  "ext_wall_linear_ft": number,
-  "int_wall_linear_ft": number,
-  "plumbing_wall_linear_ft": number,
-  "exterior_corners": number,
-  "int_t_intersections": number,
-  "doors": [
-    {
-      "mark": "D01",
-      "count": 1,
-      "width_ft": 3.0,
-      "height_ft": 6.67,
-      "rough_opening_width_ft": 3.0,
-      "rough_opening_height_ft": 6.67,
-      "description": "Ext door",
-      "header": "(2) 2x12",
-      "is_exterior": true
-    }
-  ],
-  "windows": [
-    {
-      "mark": "W01",
-      "count": 1,
-      "width_ft": 3.0,
-      "height_ft": 5.5,
-      "rough_opening_width_ft": 3.0,
-      "rough_opening_height_ft": 5.5,
-      "description": "Single hung",
-      "header": "(2) 2x10",
-      "area_sf": 16.5
-    }
-  ],
-  "trusses": [
-    {
-      "mark": "T1",
-      "type": "Flat bottom truss",
-      "count": 12,
-      "description": "24 OC"
-    }
-  ],
-  "rough_timber": [
-    {
-      "mark": "R1",
-      "size": "4x6",
-      "count": 10,
-      "description": "Porch rafters"
-    }
-  ],
-  "sheathing_type": "OSB or ZIP",
-  "roofing_type": "Tuff-Rib 29ga or other",
+  "project_name": null,
+  "sheet_info": null,
+  "sheets_identified": [],
+  "living_sf": 0,
+  "porch_sf": 0,
+  "garage_sf": 0,
+  "total_conditioned_sf": 0,
+  "building_width_ft": 0,
+  "building_depth_ft": 0,
+  "plate_height_ft": 9,
+  "ridge_height_ft": null,
+  "porch_width_ft": 0,
+  "porch_depth_ft": 0,
+  "structural_roof_pitch": "6:12",
+  "ceiling_pitch": null,
+  "porch_pitch": "2:12",
   "eave_overhang_in": 16,
-  "roof_area_main_sf": number,
-  "roof_area_porch_sf": number,
-  "foundation_type": "monolithic_slab or stem_wall or pier_beam",
+  "roof_type": "gable",
+  "has_gable_popup": false,
+  "gable_popup_width_ft": null,
+  "gable_popup_pitch": null,
+  "ext_wall_linear_ft": 0,
+  "int_wall_linear_ft": 0,
+  "plumbing_wall_linear_ft": 0,
+  "ext_wall_net_sf": 0,
+  "int_t_intersections": 0,
+  "int_corner_count": 0,
+  "blocking_lf": 0,
+  "double_top_plate_lf": 0,
+  "post_size": "8x8",
+  "post_spacing_ft": 10,
+  "porch_timber_spec": "STD",
+  "porch_rafter_size": "2x6",
+  "porch_rafter_spacing_in": 24,
+  "header_beam_size": "4x8",
+  "sheathing_type": "OSB",
+  "roofing_type": "Tuff-Rib 29ga",
+  "insulation_walls": null,
+  "insulation_roof": null,
+  "wainscot_type": null,
+  "wainscot_height_ft": null,
+  "wainscot_walls": null,
+  "exterior_finish": "metal panel",
+  "foundation_type": "monolithic_slab",
   "slab_thickness_in": 4,
-  "notes": ["any important notes or flags as strings"]
+  "thickened_edge_depth_in": 12,
+  "rebar_slab": null,
+  "rebar_beam": null,
+  "vapor_barrier": true,
+  "gravel_base_in": 4,
+  "doors": [],
+  "windows": [],
+  "trusses": [],
+  "rough_timber": [],
+  "rooms": [],
+  "notes": []
 }
 
-Important rules:
-- structural_roof_pitch is from the roof framing plan or elevation — NOT the ceiling vault note on the floor plan
-- If ceiling pitch differs from structural pitch, set ceiling_pitch to the floor plan vault pitch
-- For ext_wall_linear_ft: sum all exterior wall dimension strings if no net wall area is given
-- For plumbing walls: any wall adjacent to bathroom fixtures, laundry, or kitchen wet wall
-- If a truss or door schedule is shown, read every line exactly
-- Expand door/window marks by count — if D03 has count 8, create 8 separate door entries or note count in the object`;
+ABSOLUTE RULES:
+1. Never fabricate numbers. Use 0 or null for fields you cannot find.
+2. Never include porch SF in living_sf.
+3. Read dimension strings directly — do not estimate from scale unless no dimensions exist.
+4. If a door or window schedule exists, use it exactly. Do not recount from floor plan symbols if a schedule is present.
+5. int_wall_linear_ft must reflect actual traced wall lengths — not a formula from SF.
+6. If two sheets contradict each other, note it in the notes array and use the more detailed sheet.
+7. Sanity check your numbers before responding: living_sf should be close to building_width × building_depth minus any unheated spaces. int_wall_linear_ft should be 15-25% of living_sf as a rough check.`;
+
+
 
 // ─────────────────────────────────────────────
 // API ROUTES
