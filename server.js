@@ -624,31 +624,25 @@ app.post('/api/analyze', upload.single('drawing'), async (req, res) => {
     const fileBuffer = req.file.buffer;
     const mimeType = req.file.mimetype;
 
-    // Build content blocks — PDFs get converted to images first
+    // Build content blocks
+    // PDFs: send as native document block — Anthropic extracts text + image per page at full fidelity
+    // Images: send as image block
     let contentBlocks = [];
+    const base64Data = fileBuffer.toString('base64');
 
     if (mimeType === 'application/pdf') {
-      console.log(`PDF upload: ${req.file.originalname} — ${Math.round(fileBuffer.length/1024)}KB`);
-      let pageImages;
-      try {
-        pageImages = await pdfToImages(fileBuffer, 6, 150);
-        console.log(`Converted PDF to ${pageImages.length} page images`);
-      } catch (convErr) {
-        console.error('PDF conversion error:', convErr.message);
-        return res.status(500).json({
-          error: `Could not convert PDF to images: ${convErr.message}. Try uploading as JPG/PNG instead.`
-        });
-      }
-      // Send each page as a separate image block
-      contentBlocks = pageImages.map((b64, i) => ({
-        type: 'image',
-        source: { type: 'base64', media_type: 'image/jpeg', data: b64 }
-      }));
+      console.log(`PDF upload: ${req.file.originalname} — ${Math.round(fileBuffer.length/1024)}KB — sending natively`);
+      contentBlocks = [{
+        type: 'document',
+        source: {
+          type: 'base64',
+          media_type: 'application/pdf',
+          data: base64Data
+        }
+      }];
     } else {
-      // Direct image upload
       const validType = ['image/jpeg','image/png','image/gif','image/webp'].includes(mimeType)
         ? mimeType : 'image/jpeg';
-      const base64Data = fileBuffer.toString('base64');
       contentBlocks = [{ type: 'image', source: { type: 'base64', media_type: validType, data: base64Data } }];
     }
 
