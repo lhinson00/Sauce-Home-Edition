@@ -143,19 +143,19 @@ function runRulesEngine(extracted) {
 
   // ── DERIVED DIMENSIONS ──
   const perim = (W + L) * 2;
+  const livSF = living_sf || W * L;
   const extLF = ext_wall_linear_ft || perim;
   // Sanity check: if extracted int_wall_linear_ft is >= ext_wall_linear_ft,
-  // Claude almost certainly included exterior walls in the count — fall back to formula
+  // Claude almost certainly included exterior walls — fall back to formula
   const intLFraw = int_wall_linear_ft || 0;
   const intLF = (intLFraw > 0 && intLFraw < extLF * 0.9)
     ? intLFraw
-    : Math.round(livSF * 0.14); // ~14% of living SF is a conservative true-partition estimate
+    : Math.round(livSF * 0.14);
   if (intLFraw >= extLF * 0.9 && intLFraw > 0) {
     results.flags.push({ level: 'warning', message: `Extracted interior wall LF (${intLFraw}) appears to include exterior walls — recalculated from living SF. Verify interior wall count.` });
   }
   const plumbLF = plumbing_wall_linear_ft || 0;
   const blockingLF = blocking_lf || (int_t_intersections > 0 ? int_t_intersections * 3 : Math.ceil(intLF * 0.2));
-  const livSF = living_sf || W * L;
 
   // Use extracted porch dimensions if available, otherwise infer from porch_sf
   const porchWidth = porch_width_ft || W;
