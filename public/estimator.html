@@ -603,7 +603,7 @@ function calculate() {
   const gravelCY = Math.ceil(totalSF * (4/12) / 27);
 
   // ── EXTERIOR FRAMING ──
-  const extStuds = Math.ceil(extLF / 1.333 + 16); // field studs + corners
+  const extStuds = Math.ceil(extLF * 1.12);
   const extTopSticks = Math.ceil(plates16(extLF * 2) * 1.05);
   const extBotSticks = Math.ceil(plates16(extLF) * 1.05);
   const wallOSBSheets = Math.ceil(extLF * pH / 32 * 1.1);
@@ -619,8 +619,8 @@ function calculate() {
   const winHdrPcs = Math.ceil(winHdrLen * 2 / winHdrStk * 1.1);
 
   // ── INTERIOR FRAMING ──
-  const intStuds = Math.ceil(intLF / 1.333);
-  const plumbStuds = Math.ceil(plumbLF / 1.333);
+  const intStuds = Math.ceil(intLF * 1.12);
+  const plumbStuds = Math.ceil(plumbLF * 1.12);
   const int2x4TopStks = Math.ceil(plates16(intLF * 2) * 1.05);
   const int2x4BotStks = Math.ceil(plates16(intLF) * 1.05);
   const int2x6TopStks = Math.ceil(plates16(plumbLF * 2) * 1.05);
