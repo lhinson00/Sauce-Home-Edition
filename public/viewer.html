@@ -446,6 +446,10 @@ async function renderPage(pageNum) {
     t.classList.toggle('active', parseInt(t.dataset.page) === pageNum);
   });
 
+  // Redraw scale overlay at new canvas size
+  updateScaleForZoom();
+  redrawScaleOverlay();
+
   hideLoading();
 }
 
@@ -554,10 +558,11 @@ function hideLoading() {
   document.getElementById('loadingOverlay').style.display = 'none';
 }// ── SCALE TOOL ──
 let scaleMode = false;
-let scalePoints = [];
+// Store points as fractions of canvas (0.0–1.0) so they survive zoom changes
+let scalePoints = []; // [{fx, fy}, {fx, fy}]
 let scalePixelsPerFoot = null;
-let scaleLineEl = null;
-let scaleDot1 = null, scaleDot2 = null;
+// Store the real-world distance in feet for redraw
+let scaleRealFt = null;
 
 function startScaleTool() {
   document.getElementById('scaleModal').style.display = 'flex';
@@ -569,7 +574,7 @@ function beginPickPoints() {
   document.getElementById('scaleModal').style.display = 'none';
   scaleMode = true;
   scalePoints = [];
-  clearScaleOverlay();
+  redrawScaleOverlay();
   scroll.style.cursor = 'crosshair';
   document.getElementById('statusMsg').textContent = 'Click point 1 on a known dimension line';
   document.getElementById('scaleBtn').classList.add('active');
@@ -578,80 +583,104 @@ function beginPickPoints() {
 function cancelScale() {
   scaleMode = false;
   scalePoints = [];
-  clearScaleOverlay();
+  redrawScaleOverlay();
   document.getElementById('scaleModal').style.display = 'none';
   scroll.style.cursor = '';
   document.getElementById('scaleBtn').classList.remove('active');
   document.getElementById('statusMsg').textContent = 'Ready';
 }
 
-function clearScaleOverlay() {
-  const svg = document.getElementById('scaleOverlay');
-  while (svg.firstChild) svg.removeChild(svg.firstChild);
-  scaleLineEl = null; scaleDot1 = null; scaleDot2 = null;
-}
-
-// Convert mouse event to canvas pixel coords
-// SVG overlay sits directly on top of canvas so same coordinates for both
-function getCanvasPoint(e) {
+// Convert mouse event to fractional canvas coordinates (0.0–1.0)
+function getCanvasFraction(e) {
   const canvas = document.getElementById('pdfCanvas');
   const rect = canvas.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-  return { x, y, svgX: x, svgY: y };
+  return {
+    fx: (e.clientX - rect.left) / canvas.width,
+    fy: (e.clientY - rect.top) / canvas.height
+  };
 }
 
-// Draw dot on SVG overlay
-function drawDot(svgX, svgY, color) {
+// Convert fractional coords back to current canvas pixels
+function fractionToPixels(fx, fy) {
+  const canvas = document.getElementById('pdfCanvas');
+  return { x: fx * canvas.width, y: fy * canvas.height };
+}
+
+// Redraw the SVG overlay based on current canvas size
+// Called after every zoom/render
+function redrawScaleOverlay() {
   const svg = document.getElementById('scaleOverlay');
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+  if (scalePoints.length === 0) return;
+
+  const canvas = document.getElementById('pdfCanvas');
+  svg.setAttribute('width', canvas.width);
+  svg.setAttribute('height', canvas.height);
+
+  const p1 = fractionToPixels(scalePoints[0].fx, scalePoints[0].fy);
+  drawDotAt(svg, p1.x, p1.y, '#f5a623');
+
+  if (scalePoints.length === 2) {
+    const p2 = fractionToPixels(scalePoints[1].fx, scalePoints[1].fy);
+    drawDotAt(svg, p2.x, p2.y, scaleRealFt ? '#10b981' : '#f5a623');
+
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', p1.x); line.setAttribute('y1', p1.y);
+    line.setAttribute('x2', p2.x); line.setAttribute('y2', p2.y);
+    line.setAttribute('stroke', scaleRealFt ? '#10b981' : '#f5a623');
+    line.setAttribute('stroke-width', 2);
+    line.setAttribute('stroke-dasharray', '6 3');
+    svg.appendChild(line);
+
+    // Label showing real distance if scale is confirmed
+    if (scaleRealFt) {
+      const mx = (p1.x + p2.x) / 2;
+      const my = (p1.y + p2.y) / 2 - 10;
+      const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      label.setAttribute('x', mx); label.setAttribute('y', my);
+      label.setAttribute('text-anchor', 'middle');
+      label.setAttribute('font-size', '12');
+      label.setAttribute('font-weight', '600');
+      label.setAttribute('fill', '#10b981');
+      label.setAttribute('stroke', '#fff');
+      label.setAttribute('stroke-width', '3');
+      label.setAttribute('paint-order', 'stroke');
+      label.textContent = scaleRealFt >= 1 ? scaleRealFt + "'" : (scaleRealFt * 12) + '"';
+      svg.appendChild(label);
+    }
+  }
+}
+
+function drawDotAt(svg, x, y, color) {
   const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-  circle.setAttribute('cx', svgX);
-  circle.setAttribute('cy', svgY);
+  circle.setAttribute('cx', x); circle.setAttribute('cy', y);
   circle.setAttribute('r', 6);
   circle.setAttribute('fill', color);
   circle.setAttribute('stroke', '#fff');
   circle.setAttribute('stroke-width', 2);
   svg.appendChild(circle);
-  return circle;
-}
-
-// Draw line between two SVG points
-function drawScaleLine(x1, y1, x2, y2) {
-  const svg = document.getElementById('scaleOverlay');
-  if (scaleLineEl) svg.removeChild(scaleLineEl);
-  const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-  line.setAttribute('x1', x1); line.setAttribute('y1', y1);
-  line.setAttribute('x2', x2); line.setAttribute('y2', y2);
-  line.setAttribute('stroke', '#f5a623');
-  line.setAttribute('stroke-width', 2);
-  line.setAttribute('stroke-dasharray', '6 3');
-  svg.appendChild(line);
-  scaleLineEl = line;
 }
 
 // Handle canvas clicks for scale picking
 scroll.addEventListener('click', e => {
   if (!scaleMode) return;
-  const pt = getCanvasPoint(e);
+  const pt = getCanvasFraction(e);
 
   if (scalePoints.length === 0) {
-    // First point
     scalePoints.push(pt);
-    scaleDot1 = drawDot(pt.svgX, pt.svgY, '#f5a623');
+    redrawScaleOverlay();
     document.getElementById('statusMsg').textContent = 'Click point 2 on the same dimension line';
 
   } else if (scalePoints.length === 1) {
-    // Second point
     scalePoints.push(pt);
-    scaleDot2 = drawDot(pt.svgX, pt.svgY, '#f5a623');
-    drawScaleLine(scalePoints[0].svgX, scalePoints[0].svgY, pt.svgX, pt.svgY);
+    redrawScaleOverlay();
 
-    // Calculate pixel distance on canvas
-    const dx = pt.x - scalePoints[0].x;
-    const dy = pt.y - scalePoints[0].y;
-    const pixelDist = Math.sqrt(dx*dx + dy*dy);
+    // Calculate pixel distance at current zoom
+    const canvas = document.getElementById('pdfCanvas');
+    const p1 = fractionToPixels(scalePoints[0].fx, scalePoints[0].fy);
+    const p2 = fractionToPixels(scalePoints[1].fx, scalePoints[1].fy);
+    const pixelDist = Math.sqrt(Math.pow(p2.x-p1.x,2) + Math.pow(p2.y-p1.y,2));
 
-    // Show modal step 2
     scaleMode = false;
     scroll.style.cursor = '';
     document.getElementById('scalePixelInfo').textContent =
@@ -660,9 +689,6 @@ scroll.addEventListener('click', e => {
     document.getElementById('scaleStep1').style.display = 'none';
     document.getElementById('scaleStep2').style.display = '';
     document.getElementById('scaleDistInput').focus();
-
-    // Store pixel distance for confirmation
-    scroll.dataset.pixelDist = pixelDist;
     document.getElementById('statusMsg').textContent = 'Enter the real distance in the dialog';
   }
 });
@@ -670,25 +696,44 @@ scroll.addEventListener('click', e => {
 function confirmScale() {
   const dist = parseFloat(document.getElementById('scaleDistInput').value);
   const unit = document.getElementById('scaleUnitInput').value;
-  if (!dist || dist <= 0) {
-    document.getElementById('scaleDistInput').focus();
-    return;
-  }
+  if (!dist || dist <= 0) { document.getElementById('scaleDistInput').focus(); return; }
+
   const distFt = unit === 'in' ? dist / 12 : dist;
-  const pixelDist = parseFloat(scroll.dataset.pixelDist);
+  scaleRealFt = distFt;
+
+  // Calculate pixels-per-foot using current canvas size
+  const canvas = document.getElementById('pdfCanvas');
+  const p1 = fractionToPixels(scalePoints[0].fx, scalePoints[0].fy);
+  const p2 = fractionToPixels(scalePoints[1].fx, scalePoints[1].fy);
+  const pixelDist = Math.sqrt(Math.pow(p2.x-p1.x,2) + Math.pow(p2.y-p1.y,2));
+
+  // Store as FRACTION of canvas width per foot — zoom-independent
+  // When we need to measure: get current pixelDist, divide by (canvasWidth * fracPerFoot)
+  const fracPerFoot = (pixelDist / canvas.width) / distFt;
+  scroll.dataset.fracPerFoot = fracPerFoot;
+  // Also store current pixels-per-foot for immediate use
   scalePixelsPerFoot = pixelDist / distFt;
 
-  // Update UI
+  redrawScaleOverlay();
+
   document.getElementById('scaleModal').style.display = 'none';
   document.getElementById('scaleBtn').classList.remove('active');
   document.getElementById('scaleBtn').classList.add('set');
   document.getElementById('scaleBadge').style.display = 'flex';
   document.getElementById('scaleLabel').textContent =
-    `1" = ${(scalePixelsPerFoot / 12).toFixed(1)}px`;
+    `1ft = ${scalePixelsPerFoot.toFixed(1)}px`;
   document.getElementById('statusMsg').textContent =
-    `Scale set — ${dist}${unit === 'ft' ? "'" : '"'} = ${Math.round(pixelDist)}px · ${scalePixelsPerFoot.toFixed(1)} px/ft`;
+    `Scale set — ${dist}${unit === 'ft' ? "'" : '"'} confirmed`;
 
-  console.log(`Scale: ${scalePixelsPerFoot.toFixed(2)} pixels per foot`);
+  console.log(`Scale: fracPerFoot=${fracPerFoot.toFixed(6)}, px/ft=${scalePixelsPerFoot.toFixed(2)}`);
+}
+
+// Recalculate pixels-per-foot after zoom changes (canvas width changes)
+function updateScaleForZoom() {
+  const fracPerFoot = parseFloat(scroll.dataset.fracPerFoot);
+  if (!fracPerFoot) return;
+  const canvas = document.getElementById('pdfCanvas');
+  scalePixelsPerFoot = canvas.width * fracPerFoot;
 }
 
 </script>
