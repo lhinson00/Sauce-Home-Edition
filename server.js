@@ -731,13 +731,27 @@ Be precise. Read every dimension string you can see. Do not estimate.`;
       return res.status(500).json({ error: 'AI returned empty response. Try a higher resolution image.' });
     }
 
-    // Parse JSON from response
+    // Parse JSON from response — extract the JSON object regardless of surrounding markdown
     let extracted;
     try {
-      const clean = rawText.replace(/```json|```/g, '').trim();
-      extracted = JSON.parse(clean);
+      // Strategy 1: strip markdown fences and parse directly
+      let clean = rawText.replace(/```json\s*/gi, '').replace(/```\s*/g, '').trim();
+      // Strategy 2: if that fails, find the first { and last } and extract just that
+      try {
+        extracted = JSON.parse(clean);
+      } catch {
+        const first = rawText.indexOf('{');
+        const last = rawText.lastIndexOf('}');
+        if (first !== -1 && last !== -1 && last > first) {
+          clean = rawText.substring(first, last + 1);
+          extracted = JSON.parse(clean);
+        } else {
+          throw new Error('No JSON object found in response');
+        }
+      }
     } catch (e) {
-      console.error('JSON parse error:', e.message, 'Raw:', rawText.substring(0,300));
+      console.error('JSON parse error:', e.message, 'Raw:', rawText.substring(0, 300));
+
       return res.status(500).json({ error: 'Could not parse drawing data — the AI response was not valid JSON. Try a clearer image.', raw: rawText.substring(0, 300) });
     }
 
