@@ -613,14 +613,14 @@ ABSOLUTE RULES:
 // API ROUTES
 // ─────────────────────────────────────────────
 
-// Read schedules from a plan image (canvas capture)
+// Read schedules — accepts native PDF (preferred) or image fallback
 app.post('/api/read-schedules', async (req, res) => {
   try {
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) return res.status(500).json({ error: 'API key not configured' });
 
-    const { image } = req.body;
-    if (!image) return res.status(400).json({ error: 'No image provided' });
+    const { pdf, page, image } = req.body;
+    if (!pdf && !image) return res.status(400).json({ error: 'No content provided' });
 
     const prompt = `You are reading a residential construction plan. Read the schedules on this page exactly as written. Do not estimate or guess.
 
@@ -656,6 +656,23 @@ Return ONLY valid JSON, no markdown fences:
   "notes": []
 }`;
 
+    // Build content — native PDF is far superior to image
+    let content;
+    if (pdf) {
+      content = [
+        {
+          type: 'document',
+          source: { type: 'base64', media_type: 'application/pdf', data: pdf }
+        },
+        { type: 'text', text: page > 1 ? `Please read page ${page} of this document.\n\n${prompt}` : prompt }
+      ];
+    } else {
+      content = [
+        { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: image } },
+        { type: 'text', text: prompt }
+      ];
+    }
+
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -666,13 +683,7 @@ Return ONLY valid JSON, no markdown fences:
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
         max_tokens: 3000,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: image } },
-            { type: 'text', text: prompt }
-          ]
-        }]
+        messages: [{ role: 'user', content }]
       })
     });
 
