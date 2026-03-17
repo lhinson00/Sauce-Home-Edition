@@ -74,7 +74,7 @@ html,body{min-height:100%;background:var(--navy);color:var(--text);font-family:'
   <div class="hdr-logo">SE</div><div class="hdr-pipe"></div>
   <div class="hdr-title">Barndominium Shell Package</div>
   <div class="hdr-sp"></div>
-  <button class="btn-save" id="btnSave" onclick="saveQuote()">💾 Save Quote</button>
+  <button class="btn-save" onclick="previewQuote()" style="background:var(--navy3);border:1px solid rgba(255,255,255,.15);color:#fff;margin-right:8px;">🖨 Preview Quote</button><button class="btn-save" id="btnSave" onclick="saveQuote()">💾 Save Quote</button>
 </header>
 <div class="page">
 <div class="form-col">
@@ -846,6 +846,46 @@ function calcTurnkey() {
 
   // Store D101 globally for use in calc()
   window._D101 = D101;
+}
+
+// PREVIEW QUOTE — opens customer-facing quote sheet
+function previewQuote() {
+  const strip = id => {
+    const el = document.getElementById(id);
+    if (!el) return 0;
+    return parseFloat(el.textContent.replace(/[$,]/g,'')) || 0;
+  };
+  const payload = {
+    quoteId:       'BQ-' + Date.now().toString(36).toUpperCase(),
+    date:          new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}),
+    custName:      document.getElementById('custName')?.value || '',
+    custPhone:     document.getElementById('custPhone')?.value || '',
+    custEmail:     document.getElementById('custEmail')?.value || '',
+    cityStZip:     document.getElementById('cityStZip')?.value || '',
+    salesman:      document.getElementById('salesman')?.value || '',
+    planName:      document.getElementById('planName')?.value || '',
+    foundationType:foundType,
+    mileage:       document.getElementById('sMiles')?.value || '0',
+    // Areas from result panel
+    livingSF:      document.getElementById('rLivSF')?.textContent?.replace(' SF','') || '0',
+    sf2nd:         document.getElementById('r2ndSF')?.textContent?.replace(' SF','') || '0',
+    garageSF:      document.getElementById('rGarSF')?.textContent?.replace(' SF','') || '0',
+    porchSF:       document.getElementById('rPorchSF')?.textContent?.replace(' SF','') || '0',
+    concSF:        document.getElementById('rConcSF')?.textContent?.replace(' SF','') || '0',
+    // Pricing from result panel
+    N29: strip('rN29'), N30: strip('rN30'), N31: strip('rN31'),
+    N37: strip('rN37'), N39: strip('rN39') || (window._D101||0),
+    N40: strip('rN40'), N41: strip('rN41'), N42: strip('rN42'), N44: strip('rN44'),
+    deposits: parseFloat(document.getElementById('deposits')?.value) || 0,
+  };
+
+  // Store in localStorage as fallback
+  try { localStorage.setItem('barndo_quote_preview', JSON.stringify(payload)); } catch(e) {}
+
+  // Open quote sheet
+  const url = '/barndo_quote.html?data=' + encodeURIComponent(JSON.stringify(payload));
+  const win = window.open(url, '_blank');
+  if (win) win.postMessage({ type: 'BARNDO_QUOTE', payload }, '*');
 }
 
 // SAVE
