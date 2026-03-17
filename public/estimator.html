@@ -508,7 +508,83 @@ tr:hover td{background:#fafbfc;}
 </div>
 
 <script>
-// ── STATE ──
+// ── URL PARAM PRE-FILL (from Plan Viewer) ──
+window.addEventListener('DOMContentLoaded', () => {
+  const p = new URLSearchParams(window.location.search);
+  if (!p.has('ext_lf') && !p.has('living_sf')) return; // nothing to prefill
+
+  const set = (id, val) => { const el = document.getElementById(id); if (el && val !== '' && val !== null && val !== undefined) el.value = val; };
+  const setCount = (id, val) => { const el = document.getElementById(id); if (el && val !== '' && val !== undefined) el.textContent = parseInt(val) || 0; };
+  const setSV = (key, val) => { if (val) V[key] = val; };
+
+  // Helper to click a seg button by key/value
+  const clickSeg = (key, val) => {
+    document.querySelectorAll('.seg-btn').forEach(btn => {
+      const m = btn.getAttribute('onclick')?.match(/setSeg\(this,'([^']+)','([^']+)'\)/);
+      if (m && m[1] === key && m[2] === val) btn.click();
+    });
+  };
+
+  // Building dimensions — derive from living_sf if width/length not provided
+  if (p.get('living_sf')) set('livingSF', p.get('living_sf'));
+  if (p.get('ext_lf'))    set('extWallLF', p.get('ext_lf'));
+  if (p.get('int_lf'))    set('intWallLF', p.get('int_lf'));
+  if (p.get('plumb_lf'))  set('plumbWallLF', p.get('plumb_lf'));
+
+  // Porch
+  if (p.get('porch_sf')) {
+    const psf = parseFloat(p.get('porch_sf'));
+    const w = parseFloat(document.getElementById('porchWidth')?.value || 30);
+    if (psf > 0) set('porchDepth', Math.round(psf / w));
+  }
+
+  // Plate height
+  if (p.get('plate_ht')) clickSeg('plateH', String(parseInt(p.get('plate_ht'))));
+
+  // Roof pitch
+  if (p.get('pitch')) clickSeg('pitch', p.get('pitch'));
+
+  // Porch pitch
+  if (p.get('porch_pitch')) clickSeg('porchPitch', p.get('porch_pitch'));
+
+  // Doors — map from schedule to estimator counts
+  try {
+    const doors = JSON.parse(p.get('doors') || '[]');
+    let extCount = 0, intCount = 0, dblCount = 0;
+    doors.forEach(d => {
+      const count = parseInt(d.count) || 1;
+      const w = parseFloat(d.rough_opening_width_ft) || 3;
+      if (d.is_exterior) {
+        if (w >= 4.5) dblCount += count; // double door
+        else extCount += count;
+      } else {
+        intCount += count;
+      }
+    });
+    setCount('dExt', extCount);
+    setCount('dInt', intCount);
+    setCount('dDbl', dblCount);
+  } catch(e) {}
+
+  // Windows — map to estimator counts
+  try {
+    const windows = JSON.parse(p.get('windows') || '[]');
+    let stdCount = 0, twinCount = 0, smCount = 0;
+    windows.forEach(w => {
+      const count = parseInt(w.count) || 1;
+      const width = parseFloat(w.rough_opening_width_ft) || 3;
+      const height = parseFloat(w.rough_opening_height_ft) || 4;
+      if (width >= 5 || (width >= 4 && height >= 4)) twinCount += count;
+      else if (height <= 3.5) smCount += count;
+      else stdCount += count;
+    });
+    setCount('wStd', stdCount);
+    setCount('wTwin', twinCount);
+    setCount('wSm', smCount);
+  } catch(e) {}
+
+  liveUpdate();
+});
 const V = {
   plateH: '9', pitch: '6:12', overhang: '16', sheathing: 'OSB',
   roofing: 'Tuff-Rib 29ga', porchPitch: '2:12', wallSheathing: 'OSB', slabThk: '4',
