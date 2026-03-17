@@ -63,7 +63,7 @@ body{font-family:'Inter',sans-serif;background:var(--off);color:var(--text);disp
 
 /* ── VIEWER SCREEN ── */
 #viewerScreen{flex:1;display:none;position:relative;overflow:hidden;}
-#viewerScreen.on{display:block;}
+#viewerScreen.on{display:flex;}
 
 /* Plan canvas — fills everything */
 .plan-scroll{
@@ -592,7 +592,7 @@ function goToPage(n){if(n<1||n>totalPages)return;currentPage=n;renderPage(n);doc
 function changePage(d){goToPage(currentPage+d);}
 function adjustZoom(d){currentZoom=Math.max(.25,Math.min(4,currentZoom+d));renderPage(currentPage);}
 function setZoom(z){currentZoom=z;renderPage(currentPage);}
-function showViewer(){document.getElementById('uploadScreen').style.display='none';const v=document.getElementById('viewerScreen');v.classList.add('on');v.style.display='block';}
+function showViewer(){document.getElementById('uploadScreen').style.display='none';const v=document.getElementById('viewerScreen');v.classList.add('on');v.style.display='flex';}
 function showLoading(m){document.getElementById('loadingText').textContent=m||'Loading...';document.getElementById('loadingOverlay').style.display='flex';}
 function hideLoading(){document.getElementById('loadingOverlay').style.display='none';}
 function setStatus(m){document.getElementById('statusMsg').textContent=m;}
