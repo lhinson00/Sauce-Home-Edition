@@ -622,58 +622,53 @@ app.post('/api/read-schedules', async (req, res) => {
     const { pdf, page, image } = req.body;
     if (!pdf && !image) return res.status(400).json({ error: 'No content provided' });
 
-    const prompt = `You are reading a residential construction plan schedule table. Extract data with 100% accuracy by reading each cell individually.
+    const prompt = `You are reading a residential construction plan. Read the schedule tables EXACTLY as printed. Every value must come directly from the table — do not estimate, interpolate, or use memory.
 
-STEP 1 — DOOR SCHEDULE
-Find the table titled "Door Schedule". Read every row left to right:
-- Column 1 (Mark): D01, D02, etc.
-- Column 2 (Count): the integer in this cell — READ IT CAREFULLY, do not guess
-- Column 3 (Size): width x height, convert feet-inches to decimal: X'-Y" = X + Y/12. Examples: 3'-0" = 3.0, 6'-8" = 6.67, 5'-0" = 5.0, 2'-8" = 2.67. Never add feet and inches together raw.
-- Column 4 (Description): full text, determines if exterior (contains "Ext") or interior (contains "Int")
-- Column 5 (Header Size): e.g. "(2) 2x12" — READ THE FULL VALUE including the number before 2x
-- is_exterior: true if Description contains "Ext.", false if contains "Int."
+DOOR SCHEDULE — locate the table titled "Door Schedule". For each data row (skip the header row):
+- mark: Column 1 value (D01, D02, etc.)
+- count: Column 2 value — read the EXACT integer printed in that cell
+- rough_opening_width_ft: Column 3 width — convert feet-inches: X'-Y" → X + (Y/12). Example: 2'-8" → 2.67, 3'-0" → 3.0, 5'-0" → 5.0
+- rough_opening_height_ft: Column 3 height — same conversion
+- description: Column 4 text exactly as printed
+- header: Column 5 value exactly as printed e.g. "(2) 2x12"
+- is_exterior: true if description contains "Ext", false if contains "Int"
 
-STEP 2 — WINDOW SCHEDULE  
-Find the table titled "Window Schedule". Read every row:
-- Column 1 (Mark): W01, W02, etc.
-- Column 2 (Count): READ THIS INTEGER CAREFULLY from the cell — do not confuse it with any other number
-- Column 3 (Size): width x height. Convert feet-inches to decimal feet: X'-Y" = X + Y/12. Examples: 5'-6" = 5.5, 3'-0" = 3.0, 6'-8" = 6.67, 5'-0" = 5.0
-- Column 4 (Description): window type
-- Column 5 (Header Size): READ THE FULL VALUE — (2) 2x10, (2) 2x6, etc.
+WINDOW SCHEDULE — locate the table titled "Window Schedule". For each data row:
+- mark: Column 1 (W01, W02, etc.)
+- count: Column 2 — read the EXACT integer in that cell
+- rough_opening_width_ft: Column 3 width converted to decimal feet
+- rough_opening_height_ft: Column 3 height converted to decimal feet
+- description: Column 4 exactly as printed
+- header: Column 5 exactly as printed
 
-STEP 3 — VERIFICATION
-For doors: sum all Count values. Check against the total Door Area row at the bottom — if counts are wrong, the area total won't match.
-For windows: sum all Count values. Check against the Window Area total row.
-Go back and re-read any row where your count seems uncertain. The Count column is a single integer — it is never a decimal and never the same as the mark number.
+SQFT SCHEDULE — locate any SF/area table:
+- living_sf: number next to "Living Space" or similar
+- porch_sf: total of all porch areas combined
 
-STEP 4 — SQFT SCHEDULE
-Read every row in the SQFT Schedule table: area number and name.
-- living_sf: the SF next to "Living Space"
-- porch_sf: sum of all porch SF values (Front Porch + Back Porch, etc.)
+BUILDING INFO — read from elevation sheets or title block if visible:
+- plate_height_ft: wall height number only
+- structural_roof_pitch: pitch as "X:12"
+- porch_pitch: porch pitch as "X:12"
+- eave_overhang_in: overhang in inches
 
-Return ONLY valid JSON, no markdown:
+VERIFICATION — before outputting, confirm:
+- Door counts sum to match the total area row at bottom of door schedule
+- Window counts sum to match the total area row at bottom of window schedule
+- Each size value was read from the SIZE column, not guessed
+
+Return ONLY a valid JSON object. No markdown, no explanation:
 {
-  "living_sf": 1200,
-  "porch_sf": 264,
-  "plate_height_ft": 9,
-  "structural_roof_pitch": "6:12",
-  "porch_pitch": "2:12",
-  "eave_overhang_in": 16,
-  "doors": [
-    {"mark":"D01","count":1,"rough_opening_width_ft":3.0,"rough_opening_height_ft":6.67,"description":"Ext. Door W/ Sidelites","header":"(2) 2x12","is_exterior":true},
-    {"mark":"D02","count":1,"rough_opening_width_ft":3.0,"rough_opening_height_ft":6.67,"description":"Ext. Door","header":"(2) 2x10","is_exterior":true},
-    {"mark":"D03","count":8,"rough_opening_width_ft":2.67,"rough_opening_height_ft":6.67,"description":"Int. Walk Door","header":"(2) 2x6","is_exterior":false},
-    {"mark":"D04","count":2,"rough_opening_width_ft":5.0,"rough_opening_height_ft":6.67,"description":"Dbl. Flush Panel Door","header":"(2) 2x6","is_exterior":false}
-  ],
-  "windows": [
-    {"mark":"W01","count":3,"rough_opening_width_ft":3.0,"rough_opening_height_ft":5.0,"description":"S/H Window","header":"(2) 2x10"},
-    {"mark":"W02","count":2,"rough_opening_width_ft":3.0,"rough_opening_height_ft":3.0,"description":"S/H Window","header":"(2) 2x10"}
-  ],
+  "living_sf": null,
+  "porch_sf": null,
+  "plate_height_ft": null,
+  "structural_roof_pitch": null,
+  "porch_pitch": null,
+  "eave_overhang_in": null,
+  "doors": [],
+  "windows": [],
   "trusses": [],
   "notes": []
-}
-
-IMPORTANT: The example JSON above shows what a correctly read schedule looks like. Your job is to read THIS plan's actual values with the same precision.`;
+}`;
 
     // Build content — native PDF is far superior to image
     let content;
@@ -702,6 +697,7 @@ IMPORTANT: The example JSON above shows what a correctly read schedule looks lik
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
         max_tokens: 3000,
+        temperature: 0,
         messages: [{ role: 'user', content }]
       })
     });
