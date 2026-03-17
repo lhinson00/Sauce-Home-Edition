@@ -3,195 +3,272 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sauce Estimator — Plan Viewer</title>
+<title>Plan Viewer — Sauce Estimator</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
 :root{
-  --navy:#1a2332;--navy2:#212d3d;
+  --navy:#1a2332;--navy2:#212d3d;--navy3:#263044;
   --amber:#f5a623;--amber2:#f7b94a;
-  --canvas-bg:#3a3d40;
-  --sidebar-bg:#1e2530;--sidebar-border:#2a3548;
-  --toolbar-bg:#242e3f;--toolbar2-bg:#1c2535;--toolbar-border:#2d3a50;
-  --panel-bg:#1a2130;--panel-border:#2a3548;
-  --text:#e8edf2;--muted:#7a8a9a;--muted2:#4a5a6a;
-  --border:#2a3548;--border2:#354560;
+  --teal:#2dd4aa;
+  --off:#f0f2f5;--white:#fff;
+  --border:#e2e5ea;--border2:#d0d4da;
+  --text:#1a2332;--muted:#6b7280;--muted2:#9ca3af;
   --success:#10b981;--danger:#ef4444;
-  --ext:#4a8cff;--int:#a855f7;--plb:#f59e0b;
+  --ext:#2563eb;--int:#7c3aed;--plb:#d97706;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Inter',sans-serif;background:var(--canvas-bg);color:var(--text);height:100vh;overflow:hidden;}
-.app{display:flex;flex-direction:column;height:100vh;}
-.app-body{flex:1;display:flex;overflow:hidden;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'Inter',sans-serif;background:var(--off);color:var(--text);display:flex;flex-direction:column;}
 
-/* NAV */
-.nav{background:var(--navy);height:46px;display:flex;align-items:center;padding:0 16px;border-bottom:1px solid var(--border);flex-shrink:0;}
-.nav-mark{width:28px;height:28px;background:var(--amber);border-radius:5px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:11px;color:var(--navy);margin-right:10px;flex-shrink:0;}
-.nav-title{font-size:13px;font-weight:700;color:#fff;line-height:1.1;}
-.nav-sub{font-size:9px;font-weight:600;color:var(--amber);letter-spacing:.8px;text-transform:uppercase;}
-.nav-div{width:1px;height:20px;background:rgba(255,255,255,.1);margin:0 12px;}
-.nav-mod{font-size:11px;font-weight:600;color:rgba(255,255,255,.3);letter-spacing:.5px;text-transform:uppercase;}
+/* ── NAV ── */
+.nav{background:var(--navy);height:52px;display:flex;align-items:center;padding:0 16px;z-index:100;flex-shrink:0;}
+.nav-mark{width:32px;height:32px;background:var(--amber);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--navy);margin-right:10px;flex-shrink:0;}
+.nav-name{font-size:13px;font-weight:700;color:#fff;}
+.nav-sub{font-size:10px;font-weight:600;color:var(--amber);letter-spacing:.5px;text-transform:uppercase;}
+.nav-div{width:1px;height:28px;background:rgba(255,255,255,.12);margin:0 16px;}
+.nav-mod{font-size:12px;font-weight:600;color:rgba(255,255,255,.45);letter-spacing:.3px;text-transform:uppercase;}
 .nav-sp{flex:1;}
-.nav-btn{background:transparent;border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.5);padding:4px 11px;border-radius:4px;font-size:11px;font-weight:500;cursor:pointer;margin-left:6px;transition:all .15s;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center;}
-.nav-btn:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.85);}
+.nav-btn{background:transparent;border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.7);padding:5px 14px;border-radius:5px;font-size:12px;font-weight:500;cursor:pointer;margin-left:8px;transition:all .15s;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center;}
+.nav-btn:hover{background:rgba(255,255,255,.08);color:#fff;}
 .nav-btn.amber{background:var(--amber);border-color:var(--amber);color:var(--navy);font-weight:700;}
 .nav-btn.amber:hover{background:var(--amber2);}
 
-/* UPLOAD */
-#uploadScreen{flex:1;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a2332 0%,#212d3d 100%);}
-.upload-card{background:#1e2836;border:1px solid var(--border2);border-radius:14px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,.4);width:460px;}
-.upload-head{padding:22px 26px 16px;border-bottom:1px solid var(--border);}
-.upload-title{font-size:17px;font-weight:700;color:#fff;margin-bottom:3px;}
-.upload-sub{font-size:12px;color:var(--muted);}
-.upload-body{padding:22px;}
-.dz{border:2px dashed var(--border2);border-radius:10px;padding:40px 20px;text-align:center;cursor:pointer;transition:all .2s;position:relative;background:rgba(255,255,255,.02);}
-.dz:hover,.dz.over{border-color:var(--amber);background:rgba(245,166,35,.05);}
+/* ── UPLOAD SCREEN ── */
+#uploadScreen{flex:1;display:flex;align-items:center;justify-content:center;}
+.upload-card{background:#fff;border:1px solid var(--border);border-radius:14px;width:500px;overflow:hidden;box-shadow:0 4px 24px rgba(26,35,50,.08);}
+.upload-head{padding:26px 28px 20px;border-bottom:1px solid var(--border);}
+.upload-title{font-size:20px;font-weight:700;color:var(--navy);margin-bottom:4px;}
+.upload-sub{font-size:13px;color:var(--muted);line-height:1.5;}
+.upload-body{padding:24px 28px;}
+.dz{border:2px dashed var(--border2);border-radius:10px;padding:44px 20px;text-align:center;cursor:pointer;transition:all .2s;position:relative;background:var(--off);}
+.dz:hover,.dz.over{border-color:var(--amber);background:#fffbf2;}
 .dz input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
-.dz-icon{width:48px;height:48px;background:rgba(245,166,35,.12);border:1px solid rgba(245,166,35,.25);border-radius:9px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;}
-.dz h3{font-size:14px;font-weight:600;color:#fff;margin-bottom:4px;}
-.dz p{font-size:12px;color:var(--muted);}
-.fmts{display:flex;gap:5px;justify-content:center;margin-top:10px;}
-.fmt{font-size:9px;font-weight:700;letter-spacing:.5px;padding:2px 7px;border-radius:3px;background:rgba(255,255,255,.06);color:var(--muted);text-transform:uppercase;border:1px solid var(--border2);}
+.dz-icon{width:52px;height:52px;background:var(--navy);border-radius:10px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;}
+.dz h3{font-size:15px;font-weight:600;color:var(--navy);margin-bottom:5px;}
+.dz p{font-size:13px;color:var(--muted);}
+.dz-fmts{display:flex;gap:5px;justify-content:center;margin-top:12px;}
+.dz-fmt{font-size:10px;font-weight:600;letter-spacing:.5px;padding:2px 8px;border-radius:4px;background:#fff;color:var(--muted);text-transform:uppercase;border:1px solid var(--border2);}
 
-/* VIEWER */
-#viewerScreen{flex:1;display:none;overflow:hidden;}
-#viewerScreen.active{display:flex;}
+/* ── VIEWER SCREEN ── */
+#viewerScreen{flex:1;display:none;position:relative;overflow:hidden;}
+#viewerScreen.on{display:block;}
 
-/* SIDEBAR */
-.sidebar{width:180px;flex-shrink:0;background:var(--sidebar-bg);border-right:1px solid var(--sidebar-border);display:flex;flex-direction:column;overflow:hidden;}
-.sb-head{padding:10px 12px;border-bottom:1px solid var(--sidebar-border);}
-.sb-filename{font-size:11px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.sb-meta{font-size:10px;color:var(--muted);margin-top:1px;}
-.sb-open{margin:6px 8px;padding:6px 10px;border-radius:4px;border:1px solid var(--border2);background:transparent;color:var(--muted);font-size:10px;font-weight:600;cursor:pointer;font-family:inherit;width:calc(100% - 16px);display:flex;align-items:center;gap:4px;transition:all .15s;}
-.sb-open:hover{background:rgba(255,255,255,.05);color:var(--text);}
-.thumbs{flex:1;overflow-y:auto;padding:8px;scrollbar-width:thin;scrollbar-color:var(--border2) transparent;}
-.thumb-item{border-radius:4px;overflow:hidden;margin-bottom:7px;cursor:pointer;border:2px solid transparent;transition:all .15s;}
-.thumb-item.active{border-color:var(--amber);}
-.thumb-item:hover:not(.active){border-color:rgba(255,255,255,.15);}
-.thumb-canvas{width:100%;display:block;background:#2a2a2a;}
-.thumb-label{padding:3px 6px;font-size:9px;font-weight:500;color:var(--muted);background:var(--sidebar-bg);}
+/* Plan canvas — fills everything */
+.plan-scroll{
+  position:absolute;inset:0;
+  overflow:auto;
+  display:flex;align-items:flex-start;justify-content:center;
+  padding:76px 20px 32px;
+  cursor:grab;
+  background:#d4d7db;
+  background-image:
+    linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);
+  background-size:40px 40px;
+}
+.plan-scroll.dragging{cursor:grabbing;}
+#pdfCanvas{
+  box-shadow:0 2px 8px rgba(0,0,0,.1),0 16px 48px rgba(0,0,0,.18);
+  display:block;background:#fff;flex-shrink:0;
+  border-radius:1px;
+}
 
-/* CANVAS AREA */
-.canvas-area{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+/* ── PILL TOOLBAR ── */
+.pill-bar{
+  position:absolute;top:14px;left:50%;transform:translateX(-50%);
+  z-index:40;
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:12px;
+  box-shadow:0 2px 8px rgba(26,35,50,.1),0 8px 24px rgba(26,35,50,.08);
+  display:flex;align-items:center;
+  padding:5px 7px;gap:3px;
+  white-space:nowrap;
+}
+.pill-sep{width:1px;height:20px;background:var(--border2);margin:0 4px;flex-shrink:0;}
+.pill-group{display:flex;align-items:center;gap:2px;}
+.pill-label{font-size:9px;font-weight:700;color:var(--muted2);letter-spacing:.6px;text-transform:uppercase;padding:0 3px;}
 
-/* TOOLBARS */
-.tb{height:36px;display:flex;align-items:center;padding:0 10px;gap:5px;flex-shrink:0;}
-.tb1{background:var(--toolbar-bg);border-bottom:1px solid var(--toolbar-border);}
-.tb2{background:var(--toolbar2-bg);border-bottom:1px solid #1a2330;}
-.tb-sep{width:1px;height:14px;background:var(--border2);flex-shrink:0;margin:0 2px;}
-.tb-sp{flex:1;}
-.tb-lbl{font-size:9px;font-weight:700;color:var(--muted2);letter-spacing:.7px;text-transform:uppercase;white-space:nowrap;}
-
-/* Zoom */
-.z-btn{width:22px;height:22px;border-radius:3px;border:1px solid var(--border2);background:transparent;color:var(--muted);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;}
-.z-btn:hover{background:rgba(255,255,255,.07);color:var(--text);}
-.z-fit{font-size:8px;font-weight:700;width:26px;}
-.z-val{font-size:11px;font-weight:700;color:var(--text);min-width:32px;text-align:center;}
+/* Zoom buttons */
+.zb{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:#fff;color:var(--muted);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;flex-shrink:0;}
+.zb:hover{background:var(--off);color:var(--navy);border-color:var(--border2);}
+.zb.fit{font-size:9px;font-weight:700;width:34px;}
+.z-pct{font-size:11px;font-weight:700;color:var(--navy);min-width:38px;text-align:center;}
 
 /* Page nav */
-.pg-btn{width:20px;height:20px;border-radius:3px;border:1px solid var(--border2);background:transparent;color:var(--muted);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;}
-.pg-btn:hover:not(:disabled){background:rgba(255,255,255,.07);color:var(--text);}
-.pg-btn:disabled{opacity:.2;cursor:default;}
-.pg-info{font-size:10px;color:var(--muted);}
+.pb{width:26px;height:26px;border-radius:5px;border:1px solid var(--border);background:#fff;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;}
+.pb:hover:not(:disabled){background:var(--off);color:var(--navy);}
+.pb:disabled{opacity:.25;cursor:default;}
+.p-info{font-size:11px;color:var(--muted);min-width:36px;text-align:center;}
 
 /* Tool buttons */
-.t-btn{height:24px;padding:0 8px;border-radius:3px;font-size:10px;font-weight:600;cursor:pointer;border:1px solid var(--border2);background:rgba(255,255,255,.03);color:var(--muted);font-family:inherit;transition:all .12s;display:inline-flex;align-items:center;gap:3px;white-space:nowrap;flex-shrink:0;}
-.t-btn:hover{background:rgba(255,255,255,.07);color:var(--text);border-color:var(--border);}
-.t-btn.on{background:var(--amber);border-color:var(--amber);color:var(--navy);font-weight:700;}
-.t-btn.set{background:rgba(16,185,129,.15);border-color:rgba(16,185,129,.3);color:var(--success);}
-.t-btn.ext-on{background:rgba(74,140,255,.18);border-color:rgba(74,140,255,.4);color:var(--ext);}
-.t-btn.int-on{background:rgba(168,85,247,.18);border-color:rgba(168,85,247,.4);color:var(--int);}
-.t-btn.plb-on{background:rgba(245,158,11,.18);border-color:rgba(245,158,11,.4);color:var(--plb);}
-.t-btn.sch{border-color:rgba(245,166,35,.25);color:rgba(245,166,35,.7);}
-.t-btn.sch:hover{background:rgba(245,166,35,.08);color:var(--amber);}
+.tb{height:28px;padding:0 10px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid var(--border);background:#fff;color:var(--muted);font-family:inherit;transition:all .12s;display:inline-flex;align-items:center;gap:4px;flex-shrink:0;}
+.tb:hover{background:var(--off);color:var(--navy);border-color:var(--border2);}
+.tb.scale-active{background:var(--amber);border-color:var(--amber);color:var(--navy);font-weight:700;}
+.tb.scale-done{background:#f0faf5;border-color:#a8dfc2;color:var(--success);font-weight:600;}
+.tb.ext-on{background:#eff6ff;border-color:#bfdbfe;color:var(--ext);font-weight:700;}
+.tb.int-on{background:#f5f3ff;border-color:#ddd6fe;color:var(--int);font-weight:700;}
+.tb.plb-on{background:#fffbeb;border-color:#fde68a;color:var(--plb);font-weight:700;}
+.tb.sch{background:#fffbf2;border-color:rgba(245,166,35,.4);color:var(--amber);font-weight:600;}
+.tb.sch:hover{background:#fff8e6;}
+.tb.sch.loading{background:var(--navy);border-color:var(--navy);color:#fff;}
 
 /* LF chips */
-.lf{height:20px;padding:0 6px;border-radius:3px;font-size:9px;font-weight:700;display:inline-flex;align-items:center;gap:3px;letter-spacing:.3px;}
-.lf.ext{background:rgba(74,140,255,.1);border:1px solid rgba(74,140,255,.2);color:var(--ext);}
-.lf.int{background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.2);color:var(--int);}
-.lf.plb{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);color:var(--plb);}
+.lf{height:24px;padding:0 8px;border-radius:5px;font-size:10px;font-weight:700;display:inline-flex;align-items:center;gap:3px;}
+.lf.ext{background:#eff6ff;border:1px solid #bfdbfe;color:var(--ext);}
+.lf.int{background:#f5f3ff;border:1px solid #ddd6fe;color:var(--int);}
+.lf.plb{background:#fffbeb;border:1px solid #fde68a;color:var(--plb);}
 
-/* Status badge */
-.scale-badge{font-size:9px;font-weight:700;color:var(--success);padding:0 4px;display:none;}
+/* Scale confirmed badge */
+#scaleBadge{font-size:10px;font-weight:700;color:var(--success);padding:0 2px;display:none;}
 
-/* Canvas */
-.canvas-scroll{flex:1;overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:16px;cursor:grab;scrollbar-width:thin;scrollbar-color:var(--border2) transparent;}
-.canvas-scroll.dragging{cursor:grabbing;}
-#pdfCanvas{box-shadow:0 0 0 1px rgba(255,255,255,.04),0 8px 32px rgba(0,0,0,.6);background:#fff;display:block;}
+/* ── SLIDE DRAWER: PAGES (left) ── */
+.drawer-left{
+  position:absolute;top:0;left:0;bottom:0;z-index:30;
+  display:flex;
+}
+.drawer-left-panel{
+  width:180px;background:#fff;
+  border-right:1px solid var(--border);
+  box-shadow:4px 0 20px rgba(26,35,50,.1);
+  display:flex;flex-direction:column;
+  transform:translateX(-180px);
+  transition:transform .22s cubic-bezier(.4,0,.2,1);
+}
+.drawer-left.open .drawer-left-panel{transform:translateX(0);}
+.drawer-left-tab{
+  position:absolute;left:0;top:80px;
+  width:26px;height:54px;
+  background:#fff;border:1px solid var(--border);border-left:none;
+  border-radius:0 8px 8px 0;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;box-shadow:3px 0 8px rgba(26,35,50,.06);
+  transition:all .15s;
+}
+.drawer-left.open .drawer-left-tab{left:180px;}
+.drawer-left-tab:hover{background:var(--off);}
+.drawer-left-tab svg{transition:transform .2s;}
+.drawer-left.open .drawer-left-tab svg{transform:rotate(180deg);}
 
-/* Status bar */
-.status-bar{height:22px;background:var(--navy);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 10px;gap:14px;flex-shrink:0;}
-.st{font-size:9px;color:var(--muted2);}
-.st span{color:var(--muted);font-weight:500;}
+.dl-head{padding:10px 12px;border-bottom:1px solid var(--border);background:var(--navy);}
+.dl-filename{font-size:11px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.dl-meta{font-size:9px;color:rgba(255,255,255,.4);margin-top:1px;}
+.dl-open-btn{margin:7px;padding:6px 8px;border-radius:5px;border:1px solid var(--border2);background:#fff;color:var(--muted);font-size:10px;font-weight:600;cursor:pointer;font-family:inherit;width:calc(100% - 14px);display:flex;align-items:center;gap:4px;transition:all .12s;}
+.dl-open-btn:hover{background:var(--off);color:var(--text);}
+.dl-thumbs{flex:1;overflow-y:auto;padding:8px;scrollbar-width:thin;}
+.thumb-item{border-radius:5px;overflow:hidden;margin-bottom:7px;cursor:pointer;border:2px solid transparent;transition:all .12s;}
+.thumb-item.active{border-color:var(--amber);}
+.thumb-item:hover:not(.active){border-color:var(--border2);}
+.thumb-canvas{width:100%;display:block;background:#eee;}
+.thumb-label{padding:3px 6px;font-size:9px;font-weight:500;color:var(--muted);}
 
-/* Loading */
-.loading{position:absolute;inset:0;background:rgba(20,28,40,.75);display:flex;align-items:center;justify-content:center;z-index:20;backdrop-filter:blur(2px);}
-.loading-inner{background:var(--navy2);border:1px solid var(--border2);border-radius:8px;padding:18px 24px;text-align:center;}
-.spin{width:26px;height:26px;border:2px solid var(--border2);border-top-color:var(--amber);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 8px;}
+/* ── SLIDE DRAWER: SCHEDULE (right) ── */
+.drawer-right{
+  position:absolute;top:0;right:0;bottom:0;z-index:30;
+  display:flex;flex-direction:row-reverse;
+}
+.drawer-right-panel{
+  width:340px;background:#fff;
+  border-left:1px solid var(--border);
+  box-shadow:-4px 0 20px rgba(26,35,50,.1);
+  display:flex;flex-direction:column;
+  transform:translateX(340px);
+  transition:transform .22s cubic-bezier(.4,0,.2,1);
+}
+.drawer-right.open .drawer-right-panel{transform:translateX(0);}
+.drawer-right-tab{
+  position:absolute;right:0;top:80px;
+  width:26px;height:54px;
+  background:#fff;border:1px solid var(--border);border-right:none;
+  border-radius:8px 0 0 8px;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;box-shadow:-3px 0 8px rgba(26,35,50,.06);
+  transition:all .15s;
+}
+.drawer-right.open .drawer-right-tab{right:340px;}
+.drawer-right-tab:hover{background:var(--off);}
+.drawer-right-tab svg{transition:transform .2s;}
+.drawer-right.open .drawer-right-tab svg{transform:rotate(180deg);}
+
+.dr-head{padding:12px 16px;border-bottom:1px solid var(--border);background:var(--navy);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.dr-title{font-size:12px;font-weight:700;color:#fff;letter-spacing:.3px;text-transform:uppercase;}
+.dr-close{width:24px;height:24px;border-radius:4px;border:1px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.55);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;}
+.dr-close:hover{background:rgba(255,255,255,.08);color:#fff;}
+.dr-body{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+.dr-footer{padding:10px 14px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0;background:var(--off);}
+.dr-btn{flex:1;padding:9px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:all .15s;}
+.dr-btn.primary{background:var(--amber);color:var(--navy);}
+.dr-btn.primary:hover{background:var(--amber2);}
+.dr-btn.secondary{background:#fff;color:var(--muted);border:1px solid var(--border2);}
+.dr-btn.secondary:hover{background:var(--off);}
+
+/* Schedule panel content */
+.sch-loading{padding:36px;text-align:center;}
+.sch-spin{width:28px;height:28px;border:2px solid var(--border);border-top-color:var(--amber);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px;}
 @keyframes spin{to{transform:rotate(360deg)}}
-.loading-text{font-size:11px;color:var(--muted);}
-
-/* Modal */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:300;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(3px);}
-.modal{background:var(--navy2);border:1px solid var(--border2);border-radius:10px;padding:20px;width:320px;box-shadow:0 12px 48px rgba(0,0,0,.5);}
-.modal-title{font-size:13px;font-weight:700;color:#fff;margin-bottom:5px;}
-.modal-sub{font-size:11px;color:var(--muted);margin-bottom:14px;line-height:1.5;}
-.modal-hint{background:rgba(245,166,35,.07);border:1px solid rgba(245,166,35,.18);border-radius:5px;padding:9px 11px;font-size:11px;color:rgba(245,166,35,.85);margin-bottom:12px;line-height:1.5;}
-.modal-ok{background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.18);border-radius:5px;padding:9px 11px;font-size:11px;color:rgba(16,185,129,.85);margin-bottom:12px;}
-.modal-field{margin-bottom:11px;}
-.modal-label{font-size:9px;font-weight:600;color:var(--muted2);margin-bottom:4px;display:block;text-transform:uppercase;letter-spacing:.5px;}
-.modal-input{width:100%;padding:7px 9px;border:1px solid var(--border2);border-radius:4px;font-size:12px;font-family:inherit;color:#fff;background:rgba(255,255,255,.05);}
-.modal-input:focus{outline:none;border-color:var(--amber);}
-.modal-row{display:flex;gap:7px;}
-.modal-btn{flex:1;padding:8px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:all .15s;}
-.modal-btn.primary{background:var(--amber);color:var(--navy);}
-.modal-btn.primary:hover{background:var(--amber2);}
-.modal-btn.cancel{background:rgba(255,255,255,.05);color:var(--muted);border:1px solid var(--border2);}
-.modal-btn.cancel:hover{background:rgba(255,255,255,.09);}
-
-/* Schedule panel */
-.sch-panel{width:340px;flex-shrink:0;background:var(--panel-bg);border-left:1px solid var(--panel-border);display:none;flex-direction:column;overflow:hidden;}
-.sch-panel.open{display:flex;}
-.sch-head{padding:9px 13px;border-bottom:1px solid var(--panel-border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--toolbar-bg);}
-.sch-title{font-size:11px;font-weight:700;color:#fff;letter-spacing:.3px;text-transform:uppercase;}
-.sch-close{width:22px;height:22px;border-radius:3px;border:1px solid var(--border2);background:transparent;color:var(--muted);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;}
-.sch-close:hover{background:rgba(255,255,255,.07);color:var(--text);}
-.sch-body{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--border2) transparent;}
-.sch-loading{padding:32px;text-align:center;}
-.sch-spin{width:26px;height:26px;border:2px solid var(--border2);border-top-color:var(--amber);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 9px;}
-.sch-load-text{font-size:11px;color:var(--muted);}
-.sch-fields{display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:12px 13px;border-bottom:1px solid var(--panel-border);}
-.sch-field label{font-size:9px;font-weight:600;color:var(--muted2);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:3px;}
-.sch-field input,.sch-field select{width:100%;padding:5px 7px;border:1px solid var(--border2);border-radius:3px;font-size:11px;font-family:inherit;color:#fff;background:rgba(255,255,255,.04);}
+.sch-load-text{font-size:12px;color:var(--muted);}
+.sch-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 14px;border-bottom:1px solid var(--border);}
+.sch-field label{font-size:9px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:3px;}
+.sch-field input,.sch-field select{width:100%;padding:5px 8px;border:1px solid var(--border2);border-radius:4px;font-size:12px;font-family:inherit;color:var(--text);transition:border .12s;}
 .sch-field input:focus,.sch-field select:focus{outline:none;border-color:var(--amber);}
-.sch-section{border-bottom:1px solid var(--panel-border);}
-.sch-sec-head{padding:7px 13px;background:rgba(255,255,255,.015);display:flex;align-items:center;justify-content:space-between;}
+.sch-section{border-bottom:1px solid var(--border);}
+.sch-sec-head{padding:8px 14px;background:var(--off);display:flex;align-items:center;justify-content:space-between;}
 .sch-sec-title{font-size:9px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);}
-.sch-sec-count{font-size:9px;font-weight:600;background:rgba(245,166,35,.12);color:var(--amber);padding:1px 5px;border-radius:2px;}
-.sch-sec-body{padding:0 13px 10px;}
-.sch-tbl{width:100%;border-collapse:collapse;font-size:11px;margin-top:6px;}
-.sch-tbl th{text-align:left;padding:3px 4px;font-size:9px;font-weight:600;color:var(--muted2);border-bottom:1px solid var(--panel-border);letter-spacing:.3px;}
-.sch-tbl td{padding:5px 4px;border-bottom:1px solid rgba(42,53,72,.4);color:var(--text);vertical-align:middle;}
+.sch-sec-count{font-size:9px;font-weight:700;background:#fffbf2;color:var(--amber);padding:1px 6px;border-radius:3px;border:1px solid rgba(245,166,35,.2);}
+.sch-sec-body{padding:0 14px 10px;}
+.sch-tbl{width:100%;border-collapse:collapse;font-size:11px;margin-top:7px;}
+.sch-tbl th{text-align:left;padding:3px 4px;font-size:9px;font-weight:600;color:var(--muted2);border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.3px;}
+.sch-tbl td{padding:5px 4px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle;}
 .sch-tbl tr:last-child td{border-bottom:none;}
-.sch-tbl input[type=number]{width:40px;border:1px solid var(--border2);border-radius:3px;padding:2px 4px;font-size:11px;font-family:inherit;text-align:center;background:rgba(255,255,255,.05);color:#fff;}
-.sch-badge{display:inline-block;padding:1px 5px;border-radius:2px;font-size:9px;font-weight:600;}
-.sch-badge.ext{background:rgba(74,140,255,.15);color:var(--ext);}
-.sch-badge.int{background:rgba(255,255,255,.06);color:var(--muted);}
-.sch-note{padding:6px 13px;font-size:10px;color:var(--muted);line-height:1.5;border-bottom:1px solid var(--panel-border);}
-.sch-empty{padding:24px;text-align:center;color:var(--muted);font-size:11px;line-height:1.6;}
-.sch-footer{padding:9px 13px;border-top:1px solid var(--panel-border);display:flex;gap:7px;flex-shrink:0;background:var(--toolbar-bg);}
-.sch-btn{flex:1;padding:8px;border-radius:4px;font-size:11px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:all .15s;}
-.sch-btn.primary{background:var(--amber);color:var(--navy);}
-.sch-btn.primary:hover{background:var(--amber2);}
-.sch-btn.secondary{background:rgba(255,255,255,.05);color:var(--muted);border:1px solid var(--border2);}
-.sch-btn.secondary:hover{background:rgba(255,255,255,.09);color:var(--text);}
+.sch-tbl input[type=number]{width:40px;border:1px solid var(--border2);border-radius:3px;padding:2px 4px;font-size:11px;font-family:inherit;text-align:center;}
+.sch-badge{display:inline-block;padding:1px 5px;border-radius:3px;font-size:9px;font-weight:700;}
+.sch-badge.ext{background:#eff6ff;color:var(--ext);}
+.sch-badge.int{background:var(--off);color:var(--muted);}
+.sch-note{padding:7px 14px;font-size:10px;color:var(--muted);line-height:1.5;border-bottom:1px solid var(--border);}
+.sch-empty{padding:28px;text-align:center;color:var(--muted);font-size:12px;line-height:1.7;}
+
+/* ── STATUS BAR ── */
+.status-bar{
+  position:absolute;bottom:0;left:0;right:0;
+  height:26px;background:var(--navy);
+  display:flex;align-items:center;padding:0 14px;gap:16px;z-index:20;
+}
+.st{font-size:9px;color:rgba(255,255,255,.35);}
+.st span{color:rgba(255,255,255,.6);font-weight:500;}
+#statusMsg{font-size:9px;color:var(--amber);font-weight:600;}
+
+/* ── LOADING OVERLAY ── */
+.loading-overlay{position:absolute;inset:0;background:rgba(240,242,245,.88);display:flex;align-items:center;justify-content:center;z-index:50;backdrop-filter:blur(2px);}
+.loading-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:20px 28px;text-align:center;box-shadow:0 4px 20px rgba(26,35,50,.08);}
+.spin{width:28px;height:28px;border:2px solid var(--border);border-top-color:var(--amber);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px;}
+.loading-text{font-size:12px;font-weight:500;color:var(--muted);}
+
+/* ── SCALE MODAL ── */
+.modal-bg{position:fixed;inset:0;background:rgba(26,35,50,.45);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);}
+.modal-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:24px;width:340px;box-shadow:0 8px 40px rgba(26,35,50,.14);}
+.modal-title{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:5px;}
+.modal-sub{font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.5;}
+.modal-hint{background:#fff8ee;border:1px solid #f5dba0;border-radius:6px;padding:10px 12px;font-size:11px;color:#92610a;margin-bottom:14px;line-height:1.5;}
+.modal-ok{background:#f0faf5;border:1px solid #a8dfc2;border-radius:6px;padding:10px 12px;font-size:11px;color:#1a6640;margin-bottom:14px;}
+.modal-lbl{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px;}
+.modal-in{width:100%;padding:8px 10px;border:1px solid var(--border2);border-radius:5px;font-size:13px;font-family:inherit;color:var(--text);margin-bottom:12px;transition:border .12s;}
+.modal-in:focus{outline:none;border-color:var(--amber);box-shadow:0 0 0 3px rgba(245,166,35,.1);}
+.modal-row{display:flex;gap:8px;margin-top:4px;}
+.modal-btn{flex:1;padding:9px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:all .15s;}
+.modal-btn.ok{background:var(--amber);color:var(--navy);}
+.modal-btn.ok:hover{background:var(--amber2);}
+.modal-btn.cancel{background:var(--off);color:var(--muted);border:1px solid var(--border2);}
 </style>
 </head>
 <body>
-<div class="app">
 
+<!-- NAV -->
 <nav class="nav">
   <div class="nav-mark">SE</div>
-  <div><div class="nav-title">Sauce Estimator</div><div class="nav-sub">Home Edition</div></div>
+  <div style="margin-right:16px">
+    <div class="nav-name">Sauce Estimator</div>
+    <div class="nav-sub">Home Edition</div>
+  </div>
   <div class="nav-div"></div>
   <div class="nav-mod">Plan Viewer</div>
   <div class="nav-sp"></div>
@@ -199,27 +276,29 @@ body{font-family:'Inter',sans-serif;background:var(--canvas-bg);color:var(--text
   <a href="/" class="nav-btn amber">Dashboard</a>
 </nav>
 
-<div class="app-body">
-
 <!-- UPLOAD -->
 <div id="uploadScreen">
   <div class="upload-card">
     <div class="upload-head">
       <div class="upload-title">Open a Plan Set</div>
-      <div class="upload-sub">Upload a PDF to view, calibrate scale, and trace walls</div>
+      <div class="upload-sub">Upload a PDF or image — view at full resolution, set scale, trace walls, and read schedules.</div>
     </div>
     <div class="upload-body">
       <div class="dz" id="dropzone">
         <input type="file" id="fileInput" accept=".pdf,image/jpeg,image/png,image/webp">
         <div class="dz-icon">
           <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-            <path d="M11 2v13M5 8l6-6 6 6" stroke="#f5a623" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M2 16v2a2 2 0 002 2h14a2 2 0 002-2v-2" stroke="rgba(255,255,255,.4)" stroke-width="1.5" stroke-linecap="round"/>
+            <path d="M11 2v13M5 8l6-6 6 6" stroke="#f5a623" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 16v2a2 2 0 002 2h14a2 2 0 002-2v-2" stroke="rgba(255,255,255,.5)" stroke-width="1.8" stroke-linecap="round"/>
           </svg>
         </div>
         <h3>Drop your plan here</h3>
         <p>or click to browse — PDF, JPG, PNG</p>
-        <div class="fmts"><span class="fmt">PDF</span><span class="fmt">JPG</span><span class="fmt">PNG</span></div>
+        <div class="dz-fmts">
+          <span class="dz-fmt">PDF</span>
+          <span class="dz-fmt">JPG</span>
+          <span class="dz-fmt">PNG</span>
+        </div>
       </div>
     </div>
   </div>
@@ -228,129 +307,153 @@ body{font-family:'Inter',sans-serif;background:var(--canvas-bg);color:var(--text
 <!-- VIEWER -->
 <div id="viewerScreen">
 
-  <!-- SIDEBAR -->
-  <div class="sidebar">
-    <div class="sb-head">
-      <div class="sb-filename" id="sbFilename">—</div>
-      <div class="sb-meta" id="sbMeta">—</div>
+  <!-- THE PLAN -->
+  <div class="plan-scroll" id="planScroll">
+    <div style="position:relative;display:inline-block;">
+      <canvas id="pdfCanvas"></canvas>
+      <svg id="scaleOverlay" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;"></svg>
+      <svg id="wallOverlay" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;"></svg>
     </div>
-    <button class="sb-open" onclick="document.getElementById('fileInput2').click()">
-      <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 1v6M2 4l3-3 3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M1 7.5v1A.5.5 0 001.5 9h7a.5.5 0 00.5-.5v-1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-      Open New File
+  </div>
+
+  <!-- FLOATING PILL TOOLBAR -->
+  <div class="pill-bar">
+    <!-- Zoom -->
+    <div class="pill-group">
+      <button class="zb" onclick="adjustZoom(-0.25)">−</button>
+      <button class="zb fit" onclick="setZoom(1.0)">FIT</button>
+      <button class="zb" onclick="adjustZoom(0.25)">+</button>
+      <span class="z-pct" id="zoomLabel">100%</span>
+    </div>
+
+    <div class="pill-sep"></div>
+
+    <!-- Pages -->
+    <div class="pill-group">
+      <button class="pb" id="prevBtn" onclick="changePage(-1)">‹</button>
+      <span class="p-info" id="pageInfo">1 / 1</span>
+      <button class="pb" id="nextBtn" onclick="changePage(1)">›</button>
+    </div>
+
+    <div class="pill-sep"></div>
+
+    <!-- Scale -->
+    <button class="tb" id="scaleBtn" onclick="startScaleTool()">
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 5h8M1 2.5L2.5 5 1 7.5M9 2.5L7.5 5 9 7.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Set Scale
     </button>
-    <input type="file" id="fileInput2" accept=".pdf,image/jpeg,image/png" style="display:none">
-    <div class="thumbs" id="thumbsContainer"></div>
-  </div>
+    <span id="scaleBadge">✓ <span id="scaleLabel"></span></span>
 
-  <!-- CANVAS AREA -->
-  <div class="canvas-area" style="position:relative">
+    <div class="pill-sep"></div>
 
-    <!-- TOOLBAR 1: View -->
-    <div class="tb tb1">
-      <button class="z-btn" onclick="adjustZoom(-0.25)">−</button>
-      <button class="z-btn z-fit" onclick="setZoom(1.0)">FIT</button>
-      <button class="z-btn" onclick="adjustZoom(0.25)">+</button>
-      <span class="z-val" id="zoomLabel">100%</span>
-      <div class="tb-sep"></div>
-      <button class="pg-btn" id="prevBtn" onclick="changePage(-1)">‹</button>
-      <span class="pg-info" id="pageInfo">1 / 1</span>
-      <button class="pg-btn" id="nextBtn" onclick="changePage(1)">›</button>
-      <div class="tb-sep"></div>
-      <span class="tb-lbl" id="statusMsg" style="color:var(--muted);">Open a plan to begin</span>
-      <div class="tb-sp"></div>
+    <!-- Wall tools -->
+    <div class="pill-group">
+      <span class="pill-label">Walls</span>
+      <button class="tb" id="extWallBtn" onclick="activateWallTool('ext')">Ext</button>
+      <button class="tb" id="intWallBtn" onclick="activateWallTool('int')">Int</button>
+      <button class="tb" id="plumbWallBtn" onclick="activateWallTool('plumb')">Plumb</button>
+      <button class="tb" onclick="undoLastSegment()" style="color:var(--muted2);">↩ Undo</button>
     </div>
 
-    <!-- TOOLBAR 2: Tools -->
-    <div class="tb tb2">
-      <span class="tb-lbl">Scale</span>
-      <button class="t-btn" id="scaleBtn" onclick="startScaleTool()">Set Scale</button>
-      <div class="scale-badge" id="scaleBadge">✓ <span id="scaleLabel">set</span></div>
-      <div class="tb-sep"></div>
-      <span class="tb-lbl">Measure</span>
-      <button class="t-btn" id="extWallBtn" onclick="activateWallTool('ext')">Ext</button>
-      <button class="t-btn" id="intWallBtn" onclick="activateWallTool('int')">Int</button>
-      <button class="t-btn" id="plumbWallBtn" onclick="activateWallTool('plumb')">Plumb</button>
-      <button class="t-btn" onclick="undoLastSegment()" style="color:var(--muted2);">Undo</button>
-      <div class="lf ext" id="extTotal" style="display:none">EXT <span id="extLF">0</span>'</div>
-      <div class="lf int" id="intTotal" style="display:none">INT <span id="intLF">0</span>'</div>
-      <div class="lf plb" id="plumbTotal" style="display:none">PLB <span id="plumbLF">0</span>'</div>
-      <div class="tb-sep"></div>
-      <button class="t-btn sch" id="readBtn" onclick="readSchedules()">
-        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="1" y="1" width="8" height="8" rx="1.2" stroke="currentColor" stroke-width="1.3"/><path d="M3 3.5h4M3 5h4M3 6.5h2.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
-        Read Schedules
+    <!-- LF totals -->
+    <div class="lf ext" id="extTotal" style="display:none">EXT <span id="extLF">0</span>'</div>
+    <div class="lf int" id="intTotal" style="display:none">INT <span id="intLF">0</span>'</div>
+    <div class="lf plb" id="plumbTotal" style="display:none">PLB <span id="plumbLF">0</span>'</div>
+
+    <div class="pill-sep"></div>
+
+    <!-- Schedules -->
+    <button class="tb sch" id="readBtn" onclick="readSchedules()">
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="1" y="1" width="8" height="8" rx="1.2" stroke="currentColor" stroke-width="1.3"/><path d="M3 3.5h4M3 5.2h4M3 6.9h2.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+      Read Schedules
+    </button>
+  </div>
+
+  <!-- LEFT DRAWER: PAGES -->
+  <div class="drawer-left" id="drawerLeft">
+    <div class="drawer-left-panel">
+      <div class="dl-head">
+        <div class="dl-filename" id="dlFilename">—</div>
+        <div class="dl-meta" id="dlMeta">—</div>
+      </div>
+      <button class="dl-open-btn" onclick="document.getElementById('fileInput2').click()">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 1v6M2 4l3-3 3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M1 7.5v1A.5.5 0 001.5 9h7a.5.5 0 00.5-.5v-1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        Open New File
       </button>
+      <input type="file" id="fileInput2" accept=".pdf,image/jpeg,image/png" style="display:none">
+      <div class="dl-thumbs" id="thumbsContainer"></div>
     </div>
-
-    <div class="canvas-scroll" id="canvasScroll">
-      <div style="position:relative;display:inline-block;">
-        <canvas id="pdfCanvas"></canvas>
-        <svg id="scaleOverlay" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;"></svg>
-        <svg id="wallOverlay" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:visible;"></svg>
-      </div>
-    </div>
-
-    <div class="status-bar">
-      <div class="st">Sheet: <span id="statusSheet">—</span></div>
-      <div class="st">Size: <span id="statusSize">—</span></div>
-      <div class="st">Scale: <span id="statusScale">not set</span></div>
-    </div>
-
-    <div class="loading" id="loadingOverlay" style="display:none">
-      <div class="loading-inner">
-        <div class="spin"></div>
-        <div class="loading-text" id="loadingText">Loading...</div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- SCHEDULE PANEL -->
-  <div class="sch-panel" id="schedulePanel">
-    <div class="sch-head">
-      <div class="sch-title">Schedule Reader</div>
-      <button class="sch-close" onclick="closeSchedulePanel()">×</button>
-    </div>
-    <div class="sch-body" id="schBody">
-      <div class="sch-loading" id="schLoading" style="display:none">
-        <div class="sch-spin"></div>
-        <div class="sch-load-text">Reading schedules...</div>
-      </div>
-      <div id="schContent"></div>
-    </div>
-    <div class="sch-footer" id="schFooter" style="display:none">
-      <button class="sch-btn secondary" onclick="closeSchedulePanel()">Close</button>
-      <button class="sch-btn primary" onclick="sendToEstimator()">Send to Estimator →</button>
+    <div class="drawer-left-tab" onclick="toggleLeft()">
+      <svg width="10" height="16" viewBox="0 0 10 16" fill="none" id="leftTabIcon">
+        <path d="M7 3L3 8l4 5" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
     </div>
   </div>
 
-</div>
-</div>
-</div>
+  <!-- RIGHT DRAWER: SCHEDULE READER -->
+  <div class="drawer-right" id="drawerRight">
+    <div class="drawer-right-panel">
+      <div class="dr-head">
+        <div class="dr-title">Schedule Reader</div>
+        <button class="dr-close" onclick="closeRight()">×</button>
+      </div>
+      <div class="dr-body" id="drBody">
+        <div class="sch-loading" id="schLoading" style="display:none">
+          <div class="sch-spin"></div>
+          <div class="sch-load-text">Reading schedules from plan...</div>
+        </div>
+        <div id="schContent"></div>
+      </div>
+      <div class="dr-footer" id="drFooter" style="display:none">
+        <button class="dr-btn secondary" onclick="closeRight()">Close</button>
+        <button class="dr-btn primary" onclick="sendToEstimator()">Send to Estimator →</button>
+      </div>
+    </div>
+    <div class="drawer-right-tab" onclick="toggleRight()">
+      <svg width="10" height="16" viewBox="0 0 10 16" fill="none" id="rightTabIcon">
+        <path d="M3 3l4 5-4 5" stroke="var(--muted)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
+  </div>
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <div class="st">Sheet: <span id="statusSheet">—</span></div>
+    <div class="st">Size: <span id="statusSize">—</span></div>
+    <div class="st">Scale: <span id="statusScale">not set</span></div>
+    <div id="statusMsg"></div>
+  </div>
+
+  <!-- LOADING -->
+  <div class="loading-overlay" id="loadingOverlay" style="display:none">
+    <div class="loading-card">
+      <div class="spin"></div>
+      <div class="loading-text" id="loadingText">Loading...</div>
+    </div>
+  </div>
+
+</div><!-- end viewerScreen -->
 
 <!-- SCALE MODAL -->
-<div class="modal-overlay" id="scaleModal" style="display:none">
-  <div class="modal">
+<div class="modal-bg" id="scaleModal" style="display:none">
+  <div class="modal-card">
     <div class="modal-title">Set Plan Scale</div>
-    <div class="modal-sub">Click two points on a known dimension line, then enter the real distance between them.</div>
+    <div class="modal-sub">Click two points on a known dimension line, then enter the real distance.</div>
     <div id="scaleStep1">
-      <div class="modal-hint"><strong>Step 1:</strong> Close this, click point 1 on a known dimension line, then click point 2.</div>
+      <div class="modal-hint"><strong>Step 1:</strong> Close this dialog, then click the two endpoints of any labeled dimension on the plan.</div>
       <div class="modal-row">
-        <button class="modal-btn primary" onclick="beginPickPoints()">Start Picking Points</button>
+        <button class="modal-btn ok" onclick="beginPickPoints()">Start Picking Points</button>
         <button class="modal-btn cancel" onclick="cancelScale()">Cancel</button>
       </div>
     </div>
     <div id="scaleStep2" style="display:none">
       <div class="modal-ok" id="scalePixelInfo">Measured: — px</div>
-      <div class="modal-field">
-        <label class="modal-label">Real distance between points</label>
-        <input type="number" class="modal-input" id="scaleDistInput" placeholder="e.g. 30" min="0.1" step="0.1">
-      </div>
-      <div class="modal-field">
-        <label class="modal-label">Unit</label>
-        <select class="modal-input" id="scaleUnitInput"><option value="ft">Feet</option><option value="in">Inches</option></select>
-      </div>
+      <label class="modal-lbl">Real distance between those two points</label>
+      <input type="number" class="modal-in" id="scaleDistInput" placeholder="e.g. 30" min="0.1" step="0.1">
+      <label class="modal-lbl">Unit</label>
+      <select class="modal-in" id="scaleUnitInput"><option value="ft">Feet</option><option value="in">Inches</option></select>
       <div class="modal-row">
-        <button class="modal-btn primary" onclick="confirmScale()">Confirm Scale</button>
+        <button class="modal-btn ok" onclick="confirmScale()">Confirm Scale</button>
         <button class="modal-btn cancel" onclick="cancelScale()">Cancel</button>
       </div>
     </div>
@@ -361,10 +464,12 @@ body{font-family:'Inter',sans-serif;background:var(--canvas-bg);color:var(--text
 <script>
 pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
+// STATE
 let pdfDoc=null,currentPage=1,totalPages=1,currentZoom=1.0,baseScale=1.0,filename='';
 
 function updateScaleForZoom(){const f=parseFloat(scroll.dataset.fracPerFoot);if(!f)return;scalePixelsPerFoot=document.getElementById('pdfCanvas').width*f;}
 
+// FILE
 document.getElementById('fileInput').addEventListener('change',e=>handleFile(e.target.files[0]));
 document.getElementById('fileInput2').addEventListener('change',e=>handleFile(e.target.files[0]));
 const dz=document.getElementById('dropzone');
@@ -373,81 +478,67 @@ dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
 dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');handleFile(e.dataTransfer.files[0]);});
 
 async function handleFile(file){
-  if(!file)return;
-  filename=file.name;
-  showLoading('Loading '+file.name+'...');
+  if(!file)return;filename=file.name;showLoading('Opening '+file.name+'...');
   const reader=new FileReader();
-  reader.onload=async e=>{
-    try{if(file.type==='application/pdf')await loadPDF(e.target.result);else await loadImage(e.target.result,file);}
-    catch(err){hideLoading();alert('Could not open file: '+err.message);}
-  };
+  reader.onload=async e=>{try{if(file.type==='application/pdf')await loadPDF(e.target.result);else await loadImage(e.target.result,file);}catch(err){hideLoading();alert('Could not open: '+err.message);}};
   reader.readAsArrayBuffer(file);
 }
 
 async function loadPDF(buf){
   pdfDoc=await pdfjsLib.getDocument({data:buf}).promise;
   totalPages=pdfDoc.numPages;currentPage=1;
-  document.getElementById('sbFilename').textContent=filename;
-  document.getElementById('sbMeta').textContent=totalPages+' page'+(totalPages>1?'s':'');
+  document.getElementById('dlFilename').textContent=filename;
+  document.getElementById('dlMeta').textContent=totalPages+' page'+(totalPages>1?'s':'');
   document.getElementById('statusSheet').textContent=filename;
-  await buildThumbnails();
-  await renderPage(1);
-  showViewer();hideLoading();
+  await buildThumbnails();await renderPage(1);showViewer();hideLoading();
 }
 
 async function loadImage(dataURL,file){
   const img=new Image();
   img.onload=()=>{
-    const c=document.getElementById('pdfCanvas');
-    c.width=img.width;c.height=img.height;
+    const c=document.getElementById('pdfCanvas');c.width=img.width;c.height=img.height;
     c.getContext('2d').drawImage(img,0,0);
     totalPages=1;currentPage=1;
-    document.getElementById('sbFilename').textContent=filename;
-    document.getElementById('sbMeta').textContent='1 page';
+    document.getElementById('dlFilename').textContent=filename;
+    document.getElementById('dlMeta').textContent='1 page';
     document.getElementById('pageInfo').textContent='1 / 1';
     document.getElementById('statusSheet').textContent=filename;
     document.getElementById('statusSize').textContent=img.width+'×'+img.height+'px';
     buildImageThumb(dataURL);showViewer();hideLoading();
-  };
-  img.src=dataURL;
+  };img.src=dataURL;
 }
 
 async function buildThumbnails(){
   const con=document.getElementById('thumbsContainer');con.innerHTML='';
   for(let i=1;i<=totalPages;i++){
-    const page=await pdfDoc.getPage(i);
-    const vp=page.getViewport({scale:0.16});
+    const page=await pdfDoc.getPage(i);const vp=page.getViewport({scale:.16});
     const c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;c.className='thumb-canvas';
     await page.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;
     const item=document.createElement('div');item.className='thumb-item'+(i===1?' active':'');item.dataset.page=i;
-    item.appendChild(c);
-    const lbl=document.createElement('div');lbl.className='thumb-label';lbl.textContent='Page '+i;item.appendChild(lbl);
+    item.appendChild(c);const lbl=document.createElement('div');lbl.className='thumb-label';lbl.textContent='Page '+i;item.appendChild(lbl);
     item.addEventListener('click',()=>goToPage(i));con.appendChild(item);
   }
 }
 
-function buildImageThumb(dataURL){
+function buildImageThumb(dURL){
   const con=document.getElementById('thumbsContainer');con.innerHTML='';
-  const img=document.createElement('img');img.src=dataURL;img.style.cssText='width:100%;display:block;border-radius:3px;';
+  const img=document.createElement('img');img.src=dURL;img.style.cssText='width:100%;display:block;';
   const item=document.createElement('div');item.className='thumb-item active';item.appendChild(img);
   const lbl=document.createElement('div');lbl.className='thumb-label';lbl.textContent='Page 1';item.appendChild(lbl);
   con.appendChild(item);
 }
 
 async function renderPage(n){
-  if(!pdfDoc)return;
-  showLoading('Rendering...');
+  if(!pdfDoc)return;showLoading('Rendering...');
   const page=await pdfDoc.getPage(n);
-  const se=document.getElementById('canvasScroll');
+  const se=document.getElementById('planScroll');
   const nv=page.getViewport({scale:1.0});
-  baseScale=Math.min((se.clientWidth-40)/nv.width,(se.clientHeight-40)/nv.height,2.0);
+  baseScale=Math.min((se.clientWidth-40)/nv.width,(se.clientHeight-100)/nv.height,2.5);
   const vp=page.getViewport({scale:baseScale*currentZoom});
-  const c=document.getElementById('pdfCanvas');
-  c.width=vp.width;c.height=vp.height;
+  const c=document.getElementById('pdfCanvas');c.width=vp.width;c.height=vp.height;
   await page.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;
   document.getElementById('pageInfo').textContent=n+' / '+totalPages;
-  document.getElementById('prevBtn').disabled=n<=1;
-  document.getElementById('nextBtn').disabled=n>=totalPages;
+  document.getElementById('prevBtn').disabled=n<=1;document.getElementById('nextBtn').disabled=n>=totalPages;
   document.getElementById('zoomLabel').textContent=Math.round(currentZoom*100)+'%';
   document.getElementById('statusSize').textContent=Math.round(nv.width/72*12)+'" × '+Math.round(nv.height/72*12)+'"';
   document.querySelectorAll('.thumb-item').forEach(t=>t.classList.toggle('active',parseInt(t.dataset.page)===n));
@@ -459,30 +550,32 @@ async function renderPage(n){
 
 function goToPage(n){if(n<1||n>totalPages)return;currentPage=n;renderPage(n);document.querySelector(`.thumb-item[data-page="${n}"]`)?.scrollIntoView({behavior:'smooth',block:'nearest'});}
 function changePage(d){goToPage(currentPage+d);}
-function adjustZoom(d){currentZoom=Math.max(0.25,Math.min(4.0,currentZoom+d));renderPage(currentPage);}
+function adjustZoom(d){currentZoom=Math.max(.25,Math.min(4,currentZoom+d));renderPage(currentPage);}
 function setZoom(z){currentZoom=z;renderPage(currentPage);}
-function fitToWindow(){currentZoom=1.0;renderPage(currentPage);}
-function showViewer(){document.getElementById('uploadScreen').style.display='none';const v=document.getElementById('viewerScreen');v.classList.add('active');v.style.display='flex';}
-function showLoading(msg){document.getElementById('loadingText').textContent=msg||'Loading...';document.getElementById('loadingOverlay').style.display='flex';}
+function showViewer(){document.getElementById('uploadScreen').style.display='none';const v=document.getElementById('viewerScreen');v.classList.add('on');v.style.display='block';}
+function showLoading(m){document.getElementById('loadingText').textContent=m||'Loading...';document.getElementById('loadingOverlay').style.display='flex';}
 function hideLoading(){document.getElementById('loadingOverlay').style.display='none';}
+function setStatus(m){document.getElementById('statusMsg').textContent=m;}
+
+// DRAWERS
+function toggleLeft(){document.getElementById('drawerLeft').classList.toggle('open');}
+function toggleRight(){document.getElementById('drawerRight').classList.toggle('open');}
+function closeRight(){document.getElementById('drawerRight').classList.remove('open');}
+function openRight(){document.getElementById('drawerRight').classList.add('open');}
 
 // PAN
-const scroll=document.getElementById('canvasScroll');
+const scroll=document.getElementById('planScroll');
 let isPanning=false,panStart={x:0,y:0},scrollStart={x:0,y:0};
-scroll.addEventListener('mousedown',e=>{
-  if(e.button!==0||scaleMode||wallMode)return;
-  isPanning=true;panStart={x:e.clientX,y:e.clientY};scrollStart={x:scroll.scrollLeft,y:scroll.scrollTop};
-  scroll.classList.add('dragging');e.preventDefault();
-});
+scroll.addEventListener('mousedown',e=>{if(e.button!==0||scaleMode||wallMode)return;isPanning=true;panStart={x:e.clientX,y:e.clientY};scrollStart={x:scroll.scrollLeft,y:scroll.scrollTop};scroll.classList.add('dragging');e.preventDefault();});
 document.addEventListener('mousemove',e=>{if(!isPanning)return;scroll.scrollLeft=scrollStart.x-(e.clientX-panStart.x);scroll.scrollTop=scrollStart.y-(e.clientY-panStart.y);});
 document.addEventListener('mouseup',()=>{isPanning=false;scroll.classList.remove('dragging');});
-scroll.addEventListener('wheel',e=>{if(!e.ctrlKey&&!e.metaKey)return;e.preventDefault();adjustZoom(e.deltaY>0?-0.15:0.15);},{passive:false});
+scroll.addEventListener('wheel',e=>{if(!e.ctrlKey&&!e.metaKey)return;e.preventDefault();adjustZoom(e.deltaY>0?-.15:.15);},{passive:false});
 document.addEventListener('keydown',e=>{
   if(!pdfDoc)return;
   if(e.key==='ArrowRight'||e.key==='ArrowDown')changePage(1);
   if(e.key==='ArrowLeft'||e.key==='ArrowUp')changePage(-1);
-  if((e.key==='+'||e.key==='=')&&!e.target.matches('input'))adjustZoom(0.25);
-  if(e.key==='-'&&!e.target.matches('input'))adjustZoom(-0.25);
+  if((e.key==='+'||e.key==='=')&&!e.target.matches('input'))adjustZoom(.25);
+  if(e.key==='-'&&!e.target.matches('input'))adjustZoom(-.25);
   if(e.key==='Escape'){cancelScale();wallMode=null;updateWallBtns();}
 });
 
@@ -490,42 +583,30 @@ document.addEventListener('keydown',e=>{
 let scaleMode=false,scalePoints=[],scalePixelsPerFoot=null,scaleRealFt=null;
 
 function startScaleTool(){document.getElementById('scaleModal').style.display='flex';document.getElementById('scaleStep1').style.display='';document.getElementById('scaleStep2').style.display='none';}
-function beginPickPoints(){document.getElementById('scaleModal').style.display='none';scaleMode=true;scalePoints=[];redrawScaleOverlay();scroll.style.cursor='crosshair';document.getElementById('statusMsg').textContent='Click point 1 on a known dimension';document.getElementById('scaleBtn').classList.add('on');}
-function cancelScale(){scaleMode=false;scalePoints=[];redrawScaleOverlay();document.getElementById('scaleModal').style.display='none';scroll.style.cursor='';document.getElementById('scaleBtn').classList.remove('on');document.getElementById('statusMsg').textContent='Ready';}
-
+function beginPickPoints(){document.getElementById('scaleModal').style.display='none';scaleMode=true;scalePoints=[];redrawScaleOverlay();scroll.style.cursor='crosshair';setStatus('Click point 1 on a known dimension');document.getElementById('scaleBtn').classList.add('scale-active');}
+function cancelScale(){scaleMode=false;scalePoints=[];redrawScaleOverlay();document.getElementById('scaleModal').style.display='none';scroll.style.cursor='';document.getElementById('scaleBtn').classList.remove('scale-active');setStatus('');}
 function getCanvasFraction(e){const c=document.getElementById('pdfCanvas'),r=c.getBoundingClientRect();return{fx:(e.clientX-r.left)/c.width,fy:(e.clientY-r.top)/c.height};}
 function fractionToPixels(fx,fy){const c=document.getElementById('pdfCanvas');return{x:fx*c.width,y:fy*c.height};}
 
 function redrawScaleOverlay(){
-  const svg=document.getElementById('scaleOverlay');svg.innerHTML='';
-  if(!scalePoints.length)return;
+  const svg=document.getElementById('scaleOverlay');svg.innerHTML='';if(!scalePoints.length)return;
   const c=document.getElementById('pdfCanvas');svg.setAttribute('width',c.width);svg.setAttribute('height',c.height);
-  const p1=fractionToPixels(scalePoints[0].fx,scalePoints[0].fy);
-  dotAt(svg,p1.x,p1.y,'#f5a623');
+  const p1=fractionToPixels(scalePoints[0].fx,scalePoints[0].fy);dot(svg,p1.x,p1.y,'#f5a623');
   if(scalePoints.length===2){
-    const p2=fractionToPixels(scalePoints[1].fx,scalePoints[1].fy);
-    const col=scaleRealFt?'#10b981':'#f5a623';
-    dotAt(svg,p2.x,p2.y,col);
-    const ln=document.createElementNS('http://www.w3.org/2000/svg','line');
-    ln.setAttribute('x1',p1.x);ln.setAttribute('y1',p1.y);ln.setAttribute('x2',p2.x);ln.setAttribute('y2',p2.y);
-    ln.setAttribute('stroke',col);ln.setAttribute('stroke-width',2);ln.setAttribute('stroke-dasharray','6 3');svg.appendChild(ln);
-    if(scaleRealFt){
-      const t=document.createElementNS('http://www.w3.org/2000/svg','text');
-      t.setAttribute('x',(p1.x+p2.x)/2);t.setAttribute('y',(p1.y+p2.y)/2-8);t.setAttribute('text-anchor','middle');
-      t.setAttribute('font-size','11');t.setAttribute('font-weight','600');t.setAttribute('fill','#10b981');
-      t.setAttribute('stroke','#1a2332');t.setAttribute('stroke-width','3');t.setAttribute('paint-order','stroke');
-      t.textContent=scaleRealFt>=1?scaleRealFt+"'":(scaleRealFt*12)+'"';svg.appendChild(t);
-    }
+    const p2=fractionToPixels(scalePoints[1].fx,scalePoints[1].fy);const col=scaleRealFt?'#10b981':'#f5a623';dot(svg,p2.x,p2.y,col);
+    const ln=svgEl('line');ln.setAttribute('x1',p1.x);ln.setAttribute('y1',p1.y);ln.setAttribute('x2',p2.x);ln.setAttribute('y2',p2.y);ln.setAttribute('stroke',col);ln.setAttribute('stroke-width',2);ln.setAttribute('stroke-dasharray','6 3');svg.appendChild(ln);
+    if(scaleRealFt){const t=svgEl('text');t.setAttribute('x',(p1.x+p2.x)/2);t.setAttribute('y',(p1.y+p2.y)/2-8);t.setAttribute('text-anchor','middle');t.setAttribute('font-size','11');t.setAttribute('font-weight','700');t.setAttribute('fill',col);t.setAttribute('stroke','#fff');t.setAttribute('stroke-width','3');t.setAttribute('paint-order','stroke');t.textContent=scaleRealFt>=1?scaleRealFt+"'":(scaleRealFt*12)+'"';svg.appendChild(t);}
   }
 }
 
-function dotAt(svg,x,y,col){const c=document.createElementNS('http://www.w3.org/2000/svg','circle');c.setAttribute('cx',x);c.setAttribute('cy',y);c.setAttribute('r',5);c.setAttribute('fill',col);c.setAttribute('stroke','#fff');c.setAttribute('stroke-width',1.5);svg.appendChild(c);}
+function svgEl(tag){return document.createElementNS('http://www.w3.org/2000/svg',tag);}
+function dot(svg,x,y,col){const c=svgEl('circle');c.setAttribute('cx',x);c.setAttribute('cy',y);c.setAttribute('r',5);c.setAttribute('fill',col);c.setAttribute('stroke','#fff');c.setAttribute('stroke-width',1.5);svg.appendChild(c);}
 
 scroll.addEventListener('click',e=>{
   if(!scaleMode&&!wallMode)return;
   const pt=getCanvasFraction(e);
   if(scaleMode){
-    if(!scalePoints.length){scalePoints.push(pt);redrawScaleOverlay();document.getElementById('statusMsg').textContent='Now click point 2';}
+    if(!scalePoints.length){scalePoints.push(pt);redrawScaleOverlay();setStatus('Now click point 2');}
     else if(scalePoints.length===1){
       scalePoints.push(pt);redrawScaleOverlay();
       const p1=fractionToPixels(scalePoints[0].fx,scalePoints[0].fy),p2=fractionToPixels(pt.fx,pt.fy);
@@ -534,68 +615,53 @@ scroll.addEventListener('click',e=>{
       document.getElementById('scalePixelInfo').textContent='Measured '+Math.round(dist)+' pixels between your two points';
       document.getElementById('scaleModal').style.display='flex';
       document.getElementById('scaleStep1').style.display='none';document.getElementById('scaleStep2').style.display='';
-      document.getElementById('scaleDistInput').focus();scroll.dataset.pixelDist=dist;
-      document.getElementById('statusMsg').textContent='Enter real distance in dialog';
-    }
-    return;
+      document.getElementById('scaleDistInput').focus();scroll.dataset.pixelDist=dist;setStatus('Enter real distance in dialog');
+    }return;
   }
   handleWallClick(pt);
 });
 
 function confirmScale(){
-  const dist=parseFloat(document.getElementById('scaleDistInput').value);
-  const unit=document.getElementById('scaleUnitInput').value;
+  const dist=parseFloat(document.getElementById('scaleDistInput').value);const unit=document.getElementById('scaleUnitInput').value;
   if(!dist||dist<=0){document.getElementById('scaleDistInput').focus();return;}
-  const distFt=unit==='in'?dist/12:dist;
-  scaleRealFt=distFt;
-  const px=parseFloat(scroll.dataset.pixelDist);
-  scalePixelsPerFoot=px/distFt;
+  const distFt=unit==='in'?dist/12:dist;scaleRealFt=distFt;
+  const px=parseFloat(scroll.dataset.pixelDist);scalePixelsPerFoot=px/distFt;
   scroll.dataset.fracPerFoot=(px/document.getElementById('pdfCanvas').width)/distFt;
-  redrawScaleOverlay();
-  document.getElementById('scaleModal').style.display='none';
-  document.getElementById('scaleBtn').classList.remove('on');document.getElementById('scaleBtn').classList.add('set');
-  const badge=document.getElementById('scaleBadge');badge.style.display='inline-flex';
+  redrawScaleOverlay();document.getElementById('scaleModal').style.display='none';
+  document.getElementById('scaleBtn').classList.remove('scale-active');document.getElementById('scaleBtn').classList.add('scale-done');
+  document.getElementById('scaleBtn').innerHTML='✓ Scale Set';
+  document.getElementById('scaleBadge').style.display='inline';
   document.getElementById('scaleLabel').textContent=scalePixelsPerFoot.toFixed(0)+'px/ft';
-  document.getElementById('statusScale').textContent='1ft='+scalePixelsPerFoot.toFixed(0)+'px';
-  document.getElementById('statusMsg').textContent='Scale set — ready to measure walls';
+  document.getElementById('statusScale').textContent='1ft = '+scalePixelsPerFoot.toFixed(0)+'px';
+  setStatus('Scale confirmed — select Ext, Int, or Plumb to start measuring');
 }
 
 // WALL TOOL
-const WC={ext:'#4a8cff',int:'#a855f7',plumb:'#f59e0b'};
+const WC={ext:'#2563eb',int:'#7c3aed',plumb:'#d97706'};
 const WL={ext:'EXT',int:'INT',plumb:'PLB'};
 let wallMode=null,wallSegments=[],wallPendingStart=null;
-
 function getWallTotal(t){return wallSegments.filter(s=>s.type===t).reduce((a,s)=>a+s.ft,0);}
-function updateWallTotals(){['ext','int','plumb'].forEach(t=>{const total=getWallTotal(t);const chip=document.getElementById(t+'Total');chip.style.display=total>0?'inline-flex':'none';document.getElementById(t+'LF').textContent=total.toFixed(1);});}
-function updateWallBtns(){document.getElementById('extWallBtn').classList.toggle('ext-on',wallMode==='ext');document.getElementById('intWallBtn').classList.toggle('int-on',wallMode==='int');document.getElementById('plumbWallBtn').classList.toggle('plb-on',wallMode==='plumb');}
-
+function updateWallTotals(){['ext','int','plumb'].forEach(t=>{const tot=getWallTotal(t);document.getElementById(t+'Total').style.display=tot>0?'inline-flex':'none';document.getElementById(t+'LF').textContent=tot.toFixed(1);});}
+function updateWallBtns(){document.getElementById('extWallBtn').className='tb'+(wallMode==='ext'?' ext-on':'');document.getElementById('intWallBtn').className='tb'+(wallMode==='int'?' int-on':'');document.getElementById('plumbWallBtn').className='tb'+(wallMode==='plumb'?' plb-on':'');}
 function activateWallTool(type){
   if(!scalePixelsPerFoot){alert('Set the scale first.');return;}
   wallMode=wallMode===type?null:type;wallPendingStart=null;clearWallPreview();
   scroll.style.cursor=wallMode?'crosshair':'';updateWallBtns();
-  document.getElementById('statusMsg').textContent=wallMode?WL[wallMode]+' — click start of wall segment':'Ready';
+  setStatus(wallMode?WL[wallMode]+' — click start of wall (right-click cancels segment)':'');
 }
-
 function fToPx(fx,fy){const c=document.getElementById('pdfCanvas');return{x:fx*c.width,y:fy*c.height};}
 function pxToF(x,y){const c=document.getElementById('pdfCanvas');return{fx:x/c.width,fy:y/c.height};}
 function fracToFeet(fx1,fy1,fx2,fy2){const p1=fToPx(fx1,fy1),p2=fToPx(fx2,fy2);return Math.sqrt(Math.pow(p2.x-p1.x,2)+Math.pow(p2.y-p1.y,2))/scalePixelsPerFoot;}
-function clearWallPreview(){const p=document.getElementById('wallOverlay').querySelector('#wallPreview');if(p)p.remove();}
+function clearWallPreview(){document.getElementById('wallOverlay').querySelector('#wp')?.remove();}
 
 function redrawWallOverlay(){
-  const svg=document.getElementById('wallOverlay');const c=document.getElementById('pdfCanvas');
-  const prev=svg.querySelector('#wallPreview');svg.innerHTML='';svg.setAttribute('width',c.width);svg.setAttribute('height',c.height);
+  const svg=document.getElementById('wallOverlay'),c=document.getElementById('pdfCanvas');
+  const prev=svg.querySelector('#wp');svg.innerHTML='';svg.setAttribute('width',c.width);svg.setAttribute('height',c.height);
   wallSegments.forEach(seg=>{
     const p1=fToPx(seg.fx1,seg.fy1),p2=fToPx(seg.fx2,seg.fy2),col=WC[seg.type];
-    const ln=document.createElementNS('http://www.w3.org/2000/svg','line');
-    ln.setAttribute('x1',p1.x);ln.setAttribute('y1',p1.y);ln.setAttribute('x2',p2.x);ln.setAttribute('y2',p2.y);
-    ln.setAttribute('stroke',col);ln.setAttribute('stroke-width',3);ln.setAttribute('stroke-linecap','round');ln.setAttribute('opacity','0.8');svg.appendChild(ln);
-    const mx=(p1.x+p2.x)/2,my=(p1.y+p2.y)/2-8;
-    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
-    t.setAttribute('x',mx);t.setAttribute('y',my);t.setAttribute('text-anchor','middle');t.setAttribute('font-size','10');
-    t.setAttribute('font-weight','700');t.setAttribute('fill',col);t.setAttribute('stroke','#1a2332');t.setAttribute('stroke-width','2.5');t.setAttribute('paint-order','stroke');
-    t.textContent=seg.ft.toFixed(1)+"'";svg.appendChild(t);
-    const d=document.createElementNS('http://www.w3.org/2000/svg','circle');
-    d.setAttribute('cx',p1.x);d.setAttribute('cy',p1.y);d.setAttribute('r',3.5);d.setAttribute('fill',col);d.setAttribute('stroke','#1a2332');d.setAttribute('stroke-width',1);svg.appendChild(d);
+    const ln=svgEl('line');ln.setAttribute('x1',p1.x);ln.setAttribute('y1',p1.y);ln.setAttribute('x2',p2.x);ln.setAttribute('y2',p2.y);ln.setAttribute('stroke',col);ln.setAttribute('stroke-width',3);ln.setAttribute('stroke-linecap','round');ln.setAttribute('opacity','0.72');svg.appendChild(ln);
+    const t=svgEl('text');t.setAttribute('x',(p1.x+p2.x)/2);t.setAttribute('y',(p1.y+p2.y)/2-8);t.setAttribute('text-anchor','middle');t.setAttribute('font-size','10');t.setAttribute('font-weight','700');t.setAttribute('fill',col);t.setAttribute('stroke','#fff');t.setAttribute('stroke-width','2.5');t.setAttribute('paint-order','stroke');t.textContent=seg.ft.toFixed(1)+"'";svg.appendChild(t);
+    const d=svgEl('circle');d.setAttribute('cx',p1.x);d.setAttribute('cy',p1.y);d.setAttribute('r',3.5);d.setAttribute('fill',col);d.setAttribute('stroke','#fff');d.setAttribute('stroke-width',1);svg.appendChild(d);
   });
   if(prev)svg.appendChild(prev);
 }
@@ -605,116 +671,99 @@ scroll.addEventListener('mousemove',e=>{
   const c=document.getElementById('pdfCanvas'),r=c.getBoundingClientRect();
   const x=e.clientX-r.left,y=e.clientY-r.top;
   const svg=document.getElementById('wallOverlay');
-  let prev=svg.querySelector('#wallPreview');
-  if(!prev){prev=document.createElementNS('http://www.w3.org/2000/svg','g');prev.setAttribute('id','wallPreview');svg.appendChild(prev);}
+  let prev=svg.querySelector('#wp');
+  if(!prev){prev=svgEl('g');prev.setAttribute('id','wp');svg.appendChild(prev);}
   prev.innerHTML='';
   const p1=fToPx(wallPendingStart.fx,wallPendingStart.fy),col=WC[wallMode];
-  const ln=document.createElementNS('http://www.w3.org/2000/svg','line');
-  ln.setAttribute('x1',p1.x);ln.setAttribute('y1',p1.y);ln.setAttribute('x2',x);ln.setAttribute('y2',y);
-  ln.setAttribute('stroke',col);ln.setAttribute('stroke-width',2);ln.setAttribute('stroke-dasharray','5 3');ln.setAttribute('opacity','0.6');prev.appendChild(ln);
-  const {fx,fy}=pxToF(x,y),ft=fracToFeet(wallPendingStart.fx,wallPendingStart.fy,fx,fy);
-  const t=document.createElementNS('http://www.w3.org/2000/svg','text');
-  t.setAttribute('x',(p1.x+x)/2);t.setAttribute('y',(p1.y+y)/2-8);t.setAttribute('text-anchor','middle');t.setAttribute('font-size','11');
-  t.setAttribute('font-weight','700');t.setAttribute('fill',col);t.setAttribute('stroke','#1a2332');t.setAttribute('stroke-width','2.5');t.setAttribute('paint-order','stroke');
-  t.textContent=ft.toFixed(1)+"'";prev.appendChild(t);
+  const ln=svgEl('line');ln.setAttribute('x1',p1.x);ln.setAttribute('y1',p1.y);ln.setAttribute('x2',x);ln.setAttribute('y2',y);ln.setAttribute('stroke',col);ln.setAttribute('stroke-width',2);ln.setAttribute('stroke-dasharray','5 3');ln.setAttribute('opacity','0.55');prev.appendChild(ln);
+  const {fx,fy}=pxToF(x,y);const ft=fracToFeet(wallPendingStart.fx,wallPendingStart.fy,fx,fy);
+  const t=svgEl('text');t.setAttribute('x',(p1.x+x)/2);t.setAttribute('y',(p1.y+y)/2-8);t.setAttribute('text-anchor','middle');t.setAttribute('font-size','11');t.setAttribute('font-weight','700');t.setAttribute('fill',col);t.setAttribute('stroke','#fff');t.setAttribute('stroke-width','2.5');t.setAttribute('paint-order','stroke');t.textContent=ft.toFixed(1)+"'";prev.appendChild(t);
 });
 
 function handleWallClick(pt){
   if(!wallMode)return;
-  if(!wallPendingStart){wallPendingStart=pt;document.getElementById('statusMsg').textContent=WL[wallMode]+' — click end point ('+getWallTotal(wallMode).toFixed(1)+"' so far)";}
+  if(!wallPendingStart){wallPendingStart=pt;setStatus(WL[wallMode]+' — click end ('+getWallTotal(wallMode).toFixed(1)+"' so far)");}
   else{
     const ft=fracToFeet(wallPendingStart.fx,wallPendingStart.fy,pt.fx,pt.fy);
-    if(ft>0.1){wallSegments.push({type:wallMode,fx1:wallPendingStart.fx,fy1:wallPendingStart.fy,fx2:pt.fx,fy2:pt.fy,ft});updateWallTotals();redrawWallOverlay();document.getElementById('statusMsg').textContent=WL[wallMode]+' +'+ft.toFixed(1)+"' = "+getWallTotal(wallMode).toFixed(1)+"' total";}
+    if(ft>0.1){wallSegments.push({type:wallMode,fx1:wallPendingStart.fx,fy1:wallPendingStart.fy,fx2:pt.fx,fy2:pt.fy,ft});updateWallTotals();redrawWallOverlay();setStatus(WL[wallMode]+' +'+ft.toFixed(1)+"' = "+getWallTotal(wallMode).toFixed(1)+"' total");}
     wallPendingStart=pt;clearWallPreview();
   }
 }
-
-scroll.addEventListener('contextmenu',e=>{if(!wallMode)return;e.preventDefault();wallPendingStart=null;clearWallPreview();document.getElementById('statusMsg').textContent=WL[wallMode]+' — click start point';});
-function undoLastSegment(){if(!wallSegments.length)return;wallSegments.pop();wallPendingStart=null;clearWallPreview();updateWallTotals();redrawWallOverlay();document.getElementById('statusMsg').textContent='Segment removed';}
+scroll.addEventListener('contextmenu',e=>{if(!wallMode)return;e.preventDefault();wallPendingStart=null;clearWallPreview();setStatus(WL[wallMode]+' — click start');});
+function undoLastSegment(){if(!wallSegments.length)return;wallSegments.pop();wallPendingStart=null;clearWallPreview();updateWallTotals();redrawWallOverlay();setStatus('Last segment removed');}
 function getWallMeasurements(){return{ext_wall_linear_ft:parseFloat(getWallTotal('ext').toFixed(1)),int_wall_linear_ft:parseFloat(getWallTotal('int').toFixed(1)),plumbing_wall_linear_ft:parseFloat(getWallTotal('plumb').toFixed(1))};}
 
 // SCHEDULE READER
 let scheduleData=null;
 
-function closeSchedulePanel(){const p=document.getElementById('schedulePanel');p.classList.remove('open');p.style.display='none';}
-
 async function readSchedules(){
   const canvas=document.getElementById('pdfCanvas');
   const imageData=canvas.toDataURL('image/jpeg',0.95).split(',')[1];
-  const panel=document.getElementById('schedulePanel');
-  panel.classList.add('open');panel.style.display='flex';
+  openRight();
   document.getElementById('schLoading').style.display='';
   document.getElementById('schContent').innerHTML='';
-  document.getElementById('schFooter').style.display='none';
-  document.getElementById('readBtn').classList.add('on');
+  document.getElementById('drFooter').style.display='none';
+  const btn=document.getElementById('readBtn');
+  btn.classList.add('loading');btn.textContent='Reading...';
   try{
     const res=await fetch('/api/read-schedules',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:imageData})});
-    const data=await res.json();
-    if(data.error)throw new Error(data.error);
-    scheduleData=data;renderSchedulePanel(data);
+    const data=await res.json();if(data.error)throw new Error(data.error);
+    scheduleData=data;renderSchPanel(data);
   }catch(err){
     document.getElementById('schLoading').style.display='none';
-    document.getElementById('schContent').innerHTML=`<div class="sch-empty" style="color:var(--danger);"><strong>Error</strong><br>${err.message}</div>`;
-    document.getElementById('schFooter').style.display='flex';
+    document.getElementById('schContent').innerHTML=`<div class="sch-empty" style="color:var(--danger)"><strong>Error</strong><br><br>${err.message}</div>`;
+    document.getElementById('drFooter').style.display='flex';
   }
-  document.getElementById('readBtn').classList.remove('on');
+  btn.classList.remove('loading');
+  btn.innerHTML='<svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="1" y="1" width="8" height="8" rx="1.2" stroke="currentColor" stroke-width="1.3"/><path d="M3 3.5h4M3 5.2h4M3 6.9h2.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg> Read Schedules';
 }
 
-function renderSchedulePanel(data){
+function renderSchPanel(data){
   document.getElementById('schLoading').style.display='none';
-  let html='';
-
-  html+=`<div class="sch-fields">
-    <div class="sch-field"><label>Living SF</label><input id="sp_living_sf" type="number" value="${data.living_sf||''}"></div>
-    <div class="sch-field"><label>Porch SF</label><input id="sp_porch_sf" type="number" value="${data.porch_sf||''}"></div>
-    <div class="sch-field"><label>Plate Ht</label><input id="sp_plate_ht" type="number" value="${data.plate_height_ft||9}"></div>
+  let h='';
+  h+=`<div class="sch-info-grid">
+    <div class="sch-field"><label>Living SF</label><input id="sp_sf" type="number" value="${data.living_sf||''}"></div>
+    <div class="sch-field"><label>Porch SF</label><input id="sp_psf" type="number" value="${data.porch_sf||''}"></div>
+    <div class="sch-field"><label>Plate Ht</label><input id="sp_ht" type="number" value="${data.plate_height_ft||9}"></div>
     <div class="sch-field"><label>Roof Pitch</label><input id="sp_pitch" type="text" value="${data.structural_roof_pitch||'6:12'}"></div>
-    <div class="sch-field"><label>Porch Pitch</label><input id="sp_porch_pitch" type="text" value="${data.porch_pitch||'2:12'}"></div>
-    <div class="sch-field"><label>Overhang (in)</label><input id="sp_overhang" type="number" value="${data.eave_overhang_in||16}"></div>
+    <div class="sch-field"><label>Porch Pitch</label><input id="sp_ppitch" type="text" value="${data.porch_pitch||'2:12'}"></div>
+    <div class="sch-field"><label>Overhang (in)</label><input id="sp_oh" type="number" value="${data.eave_overhang_in||16}"></div>
   </div>`;
-
   if(data.doors?.length){
     const ext=data.doors.filter(d=>d.is_exterior).reduce((a,d)=>a+(d.count||1),0);
     const int=data.doors.filter(d=>!d.is_exterior).reduce((a,d)=>a+(d.count||1),0);
-    html+=`<div class="sch-section"><div class="sch-sec-head"><span class="sch-sec-title">Doors</span><span class="sch-sec-count">${ext} ext · ${int} int</span></div><div class="sch-sec-body"><table class="sch-tbl"><thead><tr><th>Mark</th><th>Qty</th><th>W×H</th><th>Header</th><th></th></tr></thead><tbody>`;
-    data.doors.forEach((d,i)=>{html+=`<tr><td><strong>${d.mark||'—'}</strong></td><td><input type="number" value="${d.count||1}" min="0" data-door="${i}"></td><td style="color:var(--muted)">${d.rough_opening_width_ft||'?'}×${d.rough_opening_height_ft||'?'}'</td><td style="color:var(--muted);font-size:9px">${d.header||'—'}</td><td><span class="sch-badge ${d.is_exterior?'ext':'int'}">${d.is_exterior?'EXT':'INT'}</span></td></tr>`;});
-    html+=`</tbody></table></div></div>`;
+    h+=`<div class="sch-section"><div class="sch-sec-head"><span class="sch-sec-title">Doors</span><span class="sch-sec-count">${ext} ext · ${int} int</span></div><div class="sch-sec-body"><table class="sch-tbl"><thead><tr><th>Mark</th><th>Qty</th><th>W×H</th><th>Header</th><th></th></tr></thead><tbody>`;
+    data.doors.forEach((d,i)=>{h+=`<tr><td><strong>${d.mark||'—'}</strong></td><td><input type="number" value="${d.count||1}" min="0"></td><td style="color:var(--muted)">${d.rough_opening_width_ft||'?'}×${d.rough_opening_height_ft||'?'}'</td><td style="color:var(--muted);font-size:9px">${d.header||'—'}</td><td><span class="sch-badge ${d.is_exterior?'ext':'int'}">${d.is_exterior?'EXT':'INT'}</span></td></tr>`;});
+    h+=`</tbody></table></div></div>`;
   }
-
   if(data.windows?.length){
-    const total=data.windows.reduce((a,w)=>a+(w.count||1),0);
-    html+=`<div class="sch-section"><div class="sch-sec-head"><span class="sch-sec-title">Windows</span><span class="sch-sec-count">${total} total</span></div><div class="sch-sec-body"><table class="sch-tbl"><thead><tr><th>Mark</th><th>Qty</th><th>W×H</th><th>Header</th></tr></thead><tbody>`;
-    data.windows.forEach((w,i)=>{html+=`<tr><td><strong>${w.mark||'—'}</strong></td><td><input type="number" value="${w.count||1}" min="0" data-win="${i}"></td><td style="color:var(--muted)">${w.rough_opening_width_ft||'?'}×${w.rough_opening_height_ft||'?'}'</td><td style="color:var(--muted);font-size:9px">${w.header||'—'}</td></tr>`;});
-    html+=`</tbody></table></div></div>`;
+    const tot=data.windows.reduce((a,w)=>a+(w.count||1),0);
+    h+=`<div class="sch-section"><div class="sch-sec-head"><span class="sch-sec-title">Windows</span><span class="sch-sec-count">${tot} total</span></div><div class="sch-sec-body"><table class="sch-tbl"><thead><tr><th>Mark</th><th>Qty</th><th>W×H</th><th>Header</th></tr></thead><tbody>`;
+    data.windows.forEach((w,i)=>{h+=`<tr><td><strong>${w.mark||'—'}</strong></td><td><input type="number" value="${w.count||1}" min="0"></td><td style="color:var(--muted)">${w.rough_opening_width_ft||'?'}×${w.rough_opening_height_ft||'?'}'</td><td style="color:var(--muted);font-size:9px">${w.header||'—'}</td></tr>`;});
+    h+=`</tbody></table></div></div>`;
   }
-
   if(data.trusses?.length){
-    const total=data.trusses.reduce((a,t)=>a+(t.count||0),0);
-    html+=`<div class="sch-section"><div class="sch-sec-head"><span class="sch-sec-title">Trusses</span><span class="sch-sec-count">${total} EA</span></div><div class="sch-sec-body"><table class="sch-tbl"><thead><tr><th>Mark</th><th>Type</th><th>Count</th></tr></thead><tbody>`;
-    data.trusses.forEach((t,i)=>{html+=`<tr><td><strong>${t.mark||'—'}</strong></td><td style="color:var(--muted)">${t.type||'—'}</td><td><input type="number" value="${t.count||0}" min="0" data-truss="${i}"></td></tr>`;});
-    html+=`</tbody></table></div></div>`;
+    const tot=data.trusses.reduce((a,t)=>a+(t.count||0),0);
+    h+=`<div class="sch-section"><div class="sch-sec-head"><span class="sch-sec-title">Trusses</span><span class="sch-sec-count">${tot} EA</span></div><div class="sch-sec-body"><table class="sch-tbl"><thead><tr><th>Mark</th><th>Type</th><th>Count</th></tr></thead><tbody>`;
+    data.trusses.forEach((t,i)=>{h+=`<tr><td><strong>${t.mark||'—'}</strong></td><td style="color:var(--muted)">${t.type||'—'}</td><td><input type="number" value="${t.count||0}" min="0"></td></tr>`;});
+    h+=`</tbody></table></div></div>`;
   }
-
-  if(data.notes?.length){html+=`<div class="sch-section"><div class="sch-sec-head"><span class="sch-sec-title">Notes</span></div>${data.notes.map(n=>`<div class="sch-note">${n}</div>`).join('')}</div>`;}
-
-  if(!html||(!data.doors?.length&&!data.windows?.length&&!data.trusses?.length)){
-    html+='<div class="sch-empty">No schedules found on this page.<br>Navigate to the floor plan page with the door and window schedule and try again.</div>';
-  }
-
-  document.getElementById('schContent').innerHTML=html;
-  document.getElementById('schFooter').style.display='flex';
+  if(data.notes?.length){h+=`<div class="sch-section"><div class="sch-sec-head"><span class="sch-sec-title">Notes</span></div>${data.notes.map(n=>`<div class="sch-note">${n}</div>`).join('')}</div>`;}
+  if(!data.doors?.length&&!data.windows?.length&&!data.trusses?.length){h='<div class="sch-empty">No door, window, or truss schedules found on this page.<br><br>Go to the floor plan sheet with the schedule tables and try again.</div>';}
+  document.getElementById('schContent').innerHTML=h;
+  document.getElementById('drFooter').style.display='flex';
 }
 
 function sendToEstimator(){
   if(!scheduleData)return;
   const walls=getWallMeasurements();
-  const params=new URLSearchParams({
-    living_sf:document.getElementById('sp_living_sf')?.value||scheduleData.living_sf||'',
-    porch_sf:document.getElementById('sp_porch_sf')?.value||scheduleData.porch_sf||'',
-    plate_ht:document.getElementById('sp_plate_ht')?.value||9,
+  const p=new URLSearchParams({
+    living_sf:document.getElementById('sp_sf')?.value||scheduleData.living_sf||'',
+    porch_sf:document.getElementById('sp_psf')?.value||scheduleData.porch_sf||'',
+    plate_ht:document.getElementById('sp_ht')?.value||9,
     pitch:document.getElementById('sp_pitch')?.value||'6:12',
-    porch_pitch:document.getElementById('sp_porch_pitch')?.value||'2:12',
-    overhang:document.getElementById('sp_overhang')?.value||16,
+    porch_pitch:document.getElementById('sp_ppitch')?.value||'2:12',
+    overhang:document.getElementById('sp_oh')?.value||16,
     ext_lf:walls.ext_wall_linear_ft||'',
     int_lf:walls.int_wall_linear_ft||'',
     plumb_lf:walls.plumbing_wall_linear_ft||'',
@@ -722,7 +771,7 @@ function sendToEstimator(){
     windows:JSON.stringify(scheduleData.windows||[]),
     trusses:JSON.stringify(scheduleData.trusses||[])
   });
-  window.open('/estimator.html?'+params.toString(),'_blank');
+  window.open('/estimator.html?'+p.toString(),'_blank');
 }
 </script>
 </body>
