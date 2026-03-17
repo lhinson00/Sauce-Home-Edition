@@ -359,6 +359,134 @@ html,body{min-height:100%;background:var(--navy);color:var(--text);font-family:'
 </div>
 </div>
 
+
+<!-- TURNKEY UPGRADES (Turnkey sheet D101 → Quote Sheet N32) -->
+<div class="sec">
+<div class="sec-hdr">Turnkey Upgrades</div>
+<p class="sec-sub">D = B × C for each row. D101 = SUM(D1:D100) → Quote Sheet N32. Rate fields editable.</p>
+
+<div class="card">
+<table class="atbl"><thead><tr>
+  <th>Item</th><th class="r">Rate B</th><th class="r">Qty C</th><th class="r">Total D</th>
+</tr></thead><tbody>
+
+<tr class="subtag"><td colspan="4">Spray Foam Insulation (rows 3-4)</td></tr>
+<tr><td class="lbl">Spray Foam 2×4 walls (per SF)</td><td><input class="ri" id="B3" type="number" value="2.5" step=".25" oninput="calcTurnkey()"></td><td><input class="ni" id="C3" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D3">—</td></tr>
+<tr><td class="lbl">Spray Foam 2×6 walls (per SF)</td><td><input class="ri" id="B4" type="number" value="3.25" step=".25" oninput="calcTurnkey()"></td><td><input class="ni" id="C4tk" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D4">—</td></tr>
+
+<tr class="subtag"><td colspan="4">Concrete &amp; Flooring (rows 6-15)</td></tr>
+<tr><td class="lbl">Concrete drives/sidewalks (per SF)</td><td><input class="ri" id="B6" type="number" value="8.25" step=".25" oninput="calcTurnkey()"></td><td><input class="ni" id="C6" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D6">—</td></tr>
+<tr><td class="lbl">Colored concrete — no sealer (per SF)</td><td><input class="ri" id="B7" type="number" value="1.5" step=".25" oninput="calcTurnkey()"></td><td><input class="ni" id="C7" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D7">—</td></tr>
+<tr><td class="lbl">Colored concrete — with sealer (per SF)</td><td><input class="ri" id="B8" type="number" value="6" step=".25" oninput="calcTurnkey()"></td><td><input class="ni" id="C8" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D8">—</td></tr>
+<tr><td class="lbl">Stained concrete — no sealer (per SF)</td><td><input class="ri" id="B9" type="number" value="12" step=".25" oninput="calcTurnkey()"></td><td><input class="ni" id="C9" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D9">—</td></tr>
+<tr><td class="lbl">Sealer only (per SF)</td><td><input class="ri" id="B10" type="number" value="4.5" step=".25" oninput="calcTurnkey()"></td><td><input class="ni" id="C10" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D10">—</td></tr>
+<tr><td class="lbl">Stamped concrete — existing pour (per SF)</td><td><input class="ri" id="B11" type="number" value="10" step=".25" oninput="calcTurnkey()"></td><td><input class="ni" id="C11" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D11">—</td></tr>
+<tr><td class="lbl">Stamped concrete — new pour (per SF)</td><td><input class="ri" id="B12" type="number" value="17" step=".25" oninput="calcTurnkey()"></td><td><input class="ni" id="C12tk" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D12">—</td></tr>
+<tr><td class="lbl">Radiant flooring (per SF, 200 SF min)</td><td><input class="ri" id="B13" type="number" value="10.775" step=".25" oninput="calcTurnkey()"></td><td><input class="ni" id="C13" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D13">—</td></tr>
+<tr><td class="lbl">Carpet upcharge (per SF)</td><td><input class="ri" id="B14" type="number" value="3" step=".25" oninput="calcTurnkey()"></td><td><input class="ni" id="C14" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D14">—</td></tr>
+<tr><td class="lbl">Hardwood flooring (per SF)</td><td><input class="ri" id="B15" type="number" value="8" step=".25" oninput="calcTurnkey()"></td><td><input class="ni" id="C15" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D15">—</td></tr>
+
+<tr class="subtag"><td colspan="4">Shell &amp; Exterior (rows 17-25)</td></tr>
+<tr><td class="lbl">Post sealing (each)</td><td><input class="ri" id="B17" type="number" value="120" step="10" oninput="calcTurnkey()"></td><td><input class="ni" id="C17tk" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D17">—</td></tr>
+<tr><td class="lbl">Ceiling stain (per SF)</td><td><input class="ri" id="B18" type="number" value="5" step=".25" oninput="calcTurnkey()"></td><td><input class="ni" id="C18" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D18">—</td></tr>
+<tr><td class="lbl">Exterior door paint/stain (customer supplies)</td><td><input class="ri" id="B19" type="number" value="200" step="10" oninput="calcTurnkey()"></td><td><input class="ni" id="C19" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D19">—</td></tr>
+<tr><td class="lbl">Termite pretreat (per SF)</td><td><input class="ri" id="B20" type="number" value="1" step=".25" oninput="calcTurnkey()"></td><td><input class="ni" id="C20" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D20">—</td></tr>
+<tr><td class="lbl">Extra storage shelf (each)</td><td><input class="ri" id="B21" type="number" value="155" step="5" oninput="calcTurnkey()"></td><td><input class="ni" id="C21" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D21">—</td></tr>
+<tr><td class="lbl">Pocket door (each)</td><td><input class="ri" id="B22" type="number" value="269" step="10" oninput="calcTurnkey()"></td><td><input class="ni" id="C22tk" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D22">—</td></tr>
+<tr><td class="lbl">Doggy door installation (each)</td><td><input class="ri" id="B23" type="number" value="655" step="10" oninput="calcTurnkey()"></td><td><input class="ni" id="C23" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D23">—</td></tr>
+<tr><td class="lbl">Solid wood interior door upgrade (each)</td><td><input class="ri" id="B24" type="number" value="400" step="10" oninput="calcTurnkey()"></td><td><input class="ni" id="C24" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D24">—</td></tr>
+<tr><td class="lbl">Barn door install — owner supplied (each)</td><td><input class="ri" id="B25" type="number" value="269" step="10" oninput="calcTurnkey()"></td><td><input class="ni" id="C25" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D25">—</td></tr>
+
+<tr class="subtag"><td colspan="4">Plumbing (rows 27-48)</td></tr>
+<tr><td class="lbl">Tile shower 3×5 — owner supplies tile</td><td><input class="ri" id="B27" type="number" value="2800" step="100" oninput="calcTurnkey()"></td><td><input class="ni" id="C27" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D27">—</td></tr>
+<tr><td class="lbl">Tile showers (per SF)</td><td><input class="ri" id="B28" type="number" value="40" step="5" oninput="calcTurnkey()"></td><td><input class="ni" id="C28" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D28">—</td></tr>
+<tr><td class="lbl">Backsplash — $900 min (per SF)</td><td><input class="ri" id="B29" type="number" value="60" step="5" oninput="calcTurnkey()"></td><td><input class="ni" id="C29" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D29">—</td></tr>
+<tr><td class="lbl">Tile floors — owner supplies tile (per SF)</td><td><input class="ri" id="B30" type="number" value="22" step="1" oninput="calcTurnkey()"></td><td><input class="ni" id="C30" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D30">—</td></tr>
+<tr><td class="lbl">Add 3×5 shower (not upgrade)</td><td><input class="ri" id="B31" type="number" value="5500" step="100" oninput="calcTurnkey()"></td><td><input class="ni" id="C31" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D31">—</td></tr>
+<tr><td class="lbl">Add shower head (each)</td><td><input class="ri" id="B32" type="number" value="475" step="25" oninput="calcTurnkey()"></td><td><input class="ni" id="C32" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D32">—</td></tr>
+<tr><td class="lbl">Shower bench (each)</td><td><input class="ri" id="B33" type="number" value="417" step="25" oninput="calcTurnkey()"></td><td><input class="ni" id="C33" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D33">—</td></tr>
+<tr><td class="lbl">Niche 12×18 (each)</td><td><input class="ri" id="B34" type="number" value="259" step="25" oninput="calcTurnkey()"></td><td><input class="ni" id="C34" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D34">—</td></tr>
+<tr><td class="lbl">Freestanding tub + faucet</td><td><input class="ri" id="B35" type="number" value="3876" step="100" oninput="calcTurnkey()"></td><td><input class="ni" id="C35" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D35">—</td></tr>
+<tr><td class="lbl">Stub for extra sink (each)</td><td><input class="ri" id="B36" type="number" value="757" step="25" oninput="calcTurnkey()"></td><td><input class="ni" id="C36" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D36">—</td></tr>
+<tr><td class="lbl">Ice machine line (each)</td><td><input class="ri" id="B37" type="number" value="755" step="25" oninput="calcTurnkey()"></td><td><input class="ni" id="C37" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D37">—</td></tr>
+<tr><td class="lbl">Dog wash drain (each)</td><td><input class="ri" id="B38" type="number" value="899" step="25" oninput="calcTurnkey()"></td><td><input class="ni" id="C38" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D38">—</td></tr>
+<tr><td class="lbl">Garage plumbing stub (each)</td><td><input class="ri" id="B39" type="number" value="1550" step="50" oninput="calcTurnkey()"></td><td><input class="ni" id="C39" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D39">—</td></tr>
+<tr><td class="lbl">Water heater 40-gal gas (each)</td><td><input class="ri" id="B40" type="number" value="1039" step="50" oninput="calcTurnkey()"></td><td><input class="ni" id="C40" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D40">—</td></tr>
+<tr><td class="lbl">Tankless — no pump (each)</td><td><input class="ri" id="B41" type="number" value="2048" step="50" oninput="calcTurnkey()"></td><td><input class="ni" id="C41" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D41">—</td></tr>
+<tr><td class="lbl">Tankless — w/ pump (each)</td><td><input class="ri" id="B42" type="number" value="2411" step="50" oninput="calcTurnkey()"></td><td><input class="ni" id="C42" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D42">—</td></tr>
+<tr><td class="lbl">Tankless electric (each)</td><td><input class="ri" id="B43" type="number" value="2100" step="50" oninput="calcTurnkey()"></td><td><input class="ni" id="C43" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D43">—</td></tr>
+<tr><td class="lbl">Gas lines per fixture</td><td><input class="ri" id="B44" type="number" value="1039" step="50" oninput="calcTurnkey()"></td><td><input class="ni" id="C44" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D44">—</td></tr>
+<tr><td class="lbl">Division 10 install — owner supplies</td><td><input class="ri" id="B45" type="number" value="1589" step="50" oninput="calcTurnkey()"></td><td><input class="ni" id="C45" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D45">—</td></tr>
+<tr><td class="lbl">ADA grab bars (each)</td><td><input class="ri" id="B46" type="number" value="1000" step="50" oninput="calcTurnkey()"></td><td><input class="ni" id="C46" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D46">—</td></tr>
+<tr><td class="lbl">Spigots — extra beyond 2 standard (each)</td><td><input class="ri" id="B47" type="number" value="219" step="10" oninput="calcTurnkey()"></td><td><input class="ni" id="C47" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D47">—</td></tr>
+<tr><td class="lbl">Pot filler install — owner provided</td><td><input class="ri" id="B48" type="number" value="259" step="10" oninput="calcTurnkey()"></td><td><input class="ni" id="C48" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D48">—</td></tr>
+
+<tr class="subtag"><td colspan="4">Electrical &amp; Technology (rows 50-69)</td></tr>
+<tr><td class="lbl">200A underground &lt;100ft conduit</td><td><input class="ri" id="B50" type="number" value="4500" step="100" oninput="calcTurnkey()"></td><td><input class="ni" id="C50" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D50">—</td></tr>
+<tr><td class="lbl">400A underground &lt;100ft conduit</td><td><input class="ri" id="B51" type="number" value="7500" step="100" oninput="calcTurnkey()"></td><td><input class="ni" id="C51" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D51">—</td></tr>
+<tr><td class="lbl">400A no conduit</td><td><input class="ri" id="B52" type="number" value="4000" step="100" oninput="calcTurnkey()"></td><td><input class="ni" id="C52" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D52">—</td></tr>
+<tr><td class="lbl">HVAC gas upgrade per ton <span style="font-size:9px;color:var(--amber)">(+$1k adder E53)</span></td>
+  <td><input class="ri" id="B53" type="number" value="750" step="50" oninput="calcTurnkey()"></td>
+  <td><input class="ni" id="C53" type="number" value="0" min="0" oninput="calcTurnkey()"></td>
+  <td class="tot" id="D53">—</td></tr>
+<tr><td class="lbl" style="padding-left:16px;">↳ HVAC gas adder E53</td>
+  <td colspan="2"><input class="inp" id="E53" type="number" value="0" step="100" oninput="calcTurnkey()" style="width:100%;font-family:DM Mono,monospace;font-size:11px;"></td>
+  <td class="tot" style="font-size:9px;color:var(--muted);">in D53</td></tr>
+<tr><td class="lbl">Mini Split (each)</td><td><input class="ri" id="B54" type="number" value="3199" step="100" oninput="calcTurnkey()"></td><td><input class="ni" id="C54" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D54">—</td></tr>
+<tr><td class="lbl">60" fan (each)</td><td><input class="ri" id="B55" type="number" value="228" step="10" oninput="calcTurnkey()"></td><td><input class="ni" id="C55" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D55">—</td></tr>
+<tr><td class="lbl">Fan remote (each)</td><td><input class="ri" id="B56" type="number" value="75" step="5" oninput="calcTurnkey()"></td><td><input class="ni" id="C56" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D56">—</td></tr>
+<tr><td class="lbl">Cat 6 drop (each)</td><td><input class="ri" id="B57" type="number" value="521" step="25" oninput="calcTurnkey()"></td><td><input class="ni" id="C57" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D57">—</td></tr>
+<tr><td class="lbl">Interior junction box (each)</td><td><input class="ri" id="B58" type="number" value="225" step="25" oninput="calcTurnkey()"></td><td><input class="ni" id="C58" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D58">—</td></tr>
+<tr><td class="lbl">Exterior junction box — siding (each)</td><td><input class="ri" id="B59" type="number" value="628" step="25" oninput="calcTurnkey()"></td><td><input class="ni" id="C59" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D59">—</td></tr>
+<tr><td class="lbl">Exterior junction box — T&amp;G (each)</td><td><input class="ri" id="B60" type="number" value="354" step="25" oninput="calcTurnkey()"></td><td><input class="ni" id="C60" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D60">—</td></tr>
+<tr><td class="lbl">Can lights for porch (each)</td><td><input class="ri" id="B61" type="number" value="249" step="25" oninput="calcTurnkey()"></td><td><input class="ni" id="C61" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D61">—</td></tr>
+<tr><td class="lbl">220V outlet (each)</td><td><input class="ri" id="B62" type="number" value="1227" step="50" oninput="calcTurnkey()"></td><td><input class="ni" id="C62" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D62">—</td></tr>
+<tr><td class="lbl">50A RV outlet (each)</td><td><input class="ri" id="B63" type="number" value="519" step="25" oninput="calcTurnkey()"></td><td><input class="ni" id="C63" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D63">—</td></tr>
+<tr><td class="lbl">Floor outlet (each)</td><td><input class="ri" id="B64" type="number" value="455" step="25" oninput="calcTurnkey()"></td><td><input class="ni" id="C64" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D64">—</td></tr>
+<tr><td class="lbl">Extra outlets (each)</td><td><input class="ri" id="B65" type="number" value="155" step="5" oninput="calcTurnkey()"></td><td><input class="ni" id="C65" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D65">—</td></tr>
+<tr><td class="lbl">Flood lights (each)</td><td><input class="ri" id="B66" type="number" value="529" step="25" oninput="calcTurnkey()"></td><td><input class="ni" id="C66" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D66">—</td></tr>
+<tr><td class="lbl">USB-C outlets (each)</td><td><input class="ri" id="B67" type="number" value="55" step="5" oninput="calcTurnkey()"></td><td><input class="ni" id="C67" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D67">—</td></tr>
+<tr><td class="lbl">Mud box (each)</td><td><input class="ri" id="B68" type="number" value="250" step="25" oninput="calcTurnkey()"></td><td><input class="ni" id="C68" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D68">—</td></tr>
+<tr><td class="lbl">Dimmer switch (each)</td><td><input class="ri" id="B69" type="number" value="92" step="5" oninput="calcTurnkey()"></td><td><input class="ni" id="C69" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D69">—</td></tr>
+
+<tr class="subtag"><td colspan="4">Kitchen (rows 71-79)</td></tr>
+<tr><td class="lbl">Additional cabinetry incl tops (per LF)</td><td><input class="ri" id="B71" type="number" value="450" step="25" oninput="calcTurnkey()"></td><td><input class="ni" id="C71" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D71">—</td></tr>
+<tr><td class="lbl">Islands (per SF)</td><td><input class="ri" id="B72" type="number" value="225" step="25" oninput="calcTurnkey()"></td><td><input class="ni" id="C72" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D72">—</td></tr>
+<tr><td class="lbl">Lazy Susan (each)</td><td><input class="ri" id="B73" type="number" value="1246" step="50" oninput="calcTurnkey()"></td><td><input class="ni" id="C73" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D73">—</td></tr>
+<tr><td class="lbl">Vent hood upcharge (each)</td><td><input class="ri" id="B74" type="number" value="1673" step="50" oninput="calcTurnkey()"></td><td><input class="ni" id="C74" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D74">—</td></tr>
+<tr><td class="lbl">Level 2 countertops (per SF)</td><td><input class="ri" id="B75" type="number" value="30" step="5" oninput="calcTurnkey()"></td><td><input class="ni" id="C75" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D75">—</td></tr>
+<tr><td class="lbl">Level 3 countertops (per SF)</td><td><input class="ri" id="B76" type="number" value="50" step="5" oninput="calcTurnkey()"></td><td><input class="ni" id="C76" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D76">—</td></tr>
+<tr><td class="lbl">Farmhouse sink (each)</td><td><input class="ri" id="B77" type="number" value="778" step="25" oninput="calcTurnkey()"></td><td><input class="ni" id="C77" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D77">—</td></tr>
+<tr><td class="lbl">Kitchen backsplash $1,200 min (per SF)</td><td><input class="ri" id="B78" type="number" value="60" step="5" oninput="calcTurnkey()"></td><td><input class="ni" id="C78" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D78">—</td></tr>
+<tr><td class="lbl">Under-cabinet lighting (each)</td><td><input class="ri" id="B79" type="number" value="750" step="25" oninput="calcTurnkey()"></td><td><input class="ni" id="C79" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D79">—</td></tr>
+
+<tr class="subtag"><td colspan="4">Interior Finishes (rows 81-88)</td></tr>
+<tr><td class="lbl">1×6 V-groove (per SF)</td><td><input class="ri" id="B81" type="number" value="7.5" step=".25" oninput="calcTurnkey()"></td><td><input class="ni" id="C81" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D81">—</td></tr>
+<tr><td class="lbl">1×8 Shiplap primed (per SF)</td><td><input class="ri" id="B82" type="number" value="8" step=".25" oninput="calcTurnkey()"></td><td><input class="ni" id="C82" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D82">—</td></tr>
+<tr><td class="lbl">Trim 1×4 per opening (each)</td><td><input class="ri" id="B83" type="number" value="75" step="5" oninput="calcTurnkey()"></td><td><input class="ni" id="C83" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D83">—</td></tr>
+<tr><td class="lbl">Finished stairs (each)</td><td><input class="ri" id="B84" type="number" value="1750" step="50" oninput="calcTurnkey()"></td><td><input class="ni" id="C84" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D84">—</td></tr>
+<tr><td class="lbl">Pine doors (each)</td><td><input class="ri" id="B85" type="number" value="350" step="25" oninput="calcTurnkey()"></td><td><input class="ni" id="C85" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D85">—</td></tr>
+<tr><td class="lbl">3' door upgrade (each)</td><td><input class="ri" id="B86" type="number" value="100" step="10" oninput="calcTurnkey()"></td><td><input class="ni" id="C86" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D86">—</td></tr>
+<tr><td class="lbl">Paint upgrade eggshell/semi-gloss (per SF)</td><td><input class="ri" id="B87" type="number" value="2" step=".25" oninput="calcTurnkey()"></td><td><input class="ni" id="C87" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D87">—</td></tr>
+<tr><td class="lbl">Faux beams (per LF)</td><td><input class="ri" id="B88" type="number" value="40" step="5" oninput="calcTurnkey()"></td><td><input class="ni" id="C88" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D88">—</td></tr>
+
+<tr class="subtag"><td colspan="4">Fireplaces (rows 90-96)</td></tr>
+<tr><td class="lbl">Wood Burning — Heatilator EL42</td><td><input class="ri" id="B90" type="number" value="5350" step="100" oninput="calcTurnkey()"></td><td><input class="ni" id="C90" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D90">—</td></tr>
+<tr><td class="lbl">Wood Burning — BIR42-B</td><td><input class="ri" id="B91" type="number" value="10200" step="100" oninput="calcTurnkey()"></td><td><input class="ni" id="C91" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D91">—</td></tr>
+<tr><td class="lbl">Wood Burning — 180 CT</td><td><input class="ri" id="B92" type="number" value="7000" step="100" oninput="calcTurnkey()"></td><td><input class="ni" id="C92" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D92">—</td></tr>
+<tr><td class="lbl">Wood Burning — Heat &amp; Glo Northstar-C</td><td><input class="ri" id="B93" type="number" value="11300" step="100" oninput="calcTurnkey()"></td><td><input class="ni" id="C93" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D93">—</td></tr>
+<tr><td class="lbl">Gas — BUF 36-T</td><td><input class="ri" id="B94" type="number" value="4250" step="100" oninput="calcTurnkey()"></td><td><input class="ni" id="C94" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D94">—</td></tr>
+<tr><td class="lbl">Gas — BUF 42-T</td><td><input class="ri" id="B95" type="number" value="5500" step="100" oninput="calcTurnkey()"></td><td><input class="ni" id="C95" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D95">—</td></tr>
+<tr><td class="lbl">Mantel and hearth (each)</td><td><input class="ri" id="B96" type="number" value="675" step="25" oninput="calcTurnkey()"></td><td><input class="ni" id="C96" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D96">—</td></tr>
+
+<tr class="subtag"><td colspan="4">Misc (rows 98-100)</td></tr>
+<tr><td class="lbl">Misc 1</td><td><input class="ri" id="B98" type="number" value="0" step="50" oninput="calcTurnkey()"></td><td><input class="ni" id="C98" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D98">—</td></tr>
+<tr><td class="lbl">Misc 2</td><td><input class="ri" id="B99" type="number" value="0" step="50" oninput="calcTurnkey()"></td><td><input class="ni" id="C99" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D99">—</td></tr>
+<tr><td class="lbl">Misc 3</td><td><input class="ri" id="B100" type="number" value="0" step="50" oninput="calcTurnkey()"></td><td><input class="ni" id="C100" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D100">—</td></tr>
+
+</tbody></table>
+</div>
+</div>
 <!-- SHIPPING & PAYMENTS -->
 <div class="sec">
 <div class="sec-hdr">Shipping &amp; Deposits</div>
@@ -440,7 +568,9 @@ function setFound(t,btn){
   document.querySelectorAll('.fpanel').forEach(p=>p.classList.remove('on'));
   btn.classList.add('on');
   document.getElementById('fp-'+t).classList.add('on');
-  calc();
+  window._D101 = 0;
+calcTurnkey();
+calc();
 }
 
 function calcJ6(){
@@ -656,8 +786,54 @@ function calc(){
   set('r2ndSF',  Math.round(sf2nd).toLocaleString()+' SF');
   set('rGarSF',  Math.round(garSF).toLocaleString()+' SF');
   set('rPorchSF',Math.round(porchSF).toLocaleString()+' SF');
+  // Update turnkey shell+total display
+  calcTurnkey();
   set('rN29', fmt(N29)); set('rN30', fmt(N30)); set('rN31', fmt(N31)); set('rN37', fmt(N37)); set('rN40', fmt(N40)); set('rN41', fmt(N41));
   set('rN42', fmt(N42)); set('rN44', fmt(N44));
+}
+
+// TURNKEY CALCULATION
+function calcTurnkey() {
+  // Every row: D = B * C (except D53 = B53*C53 + E53)
+  const tkRows = [3,4,6,7,8,9,10,11,12,13,14,15,
+    17,18,19,20,21,22,23,24,25,
+    27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,
+    50,51,52,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,
+    71,72,73,74,75,76,77,78,79,
+    81,82,83,84,85,86,87,88,
+    90,91,92,93,94,95,96,
+    98,99,100];
+
+  // ID suffix map — some rows had conflicts with shell package IDs
+  const idMap = {4:'C4tk', 12:'C12tk', 17:'C17tk', 22:'C22tk'};
+
+  let D101 = 0;
+  tkRows.forEach(r => {
+    const bId = 'B' + r;
+    const cId = idMap[r] ? idMap[r] : 'C' + r;
+    const dId = 'D' + r;
+    const b = parseFloat(document.getElementById(bId)?.value) || 0;
+    const c = parseFloat(document.getElementById(cId)?.value) || 0;
+    let d = b * c;
+    if (r === 53) d += (parseFloat(document.getElementById('E53')?.value) || 0);
+    D101 += d;
+    const el = document.getElementById(dId);
+    if (el) el.textContent = d > 0 ? fmt(d) : '—';
+  });
+
+  // Update result panel
+  const rD101el = document.getElementById('rD101');
+  if (rD101el) rD101el.textContent = fmt(D101);
+
+  // Shell + Turnkey
+  const C4val = parseFloat(document.getElementById('rC4')?.textContent?.replace(/[$,]/g,'')) || 0;
+  const J5val = parseFloat(document.getElementById('J5')?.value) || 0;
+  const N29val = C4val + J5val;
+  const stEl = document.getElementById('rShellPlusTurnkey');
+  if (stEl) stEl.textContent = fmt(N29val + D101);
+
+  // Store D101 globally for use in calc()
+  window._D101 = D101;
 }
 
 // SAVE
