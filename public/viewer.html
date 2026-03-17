@@ -1036,23 +1036,24 @@ function renderSchPanel(data){
 }
 
 function sendToEstimator(){
-  if(!scheduleData)return;
   const walls=getWallMeasurements();
+  const sd=scheduleData||{};
   const p=new URLSearchParams({
-    living_sf:document.getElementById('sp_sf')?.value||scheduleData.living_sf||'',
-    porch_sf:document.getElementById('sp_psf')?.value||scheduleData.porch_sf||'',
-    plate_ht:document.getElementById('sp_ht')?.value||9,
-    pitch:document.getElementById('sp_pitch')?.value||'6:12',
-    porch_pitch:document.getElementById('sp_ppitch')?.value||'2:12',
-    overhang:document.getElementById('sp_oh')?.value||16,
+    living_sf:document.getElementById('sp_sf')?.value||sd.living_sf||'',
+    porch_sf:document.getElementById('sp_psf')?.value||sd.porch_sf||'',
+    plate_ht:document.getElementById('sp_ht')?.value||sd.plate_height_ft||9,
+    pitch:document.getElementById('sp_pitch')?.value||sd.structural_roof_pitch||'6:12',
+    porch_pitch:document.getElementById('sp_ppitch')?.value||sd.porch_pitch||'2:12',
+    overhang:document.getElementById('sp_oh')?.value||sd.eave_overhang_in||16,
     ext_lf:walls.ext_wall_linear_ft||'',
     int_lf:walls.int_wall_linear_ft||'',
     plumb_lf:walls.plumbing_wall_linear_ft||'',
-    doors:JSON.stringify(scheduleData.doors||[]),
-    windows:JSON.stringify(scheduleData.windows||[]),
-    trusses:JSON.stringify(scheduleData.trusses||[])
+    doors:JSON.stringify(sd.doors||[]),
+    windows:JSON.stringify(sd.windows||[]),
+    trusses:JSON.stringify(sd.trusses||[])
   });
-  window.open('/estimator.html?'+p.toString(),'_blank');
+  // Use location.href to avoid popup blocker — opens in same tab
+  window.location.href='/estimator.html?'+p.toString();
 }
 </script>
 <!-- LOAD SESSION MODAL -->
