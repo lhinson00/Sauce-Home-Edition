@@ -17,6 +17,8 @@ html,body{min-height:100%;background:var(--navy);color:var(--text);font-family:'
 .btn-save{background:var(--amber);color:var(--navy);border:none;padding:7px 18px;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;}
 .btn-save:hover{background:var(--amber2);}
 .btn-save:disabled{opacity:.5;cursor:not-allowed;}
+body{background:#0a1218;}
+.page-wrap{max-width:1200px;margin:0 auto;}
 .page{display:grid;grid-template-columns:1fr 340px;min-height:calc(100vh - 56px);}
 .form-col{padding:20px;border-right:1px solid var(--border);}
 .result-col{padding:16px 16px 40px;background:var(--navy2);position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;display:flex;flex-direction:column;gap:8px;}
@@ -76,7 +78,7 @@ html,body{min-height:100%;background:var(--navy);color:var(--text);font-family:'
   <div class="hdr-sp"></div>
   <button class="btn-save" onclick="previewQuote()" style="background:var(--navy3);border:1px solid rgba(255,255,255,.15);color:#fff;margin-right:8px;">🖨 Preview Quote</button><button class="btn-save" id="btnSave" onclick="saveQuote()">💾 Save Quote</button>
 </header>
-<div class="page">
+<div class="page-wrap"><div class="page">
 <div class="form-col">
 
 <!-- CUSTOMER -->
@@ -507,8 +509,6 @@ html,body{min-height:100%;background:var(--navy);color:var(--text);font-family:'
 </div>
 
 </div><!-- end form-col -->
-
-<!-- RESULT COLUMN -->
 <div class="result-col">
   <div class="res-total">
     <div class="res-total-lbl">C4 — Shell Package</div>
