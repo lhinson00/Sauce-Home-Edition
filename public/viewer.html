@@ -17,7 +17,19 @@
   --ext:#2563eb;--int:#7c3aed;--plb:#d97706;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-html,body{height:100%;overflow:hidden;}
+/* SESSION PICKER MODAL */
+.session-modal-bg{position:fixed;inset:0;background:rgba(26,35,50,.5);z-index:200;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(2px);}
+.session-modal{background:#fff;border:1px solid var(--border);border-radius:12px;width:480px;max-height:70vh;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(26,35,50,.14);}
+.session-modal-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--navy);border-radius:12px 12px 0 0;}
+.session-modal-title{font-size:13px;font-weight:700;color:#fff;}
+.session-modal-close{width:24px;height:24px;border-radius:4px;border:1px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.6);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.session-modal-close:hover{background:rgba(255,255,255,.1);color:#fff;}
+.session-list{flex:1;overflow-y:auto;padding:10px;scrollbar-width:thin;}
+.session-row{padding:11px 13px;border:1px solid var(--border);border-radius:7px;margin-bottom:7px;cursor:pointer;transition:all .12s;}
+.session-row:hover{border-color:var(--amber);background:#fffbf2;}
+.session-filename{font-size:12px;font-weight:600;color:var(--navy);}
+.session-meta{font-size:10px;color:var(--muted);margin-top:2px;}
+.session-pdf{font-size:10px;color:var(--success);margin-top:3px;font-weight:500;}
 body{font-family:'Inter',sans-serif;background:var(--off);color:var(--text);display:flex;flex-direction:column;}
 
 /* ── NAV ── */
@@ -349,6 +361,10 @@ body{font-family:'Inter',sans-serif;background:var(--off);color:var(--text);disp
     <!-- Wall tools -->
     <div class="pill-group">
       <span class="pill-label">Walls</span>
+      <button class="tb" id="panModeBtn" onclick="activatePanMode()" title="Pan mode — drag to scroll">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M5 1v8M1 5h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="5" cy="5" r="1.5" fill="currentColor"/></svg>
+        Pan
+      </button>
       <button class="tb" id="extWallBtn" onclick="activateWallTool('ext')">Ext</button>
       <button class="tb" id="intWallBtn" onclick="activateWallTool('int')">Int</button>
       <button class="tb" id="plumbWallBtn" onclick="activateWallTool('plumb')">Plumb</button>
@@ -359,6 +375,19 @@ body{font-family:'Inter',sans-serif;background:var(--off);color:var(--text);disp
     <div class="lf ext" id="extTotal" style="display:none">EXT <span id="extLF">0</span>'</div>
     <div class="lf int" id="intTotal" style="display:none">INT <span id="intLF">0</span>'</div>
     <div class="lf plb" id="plumbTotal" style="display:none">PLB <span id="plumbLF">0</span>'</div>
+
+    <div class="pill-sep"></div>
+
+    <!-- Save / Load -->
+    <button class="tb" onclick="saveProgress()" title="Save to Google Sheet + Drive" style="color:var(--success);border-color:rgba(16,185,129,.3);background:rgba(16,185,129,.06);">
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 7v1.5A.5.5 0 001.5 9h7a.5.5 0 00.5-.5V7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M5 1v5M3 4l2 2 2-2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Save
+    </button>
+    <button class="tb" onclick="showLoadSessions()" title="Load saved session" style="color:var(--muted);">
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1 7v1.5A.5.5 0 001.5 9h7a.5.5 0 00.5-.5V7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><path d="M5 6V1M3 3l2-2 2 2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Load
+    </button>
+    <input type="file" id="loadInput" accept=".json" style="display:none" onchange="loadProgress(this)">
 
     <div class="pill-sep"></div>
 
@@ -577,7 +606,7 @@ function openRight(){document.getElementById('drawerRight').classList.add('open'
 // PAN
 const scroll=document.getElementById('planScroll');
 let isPanning=false,panStart={x:0,y:0},scrollStart={x:0,y:0};
-scroll.addEventListener('mousedown',e=>{if(e.button!==0||scaleMode||wallMode)return;isPanning=true;panStart={x:e.clientX,y:e.clientY};scrollStart={x:scroll.scrollLeft,y:scroll.scrollTop};scroll.classList.add('dragging');e.preventDefault();});
+// PAN handled in pan mode section above
 document.addEventListener('mousemove',e=>{if(!isPanning)return;scroll.scrollLeft=scrollStart.x-(e.clientX-panStart.x);scroll.scrollTop=scrollStart.y-(e.clientY-panStart.y);});
 document.addEventListener('mouseup',()=>{isPanning=false;scroll.classList.remove('dragging');});
 scroll.addEventListener('wheel',e=>{if(!e.ctrlKey&&!e.metaKey)return;e.preventDefault();adjustZoom(e.deltaY>0?-.15:.15);},{passive:false});
@@ -656,6 +685,9 @@ function updateWallTotals(){['ext','int','plumb'].forEach(t=>{const tot=getWallT
 function updateWallBtns(){document.getElementById('extWallBtn').className='tb'+(wallMode==='ext'?' ext-on':'');document.getElementById('intWallBtn').className='tb'+(wallMode==='int'?' int-on':'');document.getElementById('plumbWallBtn').className='tb'+(wallMode==='plumb'?' plb-on':'');}
 function activateWallTool(type){
   if(!scalePixelsPerFoot){alert('Set the scale first.');return;}
+  // Turn off pan mode
+  panMode = false;
+  document.getElementById('panModeBtn').classList.remove('on');
   wallMode=wallMode===type?null:type;wallPendingStart=null;clearWallPreview();
   scroll.style.cursor=wallMode?'crosshair':'';updateWallBtns();
   setStatus(wallMode?WL[wallMode]+' — click start of wall (right-click cancels segment)':'');
@@ -704,7 +736,222 @@ scroll.addEventListener('contextmenu',e=>{if(!wallMode)return;e.preventDefault()
 function undoLastSegment(){if(!wallSegments.length)return;wallSegments.pop();wallPendingStart=null;clearWallPreview();updateWallTotals();redrawWallOverlay();setStatus('Last segment removed');}
 function getWallMeasurements(){return{ext_wall_linear_ft:parseFloat(getWallTotal('ext').toFixed(1)),int_wall_linear_ft:parseFloat(getWallTotal('int').toFixed(1)),plumbing_wall_linear_ft:parseFloat(getWallTotal('plumb').toFixed(1))};}
 
-// SCHEDULE READER
+// PAN MODE TOGGLE
+let panMode = false;
+function activatePanMode() {
+  panMode = !panMode;
+  if (panMode) {
+    // Deactivate any active wall tool
+    wallMode = null; wallPendingStart = null; clearWallPreview(); updateWallBtns();
+    scroll.style.cursor = 'grab';
+    document.getElementById('panModeBtn').classList.add('on');
+    setStatus('Pan mode — drag to scroll, click Pan again to measure');
+  } else {
+    scroll.style.cursor = '';
+    document.getElementById('panModeBtn').classList.remove('on');
+    setStatus('');
+  }
+}
+
+// Override mousedown to respect pan mode
+scroll.addEventListener('mousedown', e => {
+  if (e.button !== 0) return;
+  // Always pan if pan mode is on, or if no active tool
+  if (panMode || (!scaleMode && !wallMode)) {
+    isPanning = true;
+    panStart = {x:e.clientX, y:e.clientY};
+    scrollStart = {x:scroll.scrollLeft, y:scroll.scrollTop};
+    scroll.classList.add('dragging');
+    e.preventDefault();
+  }
+}, true); // capture phase so it runs before the existing listener
+
+// SAVE PROGRESS
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbw8V4A6F2o8gaBFQDEcYt8V91S5we2elm2a4bKey6pzcAX4pj845VHdcHjQyc7-J7E1/exec';
+
+// SAVE PROGRESS → Google Drive (PDF) + Google Sheet (session data)
+async function saveProgress() {
+  if (!wallSegments.length && !scalePixelsPerFoot) {
+    alert('Nothing to save yet — set scale and trace some walls first.');
+    return;
+  }
+
+  // Prompt for a session name
+  const sessionName = prompt('Name this session:', filename.replace(/\.[^.]+$/, '') || 'My Plan');
+  if (!sessionName) return; // cancelled
+
+  const saveBtn = document.querySelector('[onclick="saveProgress()"]');
+  const origHTML = saveBtn.innerHTML;
+  saveBtn.innerHTML = 'Saving...';
+  saveBtn.disabled = true;
+
+  try {
+    const payload = {
+      action: 'saveTakeoff',
+      token: 'public',
+      filename: sessionName,
+      pdfBase64: rawPDFBase64 || null,
+      ext_lf: parseFloat(getWallTotal('ext').toFixed(1)),
+      int_lf: parseFloat(getWallTotal('int').toFixed(1)),
+      plumb_lf: parseFloat(getWallTotal('plumb').toFixed(1)),
+      living_sf: scheduleData?.living_sf || '',
+      porch_sf: scheduleData?.porch_sf || '',
+      pitch: scheduleData?.structural_roof_pitch || '',
+      plate_ht: scheduleData?.plate_height_ft || '',
+      doors: scheduleData?.doors || [],
+      windows: scheduleData?.windows || [],
+      scalePixelsPerFoot: scalePixelsPerFoot || null,
+      fracPerFoot: parseFloat(scroll.dataset.fracPerFoot) || null,
+      scalePoints: scalePoints,
+      scaleRealFt: scaleRealFt,
+      wallSegments: wallSegments,
+      scheduleData: scheduleData
+    };
+
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error || 'Save failed');
+
+    setStatus('✓ Saved to Google Sheet — Session ' + data.sessionId);
+    saveBtn.innerHTML = '✓ Saved!';
+    setTimeout(() => { saveBtn.innerHTML = origHTML; saveBtn.disabled = false; }, 2500);
+
+  } catch(err) {
+    alert('Save failed: ' + err.message);
+    saveBtn.innerHTML = origHTML;
+    saveBtn.disabled = false;
+  }
+}
+
+// LOAD SESSIONS → show picker from Google Sheet
+async function showLoadSessions() {
+  const modal = document.getElementById('loadSessionModal');
+  const list = document.getElementById('sessionList');
+  modal.style.display = 'flex';
+  list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted);font-size:12px;">Loading sessions...</div>';
+
+  try {
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'loadTakeoffs', token: 'public' })
+    });
+    const data = await res.json();
+    if (!data.success) throw new Error(data.error);
+
+    if (!data.sessions?.length) {
+      list.innerHTML = '<div style="padding:24px;text-align:center;color:var(--muted);font-size:12px;">No saved sessions found.</div>';
+      return;
+    }
+
+    list.innerHTML = data.sessions.map((s, i) => `
+      <div class="session-row" onclick="loadSession(${i})" data-session='${JSON.stringify(s).replace(/'/g, "&#39;")}'>
+        <div class="session-filename">${s.filename || 'Untitled'}</div>
+        <div class="session-meta">${s.date} &middot; EXT ${s.ext_lf}' INT ${s.int_lf}' &middot; ${s.living_sf ? s.living_sf+' SF' : '—'}</div>
+        ${s.pdfUrl ? '<div class="session-pdf">📄 PDF saved in Drive</div>' : ''}
+      </div>
+    `).join('');
+
+    // Store sessions for access by loadSession()
+    window._sessions = data.sessions;
+
+  } catch(err) {
+    list.innerHTML = `<div style="padding:20px;color:var(--danger);font-size:12px;">Error: ${err.message}</div>`;
+  }
+}
+
+async function loadSession(idx) {
+  const s = window._sessions[idx];
+  if (!s) return;
+  document.getElementById('loadSessionModal').style.display = 'none';
+
+  try {
+    // Restore scale
+    if (s.scalePixelsPerFoot) {
+      const parsed = JSON.parse(typeof s.scalePixelsPerFoot === 'string' ? s.scalePixelsPerFoot : JSON.stringify(s.scalePixelsPerFoot));
+      scalePixelsPerFoot = parseFloat(s.scalePixelsPerFoot);
+      scaleRealFt = parseFloat(s.scaleRealFt) || null;
+      if (s.fracPerFoot) scroll.dataset.fracPerFoot = s.fracPerFoot;
+      if (s.scalePoints) {
+        scalePoints = typeof s.scalePoints === 'string' ? JSON.parse(s.scalePoints) : s.scalePoints;
+      }
+      document.getElementById('scaleBtn').classList.add('scale-done');
+      document.getElementById('scaleBtn').innerHTML = '✓ Scale Set';
+      document.getElementById('scaleBadge').style.display = 'inline';
+      document.getElementById('scaleLabel').textContent = scalePixelsPerFoot.toFixed(0) + 'px/ft';
+      document.getElementById('statusScale').textContent = '1ft = ' + scalePixelsPerFoot.toFixed(0) + 'px';
+    }
+
+    // Restore wall segments
+    const segs = typeof s.wallSegments === 'string' ? JSON.parse(s.wallSegments) : s.wallSegments;
+    if (segs?.length) {
+      wallSegments = segs;
+      updateWallTotals();
+      redrawWallOverlay();
+      redrawScaleOverlay();
+    }
+
+    // Restore schedule data
+    if (s.scheduleData) {
+      scheduleData = typeof s.scheduleData === 'string' ? JSON.parse(s.scheduleData) : s.scheduleData;
+    }
+
+    // If PDF was saved in Drive, prompt to open it
+    if (s.pdfUrl) {
+      setStatus('Session restored — ' + (segs?.length || 0) + ' segments · PDF: right-click link below to download and re-upload');
+      const msg = `Session restored!\n\n${segs?.length || 0} wall segments loaded.\n\nYour PDF is saved in Google Drive. Open this link to download it, then use "Open New File" to re-upload it:\n\n${s.pdfUrl}`;
+      if (confirm(msg + '\n\nOpen PDF in Drive now?')) {
+        window.open(s.pdfUrl, '_blank');
+      }
+    } else {
+      setStatus('Session restored — ' + (segs?.length || 0) + ' wall segments loaded · Re-upload your PDF');
+    }
+
+  } catch(err) {
+    alert('Could not restore session: ' + err.message);
+  }
+}
+
+// Keep file-based load as fallback
+function loadProgress(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!data.version) throw new Error('Not a valid progress file');
+      if (data.scalePixelsPerFoot) {
+        scalePixelsPerFoot = data.scalePixelsPerFoot;
+        scaleRealFt = data.scaleRealFt;
+        if (data.fracPerFoot) scroll.dataset.fracPerFoot = data.fracPerFoot;
+        if (data.scalePoints) scalePoints = data.scalePoints;
+        document.getElementById('scaleBtn').classList.add('scale-done');
+        document.getElementById('scaleBtn').innerHTML = '✓ Scale Set';
+        document.getElementById('scaleBadge').style.display = 'inline';
+        document.getElementById('scaleLabel').textContent = scalePixelsPerFoot.toFixed(0) + 'px/ft';
+        document.getElementById('statusScale').textContent = '1ft = ' + scalePixelsPerFoot.toFixed(0) + 'px';
+      }
+      if (data.wallSegments?.length) {
+        wallSegments = data.wallSegments;
+        updateWallTotals();
+        redrawWallOverlay();
+        redrawScaleOverlay();
+      }
+      if (data.scheduleData) scheduleData = data.scheduleData;
+      setStatus('Progress loaded — ' + wallSegments.length + ' segments restored');
+    } catch(err) { alert('Could not load: ' + err.message); }
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
+
+
+
 let scheduleData=null;
 
 async function readSchedules(){
@@ -807,5 +1054,16 @@ function sendToEstimator(){
   window.open('/estimator.html?'+p.toString(),'_blank');
 }
 </script>
+<!-- LOAD SESSION MODAL -->
+<div class="session-modal-bg" id="loadSessionModal" style="display:none">
+  <div class="session-modal">
+    <div class="session-modal-head">
+      <div class="session-modal-title">Load Saved Session</div>
+      <button class="session-modal-close" onclick="document.getElementById('loadSessionModal').style.display='none'">×</button>
+    </div>
+    <div class="session-list" id="sessionList"></div>
+  </div>
+</div>
+
 </body>
 </html>
