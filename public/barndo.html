@@ -18,8 +18,23 @@ html,body{min-height:100%;background:var(--navy);color:var(--text);font-family:'
 .btn-save:hover{background:var(--amber2);}
 .btn-save:disabled{opacity:.5;cursor:not-allowed;}
 body{background:#1a1a1a;}
-.page-wrap{max-width:1200px;margin:0 auto;}
+.page-wrap{max-width:1200px;margin:0 auto;width:100%;}
 .page{display:grid;grid-template-columns:1fr 340px;min-height:calc(100vh - 56px);}
+/* MOBILE STICKY TOTAL */
+.mobile-total-bar{display:none;}
+@media(max-width:768px){
+  .mobile-total-bar{
+    display:flex;align-items:center;justify-content:space-between;
+    position:sticky;top:56px;z-index:150;
+    background:var(--amber);padding:8px 14px;
+    border-bottom:2px solid rgba(0,0,0,.1);
+  }
+  .mobile-total-lbl{font-size:10px;font-weight:700;color:rgba(0,0,0,.6);text-transform:uppercase;letter-spacing:.8px;}
+  .mobile-total-val{font-family:'Bebas Neue',sans-serif;font-size:26px;color:#222;letter-spacing:1px;line-height:1;}
+  .page{grid-template-columns:1fr;grid-template-rows:auto auto;}
+  .form-col{border-right:none;border-bottom:1px solid var(--border);padding:14px;}
+  .result-col{position:static;height:auto;padding:14px;overflow:visible;}
+}
 .form-col{padding:20px;border-right:1px solid var(--border);}
 .result-col{padding:16px 16px 40px;background:var(--navy2);position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;display:flex;flex-direction:column;gap:8px;}
 .sec{margin-bottom:18px;}
@@ -28,6 +43,10 @@ body{background:#1a1a1a;}
 .sec-sub{font-size:10px;color:var(--muted);margin-bottom:8px;font-style:italic;}
 .card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;}
 .fg{display:grid;gap:7px;}.fg2{grid-template-columns:1fr 1fr;}.fg3{grid-template-columns:1fr 1fr 1fr;}
+@media(max-width:768px){
+  .fg2{grid-template-columns:1fr 1fr;}
+  .fg3{grid-template-columns:1fr 1fr;}
+}
 .field{display:flex;flex-direction:column;gap:3px;}
 .field label{font-size:9px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.7px;}
 .inp{background:var(--input);border:1px solid rgba(255,255,255,.09);border-radius:5px;color:var(--text);padding:6px 8px;font-family:'DM Sans',sans-serif;font-size:12px;outline:none;width:100%;}
@@ -36,6 +55,14 @@ body{background:#1a1a1a;}
 /* Tables */
 .tbl,.atbl{width:100%;border-collapse:collapse;}
 .tbl th,.atbl th{font-size:9px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:4px 5px;text-align:left;border-bottom:1px solid var(--border);}
+@media(max-width:768px){
+  .tbl th.r,.atbl th.r{font-size:8px;padding:3px 3px;}
+  .tbl td,.atbl td{padding:3px 2px;}
+  .ni{width:46px;padding:3px 4px;font-size:10px;}
+  .ri{width:38px;padding:3px 3px;font-size:9px;}
+  .lbl{font-size:10px;}
+  .sf,.tot{font-size:9px;}
+}
 .tbl th.r,.atbl th.r{text-align:right;}
 .tbl td,.atbl td{padding:3px 3px;border-bottom:1px solid rgba(255,255,255,.02);}
 .tbl tr:last-child td,.atbl tr:last-child td{border-bottom:none;}
@@ -48,7 +75,8 @@ body{background:#1a1a1a;}
 .tot{font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);text-align:right;}
 .subtag td{font-size:9px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.7px;padding-top:8px;padding-bottom:3px;border-bottom:1px solid rgba(232,160,32,.1)!important;}
 /* Foundation */
-.ftabs{display:flex;gap:5px;margin-bottom:10px;}
+.ftabs{display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap;}
+@media(max-width:768px){.ftab{font-size:10px;padding:5px 9px;}}
 .ftab{padding:5px 12px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:11px;cursor:pointer;}
 .ftab.on{background:var(--amber);color:var(--navy);border-color:var(--amber);font-weight:700;}
 .fpanel{display:none;}.fpanel.on{display:block;}
@@ -78,6 +106,10 @@ body{background:#1a1a1a;}
   <div class="hdr-sp"></div>
   <button class="btn-save" onclick="clearQuote()" style="background:transparent;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.6);margin-right:8px;">✕ Clear</button><button class="btn-save" onclick="previewQuote()" style="background:var(--navy3);border:1px solid rgba(255,255,255,.15);color:#fff;margin-right:8px;">🖨 Preview Quote</button><button class="btn-save" id="btnSave" onclick="saveQuote()">💾 Save Quote</button>
 </header>
+<div class="mobile-total-bar">
+  <div class="mobile-total-lbl">Shell Package C4</div>
+  <div class="mobile-total-val" id="rC4mobile">$0</div>
+</div>
 <div class="page-wrap"><div class="page">
 <div class="form-col">
 
@@ -784,6 +816,7 @@ function calc(){
 
   // ── UPDATE RESULT PANEL ──
   set('rC4', fmt(C4));
+  set('rC4mobile', fmt(C4));
   set('rG9', fmt(G9)); set('rG10', fmt(G10)); set('rG11', fmt(G11)); set('rG12', fmt(G12));
   set('rBonusLab', fmt(P59+P60));
   set('rC5', fmt(C5));
