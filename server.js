@@ -622,39 +622,58 @@ app.post('/api/read-schedules', async (req, res) => {
     const { pdf, page, image } = req.body;
     if (!pdf && !image) return res.status(400).json({ error: 'No content provided' });
 
-    const prompt = `You are reading a residential construction plan. Read the schedules on this page exactly as written. Do not estimate or guess.
+    const prompt = `You are reading a residential construction plan schedule table. Extract data with 100% accuracy by reading each cell individually.
 
-DOOR SCHEDULE — find the table labeled "Door Schedule". For every row:
-- mark: the door ID (D01, D02, etc.)
-- count: the number in the Count or Qty column
-- rough_opening_width_ft: the width from the Size column (e.g. "3'-0" x 6'-8"" → 3.0)
-- rough_opening_height_ft: the height from the Size column (e.g. "3'-0" x 6'-8"" → 6.67)
-- description: the Description column text
-- header: the Header Size column (e.g. "(2) 2x12")
-- is_exterior: true if the description says "Ext" or "Exterior", false otherwise
+STEP 1 — DOOR SCHEDULE
+Find the table titled "Door Schedule". Read every row left to right:
+- Column 1 (Mark): D01, D02, etc.
+- Column 2 (Count): the integer in this cell — READ IT CAREFULLY, do not guess
+- Column 3 (Size): width x height, e.g. "3' - 0" x 6' - 8"" → width_ft=3.0, height_ft=6.67
+- Column 4 (Description): full text, determines if exterior (contains "Ext") or interior (contains "Int")
+- Column 5 (Header Size): e.g. "(2) 2x12" — READ THE FULL VALUE including the number before 2x
+- is_exterior: true if Description contains "Ext.", false if contains "Int."
 
-WINDOW SCHEDULE — find the table labeled "Window Schedule". Same approach.
-- mark, count, rough_opening_width_ft, rough_opening_height_ft, description, header
+STEP 2 — WINDOW SCHEDULE  
+Find the table titled "Window Schedule". Read every row:
+- Column 1 (Mark): W01, W02, etc.
+- Column 2 (Count): READ THIS INTEGER CAREFULLY from the cell
+- Column 3 (Size): width x height
+- Column 4 (Description): window type
+- Column 5 (Header Size): READ THE FULL VALUE — (2) 2x10, (2) 2x6, etc.
 
-SQFT SCHEDULE — find any table with area labels (Living Space, Porch, etc.) and read SF values.
+STEP 3 — VERIFICATION
+Add up all Count values in the Door Schedule. Check against the total area row at the bottom.
+Add up all Count values in the Window Schedule. Verify the total makes sense.
+If any count seems wrong, re-read that row.
 
-ROOF/PLATE — read plate height from "Top of Wall" elevation callout. Read pitch from elevation triangle labels.
+STEP 4 — SQFT SCHEDULE
+Read every row in the SQFT Schedule table: area number and name.
+- living_sf: the SF next to "Living Space"
+- porch_sf: sum of all porch SF values (Front Porch + Back Porch, etc.)
 
-CRITICAL: Read the actual text in each column cell. If a size says "3'-0" x 6'-8"", that is 3.0 wide and 6.67 tall. Never return null for a field if the value is visible in the table.
-
-Return ONLY valid JSON, no markdown fences:
+Return ONLY valid JSON, no markdown:
 {
-  "living_sf": null,
-  "porch_sf": null,
-  "plate_height_ft": null,
-  "structural_roof_pitch": null,
-  "porch_pitch": null,
-  "eave_overhang_in": null,
-  "doors": [{"mark":"D01","count":1,"rough_opening_width_ft":3.0,"rough_opening_height_ft":6.67,"description":"Ext. Door W/ Sidelights","header":"(2) 2x12","is_exterior":true}],
-  "windows": [{"mark":"W01","count":3,"rough_opening_width_ft":3.0,"rough_opening_height_ft":5.5,"description":"S/H Window","header":"(2) 2x10"}],
+  "living_sf": 1200,
+  "porch_sf": 264,
+  "plate_height_ft": 9,
+  "structural_roof_pitch": "6:12",
+  "porch_pitch": "2:12",
+  "eave_overhang_in": 16,
+  "doors": [
+    {"mark":"D01","count":1,"rough_opening_width_ft":3.0,"rough_opening_height_ft":6.67,"description":"Ext. Door W/ Sidelites","header":"(2) 2x12","is_exterior":true},
+    {"mark":"D02","count":1,"rough_opening_width_ft":3.0,"rough_opening_height_ft":6.67,"description":"Ext. Door","header":"(2) 2x10","is_exterior":true},
+    {"mark":"D03","count":8,"rough_opening_width_ft":2.67,"rough_opening_height_ft":6.67,"description":"Int. Walk Door","header":"(2) 2x6","is_exterior":false},
+    {"mark":"D04","count":2,"rough_opening_width_ft":5.0,"rough_opening_height_ft":6.67,"description":"Dbl. Flush Panel Door","header":"(2) 2x6","is_exterior":false}
+  ],
+  "windows": [
+    {"mark":"W01","count":3,"rough_opening_width_ft":3.0,"rough_opening_height_ft":5.0,"description":"S/H Window","header":"(2) 2x10"},
+    {"mark":"W02","count":2,"rough_opening_width_ft":3.0,"rough_opening_height_ft":3.0,"description":"S/H Window","header":"(2) 2x10"}
+  ],
   "trusses": [],
   "notes": []
-}`;
+}
+
+IMPORTANT: The example JSON above shows what a correctly read schedule looks like. Your job is to read THIS plan's actual values with the same precision.`;
 
     // Build content — native PDF is far superior to image
     let content;
