@@ -6,7 +6,7 @@
 <title>Sauce Estimator — Home Edition</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
-:root{--navy:#1a2332;--navy2:#212d3d;--amber:#f5a623;--amber2:#f7b94a;--teal:#2dd4aa;--white:#fff;--off:#f7f8fa;--border:#e2e5ea;--text:#1a2332;--muted:#6b7280;--muted2:#9ca3af;--success:#10b981;}
+:root{--navy:#4B4B4B;--navy2:#3a3a3a;--amber:#FF8200;--amber2:#ff9933;--teal:#2dd4aa;--white:#fff;--off:#f7f8fa;--border:#e2e5ea;--text:#4B4B4B;--muted:#6b7280;--muted2:#9ca3af;--success:#10b981;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Inter',sans-serif;background:var(--off);color:var(--text);min-height:100vh;}
 
@@ -19,7 +19,7 @@ body{font-family:'Inter',sans-serif;background:var(--off);color:var(--text);min-
 .nav-user{font-size:12px;color:rgba(255,255,255,.5);}
 
 /* PAGE */
-.page{max-width:1100px;margin:0 auto;padding:40px 24px;}
+.page{max-width:920px;margin:0 auto;padding:36px 24px;}
 .crumb{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--muted2);margin-bottom:20px;}
 .crumb-dot{width:6px;height:6px;border-radius:50%;background:var(--amber);}
 .page-title{font-size:32px;font-weight:700;color:var(--navy);letter-spacing:-.5px;margin-bottom:6px;}
@@ -29,24 +29,24 @@ body{font-family:'Inter',sans-serif;background:var(--off);color:var(--text);min-
 .section-label{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
 
 /* TOOL CARDS */
-.tools-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:40px;}
+.tools-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:40px;max-width:860px;}
 @media(max-width:720px){.tools-grid{grid-template-columns:1fr;}}
 @media(max-width:960px) and (min-width:721px){.tools-grid{grid-template-columns:1fr 1fr;}}
 
-.tool-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:24px;cursor:pointer;transition:all .15s;text-decoration:none;display:block;position:relative;overflow:hidden;}
+.tool-card{background:var(--white);border:1px solid var(--border);border-radius:10px;padding:20px;cursor:pointer;transition:all .15s;text-decoration:none;display:block;position:relative;overflow:hidden;}
 .tool-card:hover{border-color:var(--amber);transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.06);}
 .tool-card.primary{border-color:var(--amber);}
-.tool-badge{position:absolute;top:16px;right:16px;font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;letter-spacing:.5px;}
+.tool-badge{position:absolute;top:14px;right:14px;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;letter-spacing:.5px;}
 .badge-live{background:#d1fae5;color:#065f46;}
 .badge-new{background:#fef3c7;color:#92400e;}
-.tool-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;}
+.tool-icon{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;}
 .icon-blue{background:#e6f1fb;}
 .icon-amber{background:#fef3c7;}
 .icon-teal{background:#d1fae5;}
-.tool-name{font-size:17px;font-weight:700;color:var(--navy);margin-bottom:6px;}
-.tool-desc{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:16px;}
-.tool-tags{display:flex;gap:6px;flex-wrap:wrap;}
-.tag{font-size:11px;color:var(--muted);background:var(--off);border:1px solid var(--border);border-radius:4px;padding:2px 8px;}
+.tool-name{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:5px;}
+.tool-desc{font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:12px;}
+.tool-tags{display:flex;gap:5px;flex-wrap:wrap;}
+.tag{font-size:10px;color:var(--muted);background:var(--off);border:1px solid var(--border);border-radius:4px;padding:2px 7px;}
 
 /* INFO STRIP */
 .info-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:40px;}
@@ -75,7 +75,7 @@ body{font-family:'Inter',sans-serif;background:var(--off);color:var(--text);min-
   <div class="tools-grid">
 
     <!-- Barndo Quote -->
-    <a href="/barndo.html" class="tool-card" style="border-color:#c8860a20;">
+    <a href="/barndo.html" class="tool-card" style="border-color:#cc660020;">
       <span class="tool-badge badge-new">NEW</span>
       <div class="tool-icon" style="background:#fef3c7;">
         <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
