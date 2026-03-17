@@ -7,201 +7,220 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
 :root{
-  --navy:#1a2332;--navy2:#212d3d;--amber:#f5a623;--amber2:#f7b94a;
-  --teal:#2dd4aa;--off:#f0f2f5;--border:#e2e5ea;--muted:#6b7280;--muted2:#9ca3af;
+  --navy:#1a2332;--navy2:#212d3d;--navy3:#263044;
+  --amber:#f5a623;--amber2:#f7b94a;
+  --teal:#2dd4aa;--off:#f0f2f5;
+  --border:#e2e5ea;--border2:#d0d4da;
+  --muted:#6b7280;--muted2:#9ca3af;
+  --success:#10b981;--danger:#ef4444;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Inter',sans-serif;background:var(--off);color:var(--navy);min-height:100vh;}
+body{font-family:'Inter',sans-serif;background:#525659;color:var(--navy);height:100vh;overflow:hidden;}
 
-/* NAV */
-.nav{background:var(--navy);height:52px;display:flex;align-items:center;padding:0 16px;position:sticky;top:0;z-index:100;}
-.nav-mark{width:32px;height:32px;background:var(--amber);border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--navy);margin-right:10px;flex-shrink:0;}
-.nav-name{font-size:13px;font-weight:700;color:#fff;}
-.nav-sub{font-size:10px;font-weight:600;color:var(--amber);letter-spacing:.5px;text-transform:uppercase;}
+/* ── NAV ── */
+.nav{background:var(--navy);height:48px;display:flex;align-items:center;padding:0 16px;z-index:100;flex-shrink:0;}
+.nav-mark{width:30px;height:30px;background:var(--amber);border-radius:5px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:var(--navy);margin-right:10px;flex-shrink:0;}
+.nav-name{font-size:13px;font-weight:700;color:#fff;line-height:1.2;}
+.nav-sub{font-size:9px;font-weight:600;color:var(--amber);letter-spacing:.5px;text-transform:uppercase;}
+.nav-div{width:1px;height:24px;background:rgba(255,255,255,.12);margin:0 14px;}
+.nav-page{font-size:12px;font-weight:600;color:rgba(255,255,255,.5);letter-spacing:.3px;text-transform:uppercase;}
 .nav-sp{flex:1;}
-.nav-btn{background:transparent;border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.7);padding:5px 14px;border-radius:5px;font-size:12px;font-weight:500;cursor:pointer;margin-left:8px;transition:all .15s;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center;}
+.nav-btn{background:transparent;border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.65);padding:5px 12px;border-radius:5px;font-size:11px;font-weight:500;cursor:pointer;margin-left:8px;transition:all .15s;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center;}
 .nav-btn:hover{background:rgba(255,255,255,.08);color:#fff;}
 .nav-btn.amber{background:var(--amber);border-color:var(--amber);color:var(--navy);font-weight:700;}
+.nav-btn.amber:hover{background:var(--amber2);}
 
-/* UPLOAD ZONE */
-.upload-wrap{max-width:680px;margin:60px auto;padding:0 20px;}
-.upload-card{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.06);}
-.upload-head{padding:24px 28px 20px;border-bottom:1px solid var(--border);}
-.upload-title{font-size:20px;font-weight:700;color:var(--navy);margin-bottom:4px;}
+/* ── APP SHELL ── */
+.app{display:flex;flex-direction:column;height:100vh;}
+.app-body{flex:1;display:flex;overflow:hidden;}
+
+/* ── UPLOAD SCREEN ── */
+#uploadScreen{flex:1;display:flex;align-items:center;justify-content:center;background:var(--off);}
+.upload-card{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,.08);width:500px;}
+.upload-head{padding:22px 26px 18px;border-bottom:1px solid var(--border);}
+.upload-title{font-size:18px;font-weight:700;color:var(--navy);margin-bottom:3px;}
 .upload-sub{font-size:13px;color:var(--muted);}
-.upload-body{padding:28px;}
-.dz{border:2px dashed var(--border);border-radius:10px;padding:48px 24px;text-align:center;cursor:pointer;transition:all .2s;position:relative;background:var(--off);}
+.upload-body{padding:24px;}
+.dz{border:2px dashed var(--border2);border-radius:10px;padding:44px 20px;text-align:center;cursor:pointer;transition:all .2s;position:relative;background:var(--off);}
 .dz:hover,.dz.over{border-color:var(--amber);background:#fffbf2;}
 .dz input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
-.dz-icon{width:52px;height:52px;background:var(--navy);border-radius:10px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;}
-.dz h3{font-size:15px;font-weight:600;color:var(--navy);margin-bottom:6px;}
-.dz p{font-size:13px;color:var(--muted);}
-.fmts{display:flex;gap:6px;justify-content:center;margin-top:12px;}
-.fmt{font-size:10px;font-weight:600;letter-spacing:.5px;padding:3px 8px;border-radius:4px;background:#e8eaed;color:var(--muted);text-transform:uppercase;}
+.dz-icon{width:48px;height:48px;background:var(--navy);border-radius:9px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;}
+.dz h3{font-size:14px;font-weight:600;color:var(--navy);margin-bottom:5px;}
+.dz p{font-size:12px;color:var(--muted);}
+.fmts{display:flex;gap:5px;justify-content:center;margin-top:10px;}
+.fmt{font-size:9px;font-weight:700;letter-spacing:.5px;padding:2px 7px;border-radius:3px;background:#e8eaed;color:var(--muted);text-transform:uppercase;}
 
-/* VIEWER LAYOUT */
-.viewer-wrap{display:none;height:calc(100vh - 52px);}
-.viewer-wrap.active{display:flex;}
+/* ── VIEWER SCREEN ── */
+#viewerScreen{flex:1;display:none;overflow:hidden;}
+#viewerScreen.active{display:flex;}
 
-/* SIDEBAR */
-.sidebar{width:280px;flex-shrink:0;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
-.sidebar-head{padding:14px 16px;border-bottom:1px solid var(--border);background:var(--navy);}
-.sidebar-filename{font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.sidebar-meta{font-size:11px;color:rgba(255,255,255,.5);margin-top:2px;}
-.sidebar-actions{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;gap:8px;}
-.btn{padding:7px 14px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:all .15s;display:inline-flex;align-items:center;gap:6px;}
-.btn-primary{background:var(--amber);color:var(--navy);}
-.btn-primary:hover{background:var(--amber2);}
-.btn-outline{background:#fff;color:var(--navy);border:1px solid var(--border);}
-.btn-outline:hover{background:var(--off);}
-.btn-sm{padding:5px 10px;font-size:11px;}
-
-/* PAGE THUMBNAILS */
-.thumbs{flex:1;overflow-y:auto;padding:12px;}
-.thumb-item{border-radius:6px;overflow:hidden;margin-bottom:10px;cursor:pointer;border:2px solid transparent;transition:all .15s;}
+/* ── LEFT SIDEBAR (page thumbs) ── */
+.sidebar{width:200px;flex-shrink:0;background:#fff;border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+.sidebar-head{padding:10px 12px;border-bottom:1px solid var(--border);background:var(--navy2);}
+.sb-filename{font-size:12px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sb-meta{font-size:10px;color:rgba(255,255,255,.4);margin-top:1px;}
+.sb-open{margin:8px 12px;padding:6px 10px;border-radius:5px;border:1px solid var(--border2);background:#fff;color:var(--navy);font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;width:calc(100% - 24px);display:flex;align-items:center;gap:5px;transition:all .15s;}
+.sb-open:hover{background:var(--off);}
+.thumbs{flex:1;overflow-y:auto;padding:8px;}
+.thumb-item{border-radius:5px;overflow:hidden;margin-bottom:8px;cursor:pointer;border:2px solid transparent;transition:all .15s;}
 .thumb-item.active{border-color:var(--amber);}
-.thumb-item:hover{border-color:var(--navy2);}
-.thumb-canvas{width:100%;display:block;background:#f8f8f8;}
-.thumb-label{padding:6px 8px;font-size:11px;font-weight:500;color:var(--muted);background:#fff;border-top:1px solid var(--border);}
+.thumb-item:hover:not(.active){border-color:var(--navy2);}
+.thumb-canvas{width:100%;display:block;background:#eee;}
+.thumb-label{padding:4px 6px;font-size:10px;font-weight:500;color:var(--muted);background:#fff;border-top:1px solid var(--border);}
 
-/* MAIN CANVAS AREA */
-.canvas-area{flex:1;display:flex;flex-direction:column;overflow:hidden;background:#525659;}
-.canvas-toolbar{height:44px;background:var(--navy2);display:flex;align-items:center;padding:0 14px;gap:8px;flex-shrink:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;white-space:nowrap;min-width:0;}
-.canvas-toolbar::-webkit-scrollbar{display:none;}
-.canvas-toolbar > *{flex-shrink:0;}
-.toolbar-label{font-size:11px;font-weight:600;color:rgba(255,255,255,.5);letter-spacing:.5px;text-transform:uppercase;}
-.toolbar-val{font-size:13px;font-weight:600;color:#fff;}
-.toolbar-sep{width:1px;height:20px;background:rgba(255,255,255,.12);}
-.zoom-btns{display:flex;gap:4px;}
-.zoom-btn{width:28px;height:28px;border-radius:4px;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.7);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+/* ── CENTER CANVAS AREA ── */
+.canvas-area{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+
+/* TOP TOOLBAR — view controls */
+.toolbar-view{height:40px;background:var(--navy2);display:flex;align-items:center;padding:0 12px;gap:6px;flex-shrink:0;border-bottom:1px solid rgba(0,0,0,.2);}
+
+/* BOTTOM TOOLBAR — tools */
+.toolbar-tools{height:40px;background:var(--navy3);display:flex;align-items:center;padding:0 12px;gap:6px;flex-shrink:0;}
+
+/* Shared toolbar elements */
+.tb-label{font-size:10px;font-weight:600;color:rgba(255,255,255,.4);letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;}
+.tb-val{font-size:12px;font-weight:700;color:#fff;white-space:nowrap;}
+.tb-sep{width:1px;height:18px;background:rgba(255,255,255,.1);flex-shrink:0;}
+.tb-sp{flex:1;}
+
+/* Zoom controls */
+.zoom-group{display:flex;align-items:center;gap:3px;}
+.zoom-btn{width:26px;height:26px;border-radius:4px;border:1px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.65);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;}
 .zoom-btn:hover{background:rgba(255,255,255,.1);color:#fff;}
-.page-nav{display:flex;align-items:center;gap:8px;margin-left:auto;}
-.page-btn{width:28px;height:28px;border-radius:4px;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.7);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
-.page-btn:hover{background:rgba(255,255,255,.1);color:#fff;}
-.page-btn:disabled{opacity:.3;cursor:default;}
-.page-info{font-size:12px;color:rgba(255,255,255,.6);}
+.zoom-fit{font-size:9px;font-weight:700;width:30px;}
 
-.canvas-scroll{flex:1;overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:20px;cursor:grab;}
+/* Page controls */
+.page-group{display:flex;align-items:center;gap:4px;}
+.page-btn{width:24px;height:24px;border-radius:4px;border:1px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.65);font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.page-btn:hover:not(:disabled){background:rgba(255,255,255,.1);color:#fff;}
+.page-btn:disabled{opacity:.25;cursor:default;}
+.page-info{font-size:11px;color:rgba(255,255,255,.5);white-space:nowrap;}
+
+/* Tool buttons */
+.tool-btn{padding:5px 10px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,.15);background:transparent;color:rgba(255,255,255,.65);font-family:inherit;transition:all .15s;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;flex-shrink:0;height:28px;}
+.tool-btn:hover{background:rgba(255,255,255,.08);color:#fff;}
+.tool-btn.on{background:var(--amber);border-color:var(--amber);color:var(--navy);}
+.tool-btn.set{background:var(--success);border-color:var(--success);color:#fff;}
+.tool-btn.blue{background:rgba(59,110,212,.3);border-color:rgba(59,110,212,.5);color:#7aa4f5;}
+.tool-btn.blue.on{background:#3b6fd4;border-color:#3b6fd4;color:#fff;}
+.tool-btn.purple{background:rgba(167,92,212,.3);border-color:rgba(167,92,212,.5);color:#c89cf5;}
+.tool-btn.purple.on{background:#a75cd4;border-color:#a75cd4;color:#fff;}
+.tool-btn.orange{background:rgba(212,150,59,.3);border-color:rgba(212,150,59,.5);color:#f5c87a;}
+.tool-btn.orange.on{background:#d4963b;border-color:#d4963b;color:#fff;}
+
+/* LF counters */
+.lf-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;}
+.lf-chip.ext{background:rgba(59,110,212,.2);border:1px solid rgba(59,110,212,.35);color:#7aa4f5;}
+.lf-chip.int{background:rgba(167,92,212,.2);border:1px solid rgba(167,92,212,.35);color:#c89cf5;}
+.lf-chip.plb{background:rgba(212,150,59,.2);border:1px solid rgba(212,150,59,.35);color:#f5c87a;}
+
+/* Canvas scroll */
+.canvas-scroll{flex:1;overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:16px;cursor:grab;}
 .canvas-scroll.dragging{cursor:grabbing;}
-#pdfCanvas{box-shadow:0 4px 24px rgba(0,0,0,.4);background:#fff;display:block;}
+#pdfCanvas{box-shadow:0 4px 24px rgba(0,0,0,.5);background:#fff;display:block;}
 
-/* STATUS BAR */
-.status-bar{height:28px;background:var(--navy);display:flex;align-items:center;padding:0 14px;gap:16px;flex-shrink:0;}
-.status-item{font-size:11px;color:rgba(255,255,255,.5);}
-.status-item span{color:rgba(255,255,255,.85);font-weight:500;}
+/* Status bar */
+.status-bar{height:24px;background:var(--navy);display:flex;align-items:center;padding:0 12px;gap:14px;flex-shrink:0;}
+.st-item{font-size:10px;color:rgba(255,255,255,.4);}
+.st-item span{color:rgba(255,255,255,.75);font-weight:500;}
 
-/* LOADING */
-.loading{position:absolute;inset:0;background:rgba(82,86,89,.8);display:flex;align-items:center;justify-content:center;z-index:10;}
-.loading-inner{background:#fff;border-radius:10px;padding:24px 32px;text-align:center;}
-.spin{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--amber);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;}
+/* Loading overlay */
+.loading{position:absolute;inset:0;background:rgba(60,63,66,.75);display:flex;align-items:center;justify-content:center;z-index:20;}
+.loading-inner{background:#fff;border-radius:10px;padding:22px 28px;text-align:center;}
+.spin{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--amber);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px;}
 @keyframes spin{to{transform:rotate(360deg)}}
-.loading-text{font-size:13px;font-weight:500;color:var(--navy);}
+.loading-text{font-size:12px;font-weight:500;color:var(--navy);}
 
-/* SCALE TOOL */
-.tool-btn{padding:6px 12px;border-radius:5px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.65);font-family:inherit;transition:all .15s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;}
-.tool-btn:hover{background:rgba(255,255,255,.1);color:#fff;}
-.tool-btn.active{background:var(--amber);border-color:var(--amber);color:var(--navy);}
-.tool-btn.set{background:#10b981;border-color:#10b981;color:#fff;}
-.scale-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.3);border-radius:5px;padding:4px 10px;font-size:11px;font-weight:600;color:#10b981;}
-
-/* SCALE MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;display:flex;align-items:center;justify-content:center;}
-.modal{background:#fff;border-radius:12px;padding:28px;width:340px;box-shadow:0 8px 40px rgba(0,0,0,.3);}
-.modal-title{font-size:16px;font-weight:700;color:var(--navy);margin-bottom:6px;}
-.modal-sub{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.5;}
-.modal-field{margin-bottom:16px;}
-.modal-label{font-size:12px;font-weight:600;color:var(--navy);margin-bottom:6px;display:block;}
-.modal-input{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:6px;font-size:14px;font-family:inherit;color:var(--navy);transition:border .15s;}
+/* ── SCALE MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:300;display:flex;align-items:center;justify-content:center;}
+.modal{background:#fff;border-radius:12px;padding:24px;width:340px;box-shadow:0 8px 40px rgba(0,0,0,.25);}
+.modal-title{font-size:15px;font-weight:700;color:var(--navy);margin-bottom:5px;}
+.modal-sub{font-size:12px;color:var(--muted);margin-bottom:18px;line-height:1.5;}
+.modal-hint{background:#fff8ee;border:1px solid #f5dba0;border-radius:6px;padding:10px 12px;font-size:11px;color:#92610a;margin-bottom:14px;line-height:1.5;}
+.modal-ok{background:#f0faf5;border:1px solid #a8dfc2;border-radius:6px;padding:10px 12px;font-size:11px;color:#1a6640;margin-bottom:14px;}
+.modal-field{margin-bottom:14px;}
+.modal-label{font-size:11px;font-weight:600;color:var(--navy);margin-bottom:5px;display:block;}
+.modal-input{width:100%;padding:8px 10px;border:1px solid var(--border2);border-radius:6px;font-size:13px;font-family:inherit;color:var(--navy);}
 .modal-input:focus{outline:none;border-color:var(--amber);}
 .modal-row{display:flex;gap:8px;}
-.modal-btn{flex:1;padding:10px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:all .15s;}
-.modal-btn-primary{background:var(--amber);color:var(--navy);}
-.modal-btn-primary:hover{background:var(--amber2);}
-.modal-btn-cancel{background:var(--off);color:var(--muted);border:1px solid var(--border);}
-.modal-btn-cancel:hover{background:var(--border);}
+.modal-btn{flex:1;padding:9px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:all .15s;}
+.modal-btn.primary{background:var(--amber);color:var(--navy);}
+.modal-btn.primary:hover{background:var(--amber2);}
+.modal-btn.cancel{background:var(--off);color:var(--muted);border:1px solid var(--border);}
 
-/* SCALE LINE OVERLAY */
-#scaleOverlay{position:absolute;top:44px;left:0;right:0;bottom:28px;pointer-events:none;z-index:5;overflow:visible;}
-
-/* WALL TOOL */
-.tool-sep{width:1px;height:20px;background:rgba(255,255,255,.12);margin:0 4px;}
-.measure-totals{display:flex;align-items:center;gap:10px;margin-left:4px;}
-.measure-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:5px;font-size:11px;font-weight:700;}
-.measure-chip.ext{background:rgba(59,110,212,.2);border:1px solid rgba(59,110,212,.4);color:#7aa4f5;}
-.measure-chip.int{background:rgba(167,92,212,.2);border:1px solid rgba(167,92,212,.4);color:#c89cf5;}
-.measure-chip.plumb{background:rgba(212,150,59,.2);border:1px solid rgba(212,150,59,.4);color:#f5c87a;}
-
-/* SCHEDULE PANEL */
-.schedule-panel{position:fixed;top:0;right:0;width:420px;height:100vh;background:#fff;border-left:1px solid var(--border);z-index:150;display:flex;flex-direction:column;box-shadow:-4px 0 24px rgba(0,0,0,.12);transform:translateX(100%);transition:transform .25s ease;}
-.schedule-panel.open{transform:translateX(0);}
-.sp-head{padding:16px 18px;border-bottom:1px solid var(--border);background:var(--navy);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
-.sp-title{font-size:14px;font-weight:700;color:#fff;}
-.sp-close{width:28px;height:28px;border-radius:4px;border:1px solid rgba(255,255,255,.2);background:transparent;color:rgba(255,255,255,.7);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-.sp-close:hover{background:rgba(255,255,255,.1);color:#fff;}
-.sp-body{flex:1;overflow-y:auto;padding:16px;}
-.sp-section{margin-bottom:20px;}
-.sp-section-title{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border);}
-.sp-table{width:100%;border-collapse:collapse;font-size:12px;}
-.sp-table th{text-align:left;padding:5px 8px;font-size:10px;font-weight:600;color:var(--muted);background:var(--off);border-bottom:1px solid var(--border);}
-.sp-table td{padding:6px 8px;border-bottom:1px solid var(--border);vertical-align:middle;}
-.sp-table tr:last-child td{border-bottom:none;}
-.sp-table input{width:100%;border:1px solid var(--border);border-radius:4px;padding:3px 6px;font-size:12px;font-family:inherit;}
-.sp-table input:focus{outline:none;border-color:var(--amber);}
-.sp-footer{padding:14px 18px;border-top:1px solid var(--border);display:flex;gap:10px;flex-shrink:0;}
-.sp-btn{flex:1;padding:10px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:all .15s;}
-.sp-btn-primary{background:var(--amber);color:var(--navy);}
-.sp-btn-primary:hover{background:var(--amber2);}
-.sp-btn-cancel{background:var(--off);color:var(--muted);border:1px solid var(--border);}
-.sp-loading{padding:40px;text-align:center;}
-.sp-spin{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--amber);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px;}
-.sp-load-text{font-size:13px;color:var(--muted);}
-.sp-field{margin-bottom:12px;}
-.sp-label{font-size:11px;font-weight:600;color:var(--navy);margin-bottom:4px;display:block;}
-.sp-input{width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:5px;font-size:13px;font-family:inherit;}
-.sp-input:focus{outline:none;border-color:var(--amber);}
-.sp-row{display:flex;gap:10px;}
-.sp-row .sp-field{flex:1;}
+/* ── SCHEDULE PANEL ── */
+.sch-panel{width:380px;flex-shrink:0;background:#fff;border-left:1px solid var(--border);display:none;flex-direction:column;overflow:hidden;}
+.sch-panel.open{display:flex;}
+.sch-head{padding:12px 16px;border-bottom:1px solid var(--border);background:var(--navy);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.sch-title{font-size:13px;font-weight:700;color:#fff;}
+.sch-close{width:26px;height:26px;border-radius:4px;border:1px solid rgba(255,255,255,.18);background:transparent;color:rgba(255,255,255,.6);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.sch-close:hover{background:rgba(255,255,255,.1);color:#fff;}
+.sch-body{flex:1;overflow-y:auto;padding:14px;}
+.sch-section{margin-bottom:18px;}
+.sch-sec-title{font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--border);}
+.sch-table{width:100%;border-collapse:collapse;font-size:11px;}
+.sch-table th{text-align:left;padding:4px 6px;font-size:9px;font-weight:600;color:var(--muted2);background:var(--off);border-bottom:1px solid var(--border);}
+.sch-table td{padding:5px 6px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.sch-table tr:last-child td{border-bottom:none;}
+.sch-table input[type=number]{width:44px;border:1px solid var(--border2);border-radius:3px;padding:2px 4px;font-size:11px;font-family:inherit;text-align:center;}
+.sch-row{display:flex;gap:8px;margin-bottom:8px;}
+.sch-field{flex:1;}
+.sch-label{font-size:10px;font-weight:600;color:var(--navy);margin-bottom:3px;display:block;}
+.sch-input{width:100%;padding:6px 8px;border:1px solid var(--border2);border-radius:5px;font-size:12px;font-family:inherit;}
+.sch-input:focus{outline:none;border-color:var(--amber);}
+.sch-footer{padding:12px 14px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0;}
+.sch-btn{flex:1;padding:9px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:all .15s;}
+.sch-btn.primary{background:var(--amber);color:var(--navy);}
+.sch-btn.primary:hover{background:var(--amber2);}
+.sch-btn.cancel{background:var(--off);color:var(--muted);border:1px solid var(--border);}
+.sch-loading{padding:32px;text-align:center;}
+.sch-spin{width:28px;height:28px;border:3px solid var(--border);border-top-color:var(--amber);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px;}
+.sch-load-text{font-size:12px;color:var(--muted);}
+.sch-note{font-size:11px;color:var(--muted);padding:4px 0;border-bottom:1px solid var(--border);line-height:1.4;}
 </style>
 </head>
 <body>
 
+<div class="app">
+
+<!-- NAV -->
 <nav class="nav">
   <div class="nav-mark">SE</div>
-  <div style="margin-right:16px">
+  <div>
     <div class="nav-name">Sauce Estimator</div>
     <div class="nav-sub">Home Edition</div>
   </div>
-  <div style="width:1px;height:28px;background:rgba(255,255,255,.12);margin:0 12px"></div>
-  <div style="font-size:12px;font-weight:600;color:rgba(255,255,255,.5);letter-spacing:.3px;text-transform:uppercase">Plan Viewer</div>
+  <div class="nav-div"></div>
+  <div class="nav-page">Plan Viewer</div>
   <div class="nav-sp"></div>
   <a href="/estimator.html" class="nav-btn">Quick Estimate</a>
   <a href="/" class="nav-btn amber">Dashboard</a>
 </nav>
 
+<div class="app-body">
+
 <!-- UPLOAD SCREEN -->
 <div id="uploadScreen">
-  <div class="upload-wrap">
-    <div class="upload-card">
-      <div class="upload-head">
-        <div class="upload-title">Open a Plan Set</div>
-        <div class="upload-sub">Upload a PDF plan set to view it at full resolution</div>
-      </div>
-      <div class="upload-body">
-        <div class="dz" id="dropzone">
-          <input type="file" id="fileInput" accept=".pdf,image/jpeg,image/png,image/webp">
-          <div class="dz-icon">
-            <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-              <path d="M11 2v12M6 7l5-5 5 5" stroke="#f5a623" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M2 15v3a2 2 0 002 2h14a2 2 0 002-2v-3" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>
-          </div>
-          <h3>Drop your plan here</h3>
-          <p>or click to browse</p>
-          <div class="fmts">
-            <span class="fmt">PDF</span>
-            <span class="fmt">JPG</span>
-            <span class="fmt">PNG</span>
-          </div>
+  <div class="upload-card">
+    <div class="upload-head">
+      <div class="upload-title">Open a Plan Set</div>
+      <div class="upload-sub">Upload a PDF to view, scale, and measure walls</div>
+    </div>
+    <div class="upload-body">
+      <div class="dz" id="dropzone">
+        <input type="file" id="fileInput" accept=".pdf,image/jpeg,image/png,image/webp">
+        <div class="dz-icon">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+            <path d="M10 2v11M5 7l5-5 5 5" stroke="#f5a623" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M2 14v2a2 2 0 002 2h12a2 2 0 002-2v-2" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3>Drop your plan here</h3>
+        <p>or click to browse files</p>
+        <div class="fmts">
+          <span class="fmt">PDF</span>
+          <span class="fmt">JPG</span>
+          <span class="fmt">PNG</span>
         </div>
       </div>
     </div>
@@ -209,77 +228,62 @@ body{font-family:'Inter',sans-serif;background:var(--off);color:var(--navy);min-
 </div>
 
 <!-- VIEWER SCREEN -->
-<div class="viewer-wrap" id="viewerScreen">
+<div id="viewerScreen">
 
-  <!-- SIDEBAR -->
+  <!-- LEFT: PAGE THUMBNAILS -->
   <div class="sidebar">
     <div class="sidebar-head">
-      <div class="sidebar-filename" id="sidebarFilename">—</div>
-      <div class="sidebar-meta" id="sidebarMeta">—</div>
+      <div class="sb-filename" id="sbFilename">—</div>
+      <div class="sb-meta" id="sbMeta">—</div>
     </div>
-    <div class="sidebar-actions">
-      <button class="btn btn-outline btn-sm" onclick="document.getElementById('fileInput2').click()">
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v7M2 5l4-4 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M1 9v1a1 1 0 001 1h8a1 1 0 001-1V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-        Open New
-      </button>
-      <input type="file" id="fileInput2" accept=".pdf,image/jpeg,image/png" style="display:none">
-    </div>
+    <button class="sb-open" onclick="document.getElementById('fileInput2').click()">
+      <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M5.5 1v7M2 5l3.5-4L9 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M1 8v1.5A.5.5 0 001.5 10h8a.5.5 0 00.5-.5V8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Open New File
+    </button>
+    <input type="file" id="fileInput2" accept=".pdf,image/jpeg,image/png" style="display:none">
     <div class="thumbs" id="thumbsContainer"></div>
   </div>
 
-  <!-- MAIN CANVAS -->
+  <!-- CENTER: CANVAS -->
   <div class="canvas-area" style="position:relative">
-    <div class="canvas-toolbar">
-      <span class="toolbar-label">Zoom</span>
-      <div class="zoom-btns">
-        <button class="zoom-btn" onclick="adjustZoom(-0.25)" title="Zoom out">−</button>
-        <button class="zoom-btn" onclick="setZoom(1.0)" title="Fit" style="font-size:10px;width:36px">FIT</button>
-        <button class="zoom-btn" onclick="adjustZoom(0.25)" title="Zoom in">+</button>
+
+    <!-- ROW 1: View controls -->
+    <div class="toolbar-view">
+      <div class="zoom-group">
+        <button class="zoom-btn" onclick="adjustZoom(-0.25)">−</button>
+        <button class="zoom-btn zoom-fit" onclick="setZoom(1.0)">FIT</button>
+        <button class="zoom-btn" onclick="adjustZoom(0.25)">+</button>
       </div>
-      <span class="toolbar-val" id="zoomLabel">100%</span>
-      <div class="toolbar-sep"></div>
-      <button class="tool-btn" id="scaleBtn" onclick="startScaleTool()">
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 6h10M1 3l2 3-2 3M11 3l-2 3 2 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Set Scale
-      </button>
-      <div class="scale-badge" id="scaleBadge" style="display:none">
-        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M3.5 5l1 1 2-2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <span id="scaleLabel">Scale set</span>
-      </div>
-      <div class="toolbar-sep"></div>
-      <button class="tool-btn" id="extWallBtn" onclick="activateWallTool('ext')" title="Trace exterior walls">
-        <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><rect x="1" y="1" width="9" height="9" rx="1" stroke="currentColor" stroke-width="1.5"/></svg>
-        Ext Walls
-      </button>
-      <button class="tool-btn" id="intWallBtn" onclick="activateWallTool('int')" title="Trace interior walls">
-        <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M5.5 1v9M1 5.5h4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-        Int Walls
-      </button>
-      <button class="tool-btn" id="plumbWallBtn" onclick="activateWallTool('plumb')" title="Trace plumbing walls">
-        <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M3 1v9M8 1v9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-        Plumb
-      </button>
-      <button class="tool-btn" id="undoWallBtn" onclick="undoLastSegment()" title="Undo last segment" style="opacity:.6">
-        <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1 4h5a4 4 0 010 8H3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M1 4l3-3M1 4l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Undo
-      </button>
-      <div class="measure-totals">
-        <div class="measure-chip ext" id="extTotal" style="display:none">EXT <span id="extLF">0</span> LF</div>
-        <div class="measure-chip int" id="intTotal" style="display:none">INT <span id="intLF">0</span> LF</div>
-        <div class="measure-chip plumb" id="plumbTotal" style="display:none">PLB <span id="plumbLF">0</span> LF</div>
-      </div>
-      <div class="toolbar-sep"></div>
-      <button class="tool-btn" id="readBtn" onclick="readSchedules()" title="Read door, window and truss schedules with AI">
-        <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><rect x="1" y="1" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M3 4h5M3 6h5M3 8h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
-        Read Schedules
-      </button>
-      <div class="toolbar-sep"></div>
-      <span class="toolbar-label">Page</span>
-      <div class="page-nav">
+      <span class="tb-val" id="zoomLabel">100%</span>
+      <div class="tb-sep"></div>
+      <div class="page-group">
         <button class="page-btn" id="prevBtn" onclick="changePage(-1)">‹</button>
         <span class="page-info" id="pageInfo">1 / 1</span>
         <button class="page-btn" id="nextBtn" onclick="changePage(1)">›</button>
       </div>
+      <div class="tb-sep"></div>
+      <span class="tb-label" id="statusMsg">Ready</span>
+    </div>
+
+    <!-- ROW 2: Tools -->
+    <div class="toolbar-tools">
+      <span class="tb-label">Scale</span>
+      <button class="tool-btn" id="scaleBtn" onclick="startScaleTool()">Set Scale</button>
+      <div id="scaleBadge" style="display:none;font-size:10px;font-weight:700;color:var(--success);" id="scaleLabel">✓ Set</div>
+      <div class="tb-sep"></div>
+      <span class="tb-label">Walls</span>
+      <button class="tool-btn blue" id="extWallBtn" onclick="activateWallTool('ext')">Ext</button>
+      <button class="tool-btn purple" id="intWallBtn" onclick="activateWallTool('int')">Int</button>
+      <button class="tool-btn orange" id="plumbWallBtn" onclick="activateWallTool('plumb')">Plumb</button>
+      <button class="tool-btn" id="undoWallBtn" onclick="undoLastSegment()" style="opacity:.65;">Undo</button>
+      <div class="lf-chip ext" id="extTotal" style="display:none">EXT <span id="extLF">0</span>'</div>
+      <div class="lf-chip int" id="intTotal" style="display:none">INT <span id="intLF">0</span>'</div>
+      <div class="lf-chip plb" id="plumbTotal" style="display:none">PLB <span id="plumbLF">0</span>'</div>
+      <div class="tb-sep"></div>
+      <button class="tool-btn" id="readBtn" onclick="readSchedules()">
+        <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><rect x="1" y="1" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M3 4h5M3 6h5M3 8h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Read Schedules
+      </button>
     </div>
 
     <div class="canvas-scroll" id="canvasScroll">
@@ -291,48 +295,60 @@ body{font-family:'Inter',sans-serif;background:var(--off);color:var(--navy);min-
     </div>
 
     <div class="status-bar">
-      <div class="status-item">Sheet: <span id="statusSheet">—</span></div>
-      <div class="status-item">Size: <span id="statusSize">—</span></div>
-      <div class="status-item" id="statusMsg">Ready</div>
+      <div class="st-item">Sheet: <span id="statusSheet">—</span></div>
+      <div class="st-item">Size: <span id="statusSize">—</span></div>
+      <div class="st-item">Scale: <span id="statusScale">not set</span></div>
     </div>
 
     <div class="loading" id="loadingOverlay" style="display:none">
       <div class="loading-inner">
         <div class="spin"></div>
-        <div class="loading-text" id="loadingText">Loading plan...</div>
+        <div class="loading-text" id="loadingText">Loading...</div>
       </div>
     </div>
 
   </div>
 
-</div>
-
-
-    <svg id="scaleOverlay"></svg>
-
+  <!-- RIGHT: SCHEDULE PANEL -->
+  <div class="sch-panel" id="schedulePanel">
+    <div class="sch-head">
+      <div class="sch-title">Schedule Reader</div>
+      <button class="sch-close" onclick="closeSchedulePanel()">×</button>
+    </div>
+    <div class="sch-body" id="schBody">
+      <div class="sch-loading" id="schLoading" style="display:none">
+        <div class="sch-spin"></div>
+        <div class="sch-load-text">Reading schedules...</div>
+      </div>
+      <div id="schContent"></div>
+    </div>
+    <div class="sch-footer" id="schFooter" style="display:none">
+      <button class="sch-btn cancel" onclick="closeSchedulePanel()">Close</button>
+      <button class="sch-btn primary" onclick="sendToEstimator()">Send to Estimator →</button>
+    </div>
   </div>
-</div>
+
+</div><!-- end viewerScreen -->
+
+</div><!-- end app-body -->
+</div><!-- end app -->
 
 <!-- SCALE MODAL -->
 <div class="modal-overlay" id="scaleModal" style="display:none">
   <div class="modal">
     <div class="modal-title">Set Plan Scale</div>
-    <div class="modal-sub">Click two points on a known dimension line on the plan, then enter the real-world distance between them.</div>
+    <div class="modal-sub">Click two points on a known dimension line, then enter the real distance.</div>
     <div id="scaleStep1">
-      <div style="background:#fff8ee;border:1px solid #f5dba0;border-radius:6px;padding:12px 14px;font-size:12px;color:#92610a;margin-bottom:16px;">
-        <strong>Step 1:</strong> Close this dialog, then click the first point on a dimension line. The dialog will reappear after both points are clicked.
-      </div>
+      <div class="modal-hint"><strong>Step 1:</strong> Close this dialog, then click point 1 and point 2 on a known dimension line on the plan.</div>
       <div class="modal-row">
-        <button class="modal-btn modal-btn-primary" onclick="beginPickPoints()">Start Picking Points</button>
-        <button class="modal-btn modal-btn-cancel" onclick="cancelScale()">Cancel</button>
+        <button class="modal-btn primary" onclick="beginPickPoints()">Start Picking Points</button>
+        <button class="modal-btn cancel" onclick="cancelScale()">Cancel</button>
       </div>
     </div>
     <div id="scaleStep2" style="display:none">
-      <div style="background:#f0faf5;border:1px solid #a8dfc2;border-radius:6px;padding:12px 14px;font-size:12px;color:#1a6640;margin-bottom:16px;" id="scalePixelInfo">
-        Measured pixel distance: — px
-      </div>
+      <div class="modal-ok" id="scalePixelInfo">Measured: — px</div>
       <div class="modal-field">
-        <label class="modal-label">What is the real distance between those two points?</label>
+        <label class="modal-label">Real distance between those two points</label>
         <input type="number" class="modal-input" id="scaleDistInput" placeholder="e.g. 30" min="0.1" step="0.1">
       </div>
       <div class="modal-field">
@@ -343,14 +359,17 @@ body{font-family:'Inter',sans-serif;background:var(--off);color:var(--navy);min-
         </select>
       </div>
       <div class="modal-row">
-        <button class="modal-btn modal-btn-primary" onclick="confirmScale()">Confirm Scale</button>
-        <button class="modal-btn modal-btn-cancel" onclick="cancelScale()">Cancel</button>
+        <button class="modal-btn primary" onclick="confirmScale()">Confirm Scale</button>
+        <button class="modal-btn cancel" onclick="cancelScale()">Cancel</button>
       </div>
     </div>
   </div>
 </div>
+
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
+
 // Set PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
@@ -412,8 +431,8 @@ async function loadPDF(arrayBuffer) {
   currentPage = 1;
 
   // Update UI
-  document.getElementById('sidebarFilename').textContent = filename;
-  document.getElementById('sidebarMeta').textContent = totalPages + ' page' + (totalPages > 1 ? 's' : '');
+  document.getElementById('sbFilename').textContent = filename;
+  document.getElementById('sbMeta').textContent = totalPages + ' page' + (totalPages > 1 ? 's' : '');
   document.getElementById('statusSheet').textContent = filename;
 
   // Build thumbnails
@@ -437,8 +456,8 @@ async function loadImage(dataURL, file) {
     ctx.drawImage(img, 0, 0);
     totalPages = 1;
     currentPage = 1;
-    document.getElementById('sidebarFilename').textContent = filename;
-    document.getElementById('sidebarMeta').textContent = '1 page';
+    document.getElementById('sbFilename').textContent = filename;
+    document.getElementById('sbMeta').textContent = '1 page';
     document.getElementById('pageInfo').textContent = '1 / 1';
     document.getElementById('statusSheet').textContent = filename;
     document.getElementById('statusSize').textContent = img.width + ' × ' + img.height + 'px';
@@ -625,6 +644,7 @@ document.addEventListener('keydown', e => {
 function showViewer() {
   document.getElementById('uploadScreen').style.display = 'none';
   document.getElementById('viewerScreen').classList.add('active');
+  document.getElementById('viewerScreen').style.display = 'flex';
 }
 
 function showLoading(msg) {
@@ -797,7 +817,7 @@ function confirmScale() {
   document.getElementById('scaleModal').style.display = 'none';
   document.getElementById('scaleBtn').classList.remove('active');
   document.getElementById('scaleBtn').classList.add('set');
-  document.getElementById('scaleBadge').style.display = 'flex';
+  document.getElementById('scaleBadge').style.display = 'inline-flex';
   document.getElementById('scaleLabel').textContent =
     `1ft = ${scalePixelsPerFoot.toFixed(1)}px`;
   document.getElementById('statusMsg').textContent =
@@ -1062,9 +1082,9 @@ async function readSchedules() {
 
   // Open panel and show loading
   document.getElementById('schedulePanel').classList.add('open');
-  document.getElementById('spLoading').style.display = '';
-  document.getElementById('spContent').innerHTML = '';
-  document.getElementById('spFooter').style.display = 'none';
+  document.getElementById('schLoading').style.display = '';
+  document.getElementById('schContent').innerHTML = '';
+  document.getElementById('schFooter').style.display = 'none';
   document.getElementById('readBtn').classList.add('active');
 
   try {
@@ -1081,8 +1101,8 @@ async function readSchedules() {
     renderSchedulePanel(data);
 
   } catch (err) {
-    document.getElementById('spLoading').style.display = 'none';
-    document.getElementById('spContent').innerHTML =
+    document.getElementById('schLoading').style.display = 'none';
+    document.getElementById('schContent').innerHTML =
       `<div style="padding:20px;color:#ef4444;font-size:13px;">Error: ${err.message}</div>`;
   }
 
@@ -1090,7 +1110,7 @@ async function readSchedules() {
 }
 
 function renderSchedulePanel(data) {
-  document.getElementById('spLoading').style.display = 'none';
+  document.getElementById('schLoading').style.display = 'none';
 
   let html = '';
 
@@ -1179,8 +1199,8 @@ function renderSchedulePanel(data) {
     </div>`;
   }
 
-  document.getElementById('spContent').innerHTML = html;
-  document.getElementById('spFooter').style.display = 'flex';
+  document.getElementById('schContent').innerHTML = html;
+  document.getElementById('schFooter').style.display = 'flex';
 }
 
 function sendToEstimator() {
@@ -1209,25 +1229,7 @@ function sendToEstimator() {
 
 
 
-</script>
 
-<!-- SCHEDULE PANEL -->
-<div class="schedule-panel" id="schedulePanel">
-  <div class="sp-head">
-    <div class="sp-title">Schedule Reader</div>
-    <button class="sp-close" onclick="closeSchedulePanel()">×</button>
-  </div>
-  <div class="sp-body" id="spBody">
-    <div class="sp-loading" id="spLoading" style="display:none">
-      <div class="sp-spin"></div>
-      <div class="sp-load-text">Reading schedules...</div>
-    </div>
-    <div id="spContent"></div>
-  </div>
-  <div class="sp-footer" id="spFooter" style="display:none">
-    <button class="sp-btn sp-btn-cancel" onclick="closeSchedulePanel()">Close</button>
-    <button class="sp-btn sp-btn-primary" onclick="sendToEstimator()">Send to Estimator →</button>
-  </div>
-</div>
+</script>
 </body>
 </html>
