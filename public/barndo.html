@@ -370,6 +370,10 @@ html,body{min-height:100%;background:var(--navy);color:var(--text);font-family:'
   <th>Item</th><th class="r">Rate B</th><th class="r">Qty C</th><th class="r">Total D</th>
 </tr></thead><tbody>
 
+<tr class="subtag"><td colspan="4">Base Turnkey Amount (D1) — salesman enters pre-loaded total</td></tr>
+<tr><td class="lbl" style="font-weight:600;color:var(--text);">Base Turnkey Amount</td>
+  <td colspan="2"><input class="inp" id="D1" type="number" value="0" min="0" step="100" oninput="calcTurnkey()" style="font-family:'DM Mono',monospace;font-size:12px;font-weight:700;color:var(--amber2);"></td>
+  <td class="tot" id="D1disp" style="font-weight:700;color:var(--amber2);">—</td></tr>
 <tr class="subtag"><td colspan="4">Spray Foam Insulation (rows 3-4)</td></tr>
 <tr><td class="lbl">Spray Foam 2×4 walls (per SF)</td><td><input class="ri" id="B3" type="number" value="2.5" step=".25" oninput="calcTurnkey()"></td><td><input class="ni" id="C3" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D3">—</td></tr>
 <tr><td class="lbl">Spray Foam 2×6 walls (per SF)</td><td><input class="ri" id="B4" type="number" value="3.25" step=".25" oninput="calcTurnkey()"></td><td><input class="ni" id="C4tk" type="number" value="0" min="0" oninput="calcTurnkey()"></td><td class="tot" id="D4">—</td></tr>
@@ -537,6 +541,7 @@ html,body{min-height:100%;background:var(--navy);color:var(--text);font-family:'
   <div class="res-block">
     <div class="res-bh">Quote Sheet</div>
     <div class="res-row"><span class="res-rl">Shell Pkg N29</span><span class="res-rv" id="rN29">$0</span></div>
+    <div class="res-row"><span class="res-rl">Turnkey Est N39=D101</span><span class="res-rv hi" id="rN39">$0</span></div>
     <div class="res-row"><span class="res-rl">Labor N30</span><span class="res-rv" id="rN30">$0</span></div>
     <div class="res-row"><span class="res-rl">Materials N31</span><span class="res-rv" id="rN31">$0</span></div>
     <div class="res-row"><span class="res-rl">Plan Mod N37</span><span class="res-rv" id="rN37">$0</span></div>
@@ -763,8 +768,10 @@ function calc(){
   // N40 = N31*9.75% + N37*9.75%
   const N40=(N31*0.0975)+(N37*0.0975);
   const N41=g('sMiles')*g('sRate')*g('sLoads');
-  // N42 = SUM(N37:Q41) = N29+N37+N40+N41
-  const N42=N29+N37+N40+N41;
+  // N32 = D101 (Turnkey total → N39)
+  const N32 = window._D101 || 0;
+  // N42 = SUM(N37:Q41) which includes N32 (turnkey)
+  const N42=N29+N32+N37+N40+N41;
   const N43=g('deposits');
   const N44=N42-N43;
 
@@ -788,7 +795,7 @@ function calc(){
   set('rPorchSF',Math.round(porchSF).toLocaleString()+' SF');
   // Update turnkey shell+total display
   calcTurnkey();
-  set('rN29', fmt(N29)); set('rN30', fmt(N30)); set('rN31', fmt(N31)); set('rN37', fmt(N37)); set('rN40', fmt(N40)); set('rN41', fmt(N41));
+  set('rN29', fmt(N29)); set('rN39', fmt(N32)); set('rN30', fmt(N30)); set('rN31', fmt(N31)); set('rN37', fmt(N37)); set('rN40', fmt(N40)); set('rN41', fmt(N41));
   set('rN42', fmt(N42)); set('rN44', fmt(N44));
 }
 
@@ -807,7 +814,12 @@ function calcTurnkey() {
   // ID suffix map — some rows had conflicts with shell package IDs
   const idMap = {4:'C4tk', 12:'C12tk', 17:'C17tk', 22:'C22tk'};
 
-  let D101 = 0;
+  // D1 = base turnkey amount (manual entry)
+  const D1val = parseFloat(document.getElementById('D1')?.value) || 0;
+  const d1El = document.getElementById('D1disp');
+  if(d1El) d1El.textContent = D1val > 0 ? fmt(D1val) : '—';
+
+  let D101 = D1val;
   tkRows.forEach(r => {
     const bId = 'B' + r;
     const cId = idMap[r] ? idMap[r] : 'C' + r;
