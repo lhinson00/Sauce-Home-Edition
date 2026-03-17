@@ -7,14 +7,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
 :root{
-  --navy:#1a2332;--navy2:#212d3d;--navy3:#263044;
-  --amber:#f5a623;--amber2:#f7b94a;
+  --navy:#4B4B4B;--navy2:#3a3a3a;--navy3:#333333;
+  --amber:#FF8200;--amber2:#ff9933;
   --teal:#2dd4aa;
   --off:#f0f2f5;--white:#fff;
   --border:#e2e5ea;--border2:#d0d4da;
-  --text:#1a2332;--muted:#6b7280;--muted2:#9ca3af;
+  --text:#4B4B4B;--muted:#6b7280;--muted2:#9ca3af;
   --success:#10b981;--danger:#ef4444;
-  --ext:#2563eb;--int:#7c3aed;--plb:#d97706;
+  --ext:#2563eb;--int:#7c3aed;--plb:#FF8200;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{height:100%;overflow:hidden;}
@@ -301,7 +301,7 @@ body{font-family:'Inter',sans-serif;background:var(--off);color:var(--text);disp
         <input type="file" id="fileInput" accept=".pdf,image/jpeg,image/png,image/webp">
         <div class="dz-icon">
           <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-            <path d="M11 2v13M5 8l6-6 6 6" stroke="#f5a623" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M11 2v13M5 8l6-6 6 6" stroke="#FF8200" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
             <path d="M2 16v2a2 2 0 002 2h14a2 2 0 002-2v-2" stroke="rgba(255,255,255,.5)" stroke-width="1.8" stroke-linecap="round"/>
           </svg>
         </div>
@@ -644,9 +644,9 @@ function fractionToPixels(fx,fy){const c=document.getElementById('pdfCanvas');re
 function redrawScaleOverlay(){
   const svg=document.getElementById('scaleOverlay');svg.innerHTML='';if(!scalePoints.length)return;
   const c=document.getElementById('pdfCanvas');svg.setAttribute('width',c.width);svg.setAttribute('height',c.height);
-  const p1=fractionToPixels(scalePoints[0].fx,scalePoints[0].fy);dot(svg,p1.x,p1.y,'#f5a623');
+  const p1=fractionToPixels(scalePoints[0].fx,scalePoints[0].fy);dot(svg,p1.x,p1.y,'#FF8200');
   if(scalePoints.length===2){
-    const p2=fractionToPixels(scalePoints[1].fx,scalePoints[1].fy);const col=scaleRealFt?'#10b981':'#f5a623';dot(svg,p2.x,p2.y,col);
+    const p2=fractionToPixels(scalePoints[1].fx,scalePoints[1].fy);const col=scaleRealFt?'#10b981':'#FF8200';dot(svg,p2.x,p2.y,col);
     const ln=svgEl('line');ln.setAttribute('x1',p1.x);ln.setAttribute('y1',p1.y);ln.setAttribute('x2',p2.x);ln.setAttribute('y2',p2.y);ln.setAttribute('stroke',col);ln.setAttribute('stroke-width',2);ln.setAttribute('stroke-dasharray','6 3');svg.appendChild(ln);
     if(scaleRealFt){const t=svgEl('text');t.setAttribute('x',(p1.x+p2.x)/2);t.setAttribute('y',(p1.y+p2.y)/2-8);t.setAttribute('text-anchor','middle');t.setAttribute('font-size','11');t.setAttribute('font-weight','700');t.setAttribute('fill',col);t.setAttribute('stroke','#fff');t.setAttribute('stroke-width','3');t.setAttribute('paint-order','stroke');t.textContent=scaleRealFt>=1?scaleRealFt+"'":(scaleRealFt*12)+'"';svg.appendChild(t);}
   }
@@ -690,7 +690,7 @@ function confirmScale(){
 }
 
 // WALL TOOL
-const WC={ext:'#2563eb',int:'#7c3aed',plumb:'#d97706'};
+const WC={ext:'#2563eb',int:'#7c3aed',plumb:'#FF8200'};
 const WL={ext:'EXT',int:'INT',plumb:'PLB'};
 let wallMode=null,wallSegments=[],wallPendingStart=null;
 function getWallTotal(t){return wallSegments.filter(s=>s.type===t).reduce((a,s)=>a+s.ft,0);}
