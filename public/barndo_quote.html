@@ -271,7 +271,7 @@ html,body{background:#e8edf2;font-family:'DM Sans',sans-serif;color:var(--text);
       </div>
       <div class="seller-contact">
         <a href="tel:9317961521">(931) 796-1521</a>
-        <a href="mailto:lain.hinson@summertownmetals.com">lain.hinson@summertownmetals.com</a>
+        <a href="/cdn-cgi/l/email-protection#0d616c6463236564637e62634d7e786060687f79627a636068796c617e236e6260"><span class="__cf_email__" data-cfemail="167a777f78387e7f786579785665637b7b7364627961787b7362777a653875797b">[email&#160;protected]</span></a>
         <div class="seller-office">summertownmetals.com</div>
       </div>
     </div>
@@ -286,7 +286,7 @@ html,body{background:#e8edf2;font-family:'DM Sans',sans-serif;color:var(--text);
 
 </div><!-- end page -->
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ── READ VALUES PASSED VIA URL PARAMS OR POSTMESSAGE ──
 // This page can be opened from barndo.html with params,
 // or receive data via postMessage from parent window.
@@ -370,14 +370,4 @@ if (params.has('data')) {
 
 // ── READ FROM POSTMESSAGE (when opened as popup from barndo.html) ──
 window.addEventListener('message', e => {
-  if (e.data?.type === 'BARNDO_QUOTE') populate(e.data.payload);
-});
-
-// ── ALSO READ FROM LOCALSTORAGE (fallback) ──
-try {
-  const saved = localStorage.getItem('barndo_quote_preview');
-  if (saved) populate(JSON.parse(saved));
-} catch(e) {}
-</script>
-</body>
-</html>
+  if (e
