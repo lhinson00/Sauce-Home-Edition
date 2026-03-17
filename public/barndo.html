@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Barndominium Shell Package — Summertown Metals</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0f1923;--navy2:#131f2d;--navy3:#1a2840;--amber:#e8a020;--amber2:#f5b540;--border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);--text:#dce6ef;--text2:#8fa8be;--muted:#4e6478;--card:#131f2d;--card2:#1a2840;--input:#0c1520;--success:#2ecc71;}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{min-height:100%;background:var(--navy);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;}
+.hdr{background:#0c1520;border-bottom:1px solid var(--border2);height:56px;display:flex;align-items:center;padding:0 24px;gap:14px;position:sticky;top:0;z-index:200;}
+.hdr-logo{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--amber);letter-spacing:2px;}
+.hdr-pipe{width:1px;height:22px;background:var(--border2);}
+.hdr-title{font-size:10px;font-weight:500;color:var(--text2);letter-spacing:1.2px;text-transform:uppercase;}
+.hdr-sp{flex:1;}
+.btn-save{background:var(--amber);color:var(--navy);border:none;padding:7px 18px;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;}
+.btn-save:hover{background:var(--amber2);}
+.btn-save:disabled{opacity:.5;cursor:not-allowed;}
+.page{display:grid;grid-template-columns:1fr 340px;min-height:calc(100vh - 56px);}
+.form-col{padding:20px;border-right:1px solid var(--border);}
+.result-col{padding:16px 16px 40px;background:var(--navy2);position:sticky;top:56px;height:calc(100vh - 56px);overflow-y:auto;display:flex;flex-direction:column;gap:8px;}
+.sec{margin-bottom:18px;}
+.sec-hdr{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;color:var(--amber);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.sec-hdr::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(232,160,32,.3),transparent);}
+.sec-sub{font-size:10px;color:var(--muted);margin-bottom:8px;font-style:italic;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;}
+.fg{display:grid;gap:7px;}.fg2{grid-template-columns:1fr 1fr;}.fg3{grid-template-columns:1fr 1fr 1fr;}
+.field{display:flex;flex-direction:column;gap:3px;}
+.field label{font-size:9px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.7px;}
+.inp{background:var(--input);border:1px solid rgba(255,255,255,.09);border-radius:5px;color:var(--text);padding:6px 8px;font-family:'DM Sans',sans-serif;font-size:12px;outline:none;width:100%;}
+.inp:focus{border-color:rgba(232,160,32,.5);}
+.inp[type=number]{font-family:'DM Mono',monospace;}
+/* Tables */
+.tbl,.atbl{width:100%;border-collapse:collapse;}
+.tbl th,.atbl th{font-size:9px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;padding:4px 5px;text-align:left;border-bottom:1px solid var(--border);}
+.tbl th.r,.atbl th.r{text-align:right;}
+.tbl td,.atbl td{padding:3px 3px;border-bottom:1px solid rgba(255,255,255,.02);}
+.tbl tr:last-child td,.atbl tr:last-child td{border-bottom:none;}
+.lbl{font-size:11px;color:var(--text2);white-space:nowrap;}
+.ni{background:var(--input);border:1px solid rgba(255,255,255,.09);border-radius:4px;color:var(--text);padding:4px 5px;font-family:'DM Mono',monospace;font-size:11px;outline:none;width:58px;text-align:right;}
+.ni:focus{border-color:rgba(232,160,32,.5);}
+.ri{background:var(--input);border:1px solid rgba(232,160,32,.15);border-radius:4px;color:var(--amber);padding:4px 5px;font-family:'DM Mono',monospace;font-size:10px;outline:none;width:50px;text-align:right;}
+.ri:focus{border-color:rgba(232,160,32,.5);}
+.sf{font-family:'DM Mono',monospace;font-size:10px;color:var(--amber2);text-align:right;padding-right:3px;}
+.tot{font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);text-align:right;}
+.subtag td{font-size:9px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:.7px;padding-top:8px;padding-bottom:3px;border-bottom:1px solid rgba(232,160,32,.1)!important;}
+/* Foundation */
+.ftabs{display:flex;gap:5px;margin-bottom:10px;}
+.ftab{padding:5px 12px;border-radius:4px;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:'DM Sans',sans-serif;font-size:11px;cursor:pointer;}
+.ftab.on{background:var(--amber);color:var(--navy);border-color:var(--amber);font-weight:700;}
+.fpanel{display:none;}.fpanel.on{display:block;}
+.disp{font-family:'DM Mono',monospace;font-size:11px;color:var(--amber);padding:5px 7px;background:var(--input);border:1px solid var(--border);border-radius:4px;}
+.hint{font-size:10px;color:var(--muted);margin-top:5px;line-height:1.5;}
+/* Result panel */
+.res-total{background:var(--amber);border-radius:7px;padding:12px 14px;}
+.res-total-lbl{font-size:9px;font-weight:700;color:rgba(15,25,35,.6);text-transform:uppercase;letter-spacing:.8px;margin-bottom:2px;}
+.res-total-val{font-family:'Bebas Neue',sans-serif;font-size:30px;color:var(--navy);letter-spacing:1px;line-height:1;}
+.res-block{background:var(--card);border:1px solid var(--border);border-radius:7px;}
+.res-bh{padding:7px 11px;background:rgba(255,255,255,.03);border-bottom:1px solid var(--border);font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;}
+.res-row{display:flex;justify-content:space-between;align-items:flex-start;padding:5px 11px;border-bottom:1px solid rgba(255,255,255,.02);gap:4px;}
+.res-row:last-child{border-bottom:none;}
+.res-rl{font-size:10px;color:var(--text2);flex:1;padding-right:6px;line-height:1.3;}
+.res-rv{font-family:'DM Mono',monospace;font-size:11px;color:var(--text);white-space:nowrap;flex-shrink:0;}
+.res-rv.hi{color:var(--amber);}
+.res-grand{display:flex;justify-content:space-between;align-items:center;padding:9px 11px;background:rgba(232,160,32,.07);border:1px solid rgba(232,160,32,.2);border-radius:7px;}
+.res-grand-l{font-size:12px;font-weight:600;color:var(--text);}
+.res-grand-v{font-family:'DM Mono',monospace;font-size:14px;font-weight:700;color:var(--amber);}
+.res-bal{display:flex;justify-content:space-between;align-items:center;padding:9px 11px;background:rgba(46,204,113,.06);border:1px solid rgba(46,204,113,.2);border-radius:7px;}
+</style>
+</head>
+<body>
+<header class="hdr">
+  <div class="hdr-logo">SE</div><div class="hdr-pipe"></div>
+  <div class="hdr-title">Barndominium Shell Package</div>
+  <div class="hdr-sp"></div>
+  <button class="btn-save" id="btnSave" onclick="saveQuote()">💾 Save Quote</button>
+</header>
+<div class="page">
+<div class="form-col">
+
+<!-- CUSTOMER -->
+<div class="sec">
+<div class="sec-hdr">Customer Info</div>
+<div class="card">
+<div class="fg fg2">
+  <div class="field"><label>Customer Name</label><input class="inp" id="custName" type="text" oninput="calc()"></div>
+  <div class="field"><label>Phone</label><input class="inp" id="custPhone" type="text" oninput="calc()"></div>
+  <div class="field"><label>Email</label><input class="inp" id="custEmail" type="text" oninput="calc()"></div>
+  <div class="field"><label>Salesman</label><input class="inp" id="salesman" type="text" value="Lain Hinson" oninput="calc()"></div>
+  <div class="field"><label>Address</label><input class="inp" id="addr" type="text" oninput="calc()"></div>
+  <div class="field"><label>City / ST / ZIP</label><input class="inp" id="cityStZip" type="text" oninput="calc()"></div>
+  <div class="field"><label>Plan Name</label><input class="inp" id="planName" type="text" oninput="calc()"></div>
+  <div class="field"><label>Shipping Mileage</label><input class="inp" id="shipMiles" type="number" value="60" min="0" oninput="calc()"></div>
+</div>
+</div>
+</div>
+
+<!-- STANDARD PLAN / KIT H3:J7 -->
+<div class="sec">
+<div class="sec-hdr">Website Standard Plan / Kit (H3:J7)</div>
+<p class="sec-sub">Enter kit totals if starting from a pre-built plan. J6=J5-J7 auto. Adds to manual entry — use one or both.</p>
+<div class="card">
+<div class="fg fg3">
+  <div class="field"><label>Shell Package J5</label><input class="inp" id="J5" type="number" value="0" min="0" step="100" oninput="calcJ6();calc()"></div>
+  <div class="field"><label>Materials J7</label><input class="inp" id="J7" type="number" value="0" min="0" step="100" oninput="calcJ6();calc()"></div>
+  <div class="field"><label>Labor J6 = J5−J7</label><div class="disp" id="J6disp" style="color:var(--amber2);font-weight:600;">$0</div></div>
+</div>
+</div>
+</div>
+
+<!-- CONCRETED SPACES rows 22-33 -->
+<div class="sec">
+<div class="sec-hdr">Concreted Spaces (rows 22-33)</div>
+<p class="sec-sub">E=D×C (SF) · G=F×E (total). Rates editable.</p>
+<div class="card">
+<table class="tbl"><thead><tr>
+  <th>Space</th><th class="r">Width C</th><th class="r">Length D</th><th class="r">Rate F</th><th class="r">SF E</th><th class="r">Total G</th>
+</tr></thead><tbody>
+<tr><td class="lbl">Living</td><td><input class="ni" id="C22" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ni" id="D22" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ri" id="F22" type="number" value="52" step=".25" oninput="calc()"></td><td class="sf" id="E22">—</td><td class="tot" id="G22">—</td></tr>
+<tr><td class="lbl">2nd Floor</td><td><input class="ni" id="C23" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ni" id="D23" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ri" id="F23" type="number" value="52" step=".25" oninput="calc()"></td><td class="sf" id="E23">—</td><td class="tot" id="G23">—</td></tr>
+<tr><td class="lbl">Garage</td><td><input class="ni" id="C24" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ni" id="D24" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ri" id="F24" type="number" value="45" step=".25" oninput="calc()"></td><td class="sf" id="E24">—</td><td class="tot" id="G24">—</td></tr>
+<tr><td class="lbl">Front Porch</td><td><input class="ni" id="C25" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ni" id="D25" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ri" id="F25" type="number" value="42" step=".25" oninput="calc()"></td><td class="sf" id="E25">—</td><td class="tot" id="G25">—</td></tr>
+<tr><td class="lbl">Back Porch</td><td><input class="ni" id="C26" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ni" id="D26" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ri" id="F26" type="number" value="40" step=".25" oninput="calc()"></td><td class="sf" id="E26">—</td><td class="tot" id="G26">—</td></tr>
+<tr><td class="lbl">Side Porch 1</td><td><input class="ni" id="C27" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ni" id="D27" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ri" id="F27" type="number" value="40" step=".25" oninput="calc()"></td><td class="sf" id="E27">—</td><td class="tot" id="G27">—</td></tr>
+<tr><td class="lbl">Side Porch 2</td><td><input class="ni" id="C28" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ni" id="D28" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ri" id="F28" type="number" value="40" step=".25" oninput="calc()"></td><td class="sf" id="E28">—</td><td class="tot" id="G28">—</td></tr>
+<tr><td class="lbl">Carport</td><td><input class="ni" id="C29" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ni" id="D29" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ri" id="F29" type="number" value="30" step=".25" oninput="calc()"></td><td class="sf" id="E29">—</td><td class="tot" id="G29">—</td></tr>
+<tr><td class="lbl">Breezeway</td><td><input class="ni" id="C30" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ni" id="D30" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ri" id="F30" type="number" value="30" step=".25" oninput="calc()"></td><td class="sf" id="E30">—</td><td class="tot" id="G30">—</td></tr>
+<tr><td class="lbl">Patio</td><td><input class="ni" id="C31" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ni" id="D31" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ri" id="F31" type="number" value="7.75" step=".25" oninput="calc()"></td><td class="sf" id="E31">—</td><td class="tot" id="G31">—</td></tr>
+<tr><td class="lbl">Deck</td><td><input class="ni" id="C32" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ni" id="D32" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ri" id="F32" type="number" value="25" step=".25" oninput="calc()"></td><td class="sf" id="E32">—</td><td class="tot" id="G32">—</td></tr>
+<tr><td class="lbl">Misc Structure</td><td><input class="ni" id="C33" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ni" id="D33" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ri" id="F33" type="number" value="30" step=".25" oninput="calc()"></td><td class="sf" id="E33">—</td><td class="tot" id="G33">—</td></tr>
+</tbody></table>
+</div>
+</div>
+
+<!-- NON-CONCRETE SPACES rows 36-48 -->
+<div class="sec">
+<div class="sec-hdr">Non-Concrete Additions (rows 36-48)</div>
+<p class="sec-sub">Wood floor systems / additions without slab. E=D×C · G=F×E.</p>
+<div class="card">
+<table class="tbl"><thead><tr>
+  <th>Space</th><th class="r">Width C</th><th class="r">Length D</th><th class="r">Rate F</th><th class="r">SF E</th><th class="r">Total G</th>
+</tr></thead><tbody>
+<tr><td class="lbl">Living</td><td><input class="ni" id="C36" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ni" id="D36" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ri" id="F36" type="number" value="48" step=".25" oninput="calc()"></td><td class="sf" id="E36">—</td><td class="tot" id="G36">—</td></tr>
+<tr><td class="lbl">2nd Floor</td><td><input class="ni" id="C37" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ni" id="D37" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ri" id="F37" type="number" value="40" step=".25" oninput="calc()"></td><td class="sf" id="E37">—</td><td class="tot" id="G37">—</td></tr>
+<tr><td class="lbl">Garage</td><td><input class="ni" id="C38" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ni" id="D38" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ri" id="F38" type="number" value="40" step=".25" oninput="calc()"></td><td class="sf" id="E38">—</td><td class="tot" id="G38">—</td></tr>
+<tr><td class="lbl">Front Porch</td><td><input class="ni" id="C39" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ni" id="D39" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ri" id="F39" type="number" value="40" step=".25" oninput="calc()"></td><td class="sf" id="E39">—</td><td class="tot" id="G39">—</td></tr>
+<tr><td class="lbl">Back Porch</td><td><input class="ni" id="C40" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ni" id="D40" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ri" id="F40" type="number" value="40" step=".25" oninput="calc()"></td><td class="sf" id="E40">—</td><td class="tot" id="G40">—</td></tr>
+<tr><td class="lbl">Side Porch 1</td><td><input class="ni" id="C41" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ni" id="D41" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ri" id="F41" type="number" value="40" step=".25" oninput="calc()"></td><td class="sf" id="E41">—</td><td class="tot" id="G41">—</td></tr>
+<tr><td class="lbl">Side Porch 2</td><td><input class="ni" id="C42" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ni" id="D42" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ri" id="F42" type="number" value="40" step=".25" oninput="calc()"></td><td class="sf" id="E42">—</td><td class="tot" id="G42">—</td></tr>
+<tr><td class="lbl">Breezeway</td><td><input class="ni" id="C43" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ni" id="D43" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ri" id="F43" type="number" value="30" step=".25" oninput="calc()"></td><td class="sf" id="E43">—</td><td class="tot" id="G43">—</td></tr>
+<tr><td class="lbl">Patio</td><td><input class="ni" id="C44" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ni" id="D44" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ri" id="F44" type="number" value="7.75" step=".25" oninput="calc()"></td><td class="sf" id="E44">—</td><td class="tot" id="G44">—</td></tr>
+<tr><td class="lbl">Misc</td><td><input class="ni" id="C45" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ni" id="D45" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ri" id="F45" type="number" value="0" step=".25" oninput="calc()"></td><td class="sf" id="E45">—</td><td class="tot" id="G45">—</td></tr>
+<tr><td class="lbl">Porch</td><td><input class="ni" id="C46" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ni" id="D46" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ri" id="F46" type="number" value="35" step=".25" oninput="calc()"></td><td class="sf" id="E46">—</td><td class="tot" id="G46">—</td></tr>
+<tr><td class="lbl">Carport</td><td><input class="ni" id="C47" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ni" id="D47" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ri" id="F47" type="number" value="25" step=".25" oninput="calc()"></td><td class="sf" id="E47">—</td><td class="tot" id="G47">—</td></tr>
+<tr><td class="lbl">Deck</td><td><input class="ni" id="C48" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ni" id="D48" type="number" value="0" min="0" oninput="calc()"></td><td><input class="ri" id="F48" type="number" value="25" step=".25" oninput="calc()"></td><td class="sf" id="E48">—</td><td class="tot" id="G48">—</td></tr>
+</tbody></table>
+</div>
+</div>
+
+<!-- FOUNDATION -->
+<div class="sec">
+<div class="sec-hdr">Foundation</div>
+<div class="ftabs">
+  <button class="ftab on" onclick="setFound('slab',this)">Standard Slab</button>
+  <button class="ftab" onclick="setFound('basement',this)">Basement</button>
+  <button class="ftab" onclick="setFound('crawl',this)">Crawlspace</button>
+  <button class="ftab" onclick="setFound('block',this)">Block &amp; Fill</button>
+</div>
+<div class="fpanel on" id="fp-slab"><div class="card"><p class="hint">Standard 4" monolithic slab — included in space rates. No additional foundation inputs.</p></div></div>
+<div class="fpanel" id="fp-basement">
+  <div class="card">
+    <div class="fg fg3">
+      <div class="field"><label>Wall Height ft (L63)</label><input class="inp" id="bH" type="number" value="0" min="0" oninput="calc()"></div>
+      <div class="field"><label>Wall Linear Ft (M63)</label><input class="inp" id="bLF" type="number" value="0" min="0" oninput="calc()"></div>
+      <div class="field"><label>Area Sq Ft (N63)</label><input class="inp" id="bSF" type="number" value="0" min="0" oninput="calc()"></div>
+    </div>
+    <div class="hint">M69=(WallLF×WallHt)×$22.50 · M70=AreaSF×$8 · M71=AreaSF×$3 · M74=WallLF×0.24×$84 · M75=(AreaSF×0.333/27)×$84</div>
+    <div class="fg fg3" style="margin-top:8px;">
+      <div class="field"><label>Wall Cost M69</label><div class="disp" id="dM69">$0</div></div>
+      <div class="field"><label>Floor Mat M70</label><div class="disp" id="dM70">$0</div></div>
+      <div class="field"><label>Floor Labor M71</label><div class="disp" id="dM71">$0</div></div>
+      <div class="field"><label>Wall Gravel M74</label><div class="disp" id="dM74">$0</div></div>
+      <div class="field"><label>Slab Gravel M75</label><div class="disp" id="dM75">$0</div></div>
+      <div class="field"><label>Total Basement L79</label><div class="disp" id="dL79" style="color:var(--amber2);font-weight:700;">$0</div></div>
+    </div>
+  </div>
+</div>
+<div class="fpanel" id="fp-crawl">
+  <div class="card">
+    <div class="fg fg2">
+      <div class="field"><label>Linear Feet (L84)</label><input class="inp" id="cLF" type="number" value="0" min="0" oninput="calc()"></div>
+      <div class="field"><label>Rate $/LF (M84)</label><input class="inp" id="cRate" type="number" value="120" step="5" oninput="calc()"></div>
+    </div>
+    <div class="hint">N84=L84×M84 · L92=floor sys cost(LF×$8+LF×$3) · C16=N84+L92 · M88=L85×-$7.75 feeds concrete labor deduction F9</div>
+  </div>
+</div>
+<div class="fpanel" id="fp-block">
+  <div class="card">
+    <div class="fg fg3">
+      <div class="field"><label>Linear Feet (L97)</label><input class="inp" id="blLF" type="number" value="0" min="0" oninput="calc()"></div>
+      <div class="field"><label>Area SF (M97)</label><input class="inp" id="blSF" type="number" value="0" min="0" oninput="calc()"></div>
+      <div class="field"><label>Depth ft (N97)</label><input class="inp" id="blD" type="number" value="0" min="0" step=".667" oninput="calc()"></div>
+    </div>
+    <div class="hint">M99=LF×$6 · Courses=(D×12)/8 · M100=(LF×12/16)×$10×courses · Fill=(SF×D/27)×$85</div>
+  </div>
+</div>
+</div>
+
+<!-- ROOF/WALL ADDERS rows 52-62 -->
+<div class="sec">
+<div class="sec-hdr">Roof &amp; Wall Adders (rows 52-62)</div>
+<p class="sec-sub">Rows 52-56: D=material SF, L=labor SF (separate). Rows 57-62: D=qty, material cost only.</p>
+<div class="card">
+<table class="atbl"><thead><tr>
+  <th>Item</th><th class="r">Mat$/SF E</th><th class="r">Mat SF D</th><th class="r">F=E×D</th>
+  <th class="r">Lab$/SF M</th><th class="r">Lab SF L</th><th class="r">N=M×L</th>
+</tr></thead><tbody>
+<tr class="subtag"><td colspan="7">Siding — rows 52-56 (separate material &amp; labor SF)</td></tr>
+<tr><td class="lbl">Cement/LP Siding</td><td><input class="ri" id="E52" type="number" value="4" step=".25" oninput="calc()"></td><td><input class="ni" id="D52" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F52">—</td><td><input class="ri" id="M52" type="number" value="1" step=".25" oninput="calc()"></td><td><input class="ni" id="L52" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="N52">—</td></tr>
+<tr><td class="lbl">Board &amp; Batten</td><td><input class="ri" id="E53" type="number" value="2" step=".25" oninput="calc()"></td><td><input class="ni" id="D53" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F53">—</td><td><input class="ri" id="M53" type="number" value="1.5" step=".25" oninput="calc()"></td><td><input class="ni" id="L53" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="N53">—</td></tr>
+<tr><td class="lbl">Primed Smart Siding</td><td><input class="ri" id="E54" type="number" value="3.5" step=".25" oninput="calc()"></td><td><input class="ni" id="D54" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F54">—</td><td><input class="ri" id="M54" type="number" value="4" step=".25" oninput="calc()"></td><td><input class="ni" id="L54" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="N54">—</td></tr>
+<tr><td class="lbl">Standing Seam</td><td><input class="ri" id="E55" type="number" value="2" step=".25" oninput="calc()"></td><td><input class="ni" id="D55" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F55">—</td><td><input class="ri" id="M55" type="number" value="1.5" step=".25" oninput="calc()"></td><td><input class="ni" id="L55" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="N55">—</td></tr>
+<tr><td class="lbl">ZIP System</td><td><input class="ri" id="E56" type="number" value="1.5" step=".25" oninput="calc()"></td><td><input class="ni" id="D56" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F56">—</td><td><input class="ri" id="M56" type="number" value="0.5" step=".25" oninput="calc()"></td><td><input class="ni" id="L56" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="N56">—</td></tr>
+<tr class="subtag"><td colspan="7">Material only — rows 57-62 (D=qty, no labor column in C4)</td></tr>
+<tr><td class="lbl">26 Gauge Walls</td><td><input class="ri" id="E57" type="number" value="0.5" step=".25" oninput="calc()"></td><td><input class="ni" id="D57" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F57">—</td><td colspan="3" style="color:var(--muted);font-size:10px;text-align:center;">mat only</td></tr>
+<tr><td class="lbl">26 Gauge Roof</td><td><input class="ri" id="E58" type="number" value="0.5" step=".25" oninput="calc()"></td><td><input class="ni" id="D58" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F58">—</td><td colspan="3" style="color:var(--muted);font-size:10px;text-align:center;">mat only</td></tr>
+<tr><td class="lbl">Cypress Siding</td><td><input class="ri" id="E59" type="number" value="0" step=".25" oninput="calc()"></td><td><input class="ni" id="D59" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F59">—</td><td colspan="3" style="color:var(--muted);font-size:10px;text-align:center;">mat only</td></tr>
+<tr><td class="lbl">Rock Wainscot</td><td><input class="ri" id="E60" type="number" value="20" step=".25" oninput="calc()"></td><td><input class="ni" id="D60" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F60">—</td><td colspan="3" style="color:var(--muted);font-size:10px;text-align:center;">mat only</td></tr>
+<tr><td class="lbl">5/8" OSB</td><td><input class="ri" id="E61" type="number" value="0.5" step=".25" oninput="calc()"></td><td><input class="ni" id="D61" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F61">—</td><td colspan="3" style="color:var(--muted);font-size:10px;text-align:center;">mat only</td></tr>
+<tr><td class="lbl">1×6 T&amp;G Ceilings <span style="font-size:9px;color:var(--amber)">(F62÷2→framing labor)</span></td><td><input class="ri" id="E62" type="number" value="6" step=".25" oninput="calc()"></td><td><input class="ni" id="D62" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F62">—</td><td colspan="3" style="color:var(--muted);font-size:10px;text-align:center;">mat only</td></tr>
+</tbody></table>
+</div>
+</div>
+
+<!-- BONUS ADDITIONS rows 59-60 right side (S col) -->
+<div class="sec">
+<div class="sec-hdr">Bonus Additions (S59:S60)</div>
+<p class="sec-sub">L=include flag (0 or 1). O=L×(M×N) cost. P=L×(N×3) labor. Both feed C4/C5.</p>
+<div class="card">
+<table class="atbl"><thead><tr>
+  <th>Item</th><th class="r">$/SF M</th><th class="r">Fixed SF N</th><th class="r">Include L</th><th class="r">Cost O</th><th class="r">Labor P</th>
+</tr></thead><tbody>
+<tr><td class="lbl">Mini Pettus Upstairs Unfinished</td><td><input class="ri" id="M59" type="number" value="18" step=".5" oninput="calc()"></td><td><input class="ri" id="N59" type="number" value="672" step="1" oninput="calc()"></td><td><input class="ni" id="L59" type="number" value="0" min="0" max="1" step="1" oninput="calc()" style="width:44px;text-align:center;"></td><td class="tot" id="O59">—</td><td class="tot" id="P59">—</td></tr>
+<tr><td class="lbl">Pettus Upstairs Unfinished</td><td><input class="ri" id="M60" type="number" value="18" step=".5" oninput="calc()"></td><td><input class="ri" id="N60" type="number" value="868" step="1" oninput="calc()"></td><td><input class="ni" id="L60" type="number" value="0" min="0" max="1" step="1" oninput="calc()" style="width:44px;text-align:center;"></td><td class="tot" id="O60">—</td><td class="tot" id="P60">—</td></tr>
+</tbody></table>
+</div>
+</div>
+
+<!-- DOORS rows 64-69 -->
+<div class="sec">
+<div class="sec-hdr">Doors (rows 64-69)</div>
+<div class="card">
+<table class="atbl"><thead><tr><th>Item</th><th class="r">Rate E</th><th class="r">Qty D</th><th class="r">F=E×D</th></tr></thead><tbody>
+<tr><td class="lbl">Single Ext Doors</td><td><input class="ri" id="E64" type="number" value="500" step="50" oninput="calc()"></td><td><input class="ni" id="D64" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F64">—</td></tr>
+<tr><td class="lbl">Double Ext Doors</td><td><input class="ri" id="E65" type="number" value="3000" step="50" oninput="calc()"></td><td><input class="ni" id="D65" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F65">—</td></tr>
+<tr><td class="lbl">Front Door Specific</td><td><input class="ri" id="E66" type="number" value="0" step="50" oninput="calc()"></td><td><input class="ni" id="D66" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F66">—</td></tr>
+<tr><td class="lbl">Backdoor</td><td><input class="ri" id="E67" type="number" value="1690" step="50" oninput="calc()"></td><td><input class="ni" id="D67" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F67">—</td></tr>
+<tr><td class="lbl">Side Doors</td><td><input class="ri" id="E68" type="number" value="770" step="50" oninput="calc()"></td><td><input class="ni" id="D68" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F68">—</td></tr>
+<tr><td class="lbl">Special Doors</td><td><input class="ri" id="E69" type="number" value="0" step="50" oninput="calc()"></td><td><input class="ni" id="D69" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F69">—</td></tr>
+</tbody></table>
+</div>
+</div>
+
+<!-- WINDOWS rows 71-74 -->
+<div class="sec">
+<div class="sec-hdr">Windows (rows 71-74)</div>
+<div class="card">
+<table class="atbl"><thead><tr><th>Item</th><th class="r">Rate E</th><th class="r">Qty D</th><th class="r">F=E×D</th></tr></thead><tbody>
+<tr><td class="lbl">Windows (Standard)</td><td><input class="ri" id="E71" type="number" value="590" step="10" oninput="calc()"></td><td><input class="ni" id="D71" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F71">—</td></tr>
+<tr><td class="lbl">Std Window Upgrade Adj</td><td><input class="ri" id="E72" type="number" value="300" step="10" oninput="calc()"></td><td><input class="ni" id="D72" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F72">—</td></tr>
+<tr><td class="lbl">Windows (Upgrade)</td><td><input class="ri" id="E73" type="number" value="100" step="10" oninput="calc()"></td><td><input class="ni" id="D73" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F73">—</td></tr>
+<tr><td class="lbl">Special Windows</td><td><input class="ri" id="E74" type="number" value="0" step="10" oninput="calc()"></td><td><input class="ni" id="D74" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F74">—</td></tr>
+</tbody></table>
+</div>
+</div>
+
+<!-- ACCENTS 76-77 -->
+<div class="sec">
+<div class="sec-hdr">Accents (rows 76-77)</div>
+<div class="card">
+<table class="atbl"><thead><tr><th>Item</th><th class="r">Rate E</th><th class="r">Qty D</th><th class="r">F=E×D</th></tr></thead><tbody>
+<tr><td class="lbl">Gable Accents</td><td><input class="ri" id="E76" type="number" value="0" step="50" oninput="calc()"></td><td><input class="ni" id="D76" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F76">—</td></tr>
+<tr><td class="lbl">Cypress Door &amp; Window Awnings</td><td><input class="ri" id="E77" type="number" value="0" step="50" oninput="calc()"></td><td><input class="ni" id="D77" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F77">—</td></tr>
+</tbody></table>
+</div>
+</div>
+
+<!-- CUPOLAS 79-82 -->
+<div class="sec">
+<div class="sec-hdr">Cupolas (rows 79-82)</div>
+<div class="card">
+<table class="atbl"><thead><tr><th>Item</th><th class="r">Rate E</th><th class="r">Qty D</th><th class="r">F=E×D</th></tr></thead><tbody>
+<tr><td class="lbl">Small</td><td><input class="ri" id="E79" type="number" value="1250" step="50" oninput="calc()"></td><td><input class="ni" id="D79" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F79">—</td></tr>
+<tr><td class="lbl">Medium</td><td><input class="ri" id="E80" type="number" value="1750" step="50" oninput="calc()"></td><td><input class="ni" id="D80" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F80">—</td></tr>
+<tr><td class="lbl">Large</td><td><input class="ri" id="E81" type="number" value="2500" step="50" oninput="calc()"></td><td><input class="ni" id="D81" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F81">—</td></tr>
+<tr><td class="lbl">Special Build</td><td><input class="ri" id="E82" type="number" value="0" step="50" oninput="calc()"></td><td><input class="ni" id="D82" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F82">—</td></tr>
+</tbody></table>
+</div>
+</div>
+
+<!-- GARAGE DOORS 84-86 -->
+<div class="sec">
+<div class="sec-hdr">Garage Doors (rows 84-86)</div>
+<div class="card">
+<table class="atbl"><thead><tr><th>Item</th><th class="r">Rate E</th><th class="r">Qty D</th><th class="r">F=E×D</th></tr></thead><tbody>
+<tr><td class="lbl">Garage Door</td><td><input class="ri" id="E84" type="number" value="1800" step="50" oninput="calc()"></td><td><input class="ni" id="D84" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F84">—</td></tr>
+<tr><td class="lbl">Garage Door Opener w/ Install</td><td><input class="ri" id="E85" type="number" value="950" step="50" oninput="calc()"></td><td><input class="ni" id="D85" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F85">—</td></tr>
+<tr><td class="lbl">Garage Door Accessories</td><td><input class="ri" id="E86" type="number" value="0" step="50" oninput="calc()"></td><td><input class="ni" id="D86" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F86">—</td></tr>
+</tbody></table>
+</div>
+</div>
+
+<!-- FIREPLACE 88-89 -->
+<div class="sec">
+<div class="sec-hdr">Fireplace (rows 88-89)</div>
+<div class="card">
+<table class="atbl"><thead><tr><th>Item</th><th class="r">Rate E</th><th class="r">Qty D</th><th class="r">F=E×D</th></tr></thead><tbody>
+<tr><td class="lbl">Fireplace Framing Allowance</td><td><input class="ri" id="E88" type="number" value="2000" step="100" oninput="calc()"></td><td><input class="ni" id="D88" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F88">—</td></tr>
+<tr><td class="lbl">Fireplace Insert &amp; Finish Allowance</td><td><input class="ri" id="E89" type="number" value="12500" step="100" oninput="calc()"></td><td><input class="ni" id="D89" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F89">—</td></tr>
+</tbody></table>
+</div>
+</div>
+
+<!-- SAFE ROOM 91-92 -->
+<div class="sec">
+<div class="sec-hdr">Safe Room (rows 91-92)</div>
+<div class="card">
+<table class="atbl"><thead><tr><th>Item</th><th class="r">Rate E</th><th class="r">Qty D</th><th class="r">F=E×D</th></tr></thead><tbody>
+<tr><td class="lbl">Safe Room</td><td><input class="ri" id="E91" type="number" value="15000" step="500" oninput="calc()"></td><td><input class="ni" id="D91" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F91">—</td></tr>
+<tr><td class="lbl">Safe Room Door</td><td><input class="ri" id="E92" type="number" value="2000" step="100" oninput="calc()"></td><td><input class="ni" id="D92" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F92">—</td></tr>
+</tbody></table>
+</div>
+</div>
+
+<!-- EXTRAS 94/96/98 -->
+<div class="sec">
+<div class="sec-hdr">Extras (rows 94, 96, 98)</div>
+<div class="card">
+<table class="atbl"><thead><tr><th>Item</th><th class="r">Rate E</th><th class="r">Qty D</th><th class="r">F=E×D</th></tr></thead><tbody>
+<tr><td class="lbl">Seamless Gutters / LF</td><td><input class="ri" id="E94" type="number" value="9.5" step=".25" oninput="calc()"></td><td><input class="ni" id="D94" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F94">—</td></tr>
+<tr><td class="lbl">Balusters &amp; Railings / LF ($160 min)</td><td><input class="ri" id="E96" type="number" value="160" step="5" oninput="calc()"></td><td><input class="ni" id="D96" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F96">—</td></tr>
+<tr><td class="lbl">Crane</td><td><input class="ri" id="E98" type="number" value="2000" step="100" oninput="calc()"></td><td><input class="ni" id="D98" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F98">—</td></tr>
+</tbody></table>
+</div>
+</div>
+
+<!-- PLAN MODS row 100 + PUNCH LABOR -->
+<div class="sec">
+<div class="sec-hdr">Plan Modifications &amp; Punch Labor</div>
+<p class="sec-sub">F100=E100×D100 feeds Quote Sheet N37 (taxed at 9.75% separately). Punch labor G12=C12+D12-F12.</p>
+<div class="card">
+<table class="atbl"><thead><tr><th>Item</th><th class="r">Rate E</th><th class="r">Qty D</th><th class="r">Total</th></tr></thead><tbody>
+<tr><td class="lbl">Plan Modifications <span style="font-size:9px;color:var(--amber)">(→ N37, separate tax)</span></td><td><input class="ri" id="E100" type="number" value="1800" step="100" oninput="calc()"></td><td><input class="ni" id="D100" type="number" value="1" min="0" oninput="calc()"></td><td class="tot" id="F100">$1,800</td></tr>
+<tr><td class="lbl">Punch Labor Base (C12)</td><td>—</td><td><input class="ni" id="C12" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="G12disp">—</td></tr>
+<tr><td class="lbl">Punch Adder (D12)</td><td>—</td><td><input class="ni" id="D12" type="number" value="0" min="0" oninput="calc()"></td><td>—</td></tr>
+<tr><td class="lbl">Punch Special Add/Ded (F12)</td><td>—</td><td><input class="ni" id="F12inp" type="number" value="0" oninput="calc()"></td><td>—</td></tr>
+</tbody></table>
+</div>
+</div>
+
+<!-- SHIPPING & PAYMENTS -->
+<div class="sec">
+<div class="sec-hdr">Shipping &amp; Deposits</div>
+<div class="card">
+<div class="fg fg3">
+  <div class="field"><label>Mileage</label><input class="inp" id="sMiles" type="number" value="60" min="0" oninput="calc()"></div>
+  <div class="field"><label>$/Mile</label><input class="inp" id="sRate" type="number" value="4.5" step=".25" oninput="calc()"></div>
+  <div class="field"><label>Loads</label><input class="inp" id="sLoads" type="number" value="3" min="1" oninput="calc()"></div>
+</div>
+<div style="margin-top:8px;">
+  <div class="field"><label>Deposits / Payments Received ($)</label><input class="inp" id="deposits" type="number" value="0" min="0" oninput="calc()"></div>
+</div>
+</div>
+</div>
+
+</div><!-- end form-col -->
+
+<!-- RESULT COLUMN -->
+<div class="result-col">
+  <div class="res-total">
+    <div class="res-total-lbl">C4 — Shell Package</div>
+    <div class="res-total-val" id="rC4">$0</div>
+  </div>
+  <div class="res-block">
+    <div class="res-bh">Labor Breakdown</div>
+    <div class="res-row"><span class="res-rl">Concrete G9</span><span class="res-rv hi" id="rG9">$0</span></div>
+    <div class="res-row"><span class="res-rl">Framing G10</span><span class="res-rv hi" id="rG10">$0</span></div>
+    <div class="res-row"><span class="res-rl">Metal G11</span><span class="res-rv hi" id="rG11">$0</span></div>
+    <div class="res-row"><span class="res-rl">Punch G12</span><span class="res-rv hi" id="rG12">$0</span></div>
+    <div class="res-row"><span class="res-rl">Bonus Labor</span><span class="res-rv hi" id="rBonusLab">$0</span></div>
+    <div class="res-row" style="border-top:1px solid var(--border2);"><span class="res-rl" style="font-weight:600;">Total Labor C5</span><span class="res-rv hi" style="font-weight:700;" id="rC5">$0</span></div>
+  </div>
+  <div class="res-block">
+    <div class="res-bh">Foundation</div>
+    <div class="res-row"><span class="res-rl">Basement C15</span><span class="res-rv" id="rC15">$0</span></div>
+    <div class="res-row"><span class="res-rl">Crawlspace C16</span><span class="res-rv" id="rC16">$0</span></div>
+    <div class="res-row"><span class="res-rl">Block &amp; Fill C17</span><span class="res-rv" id="rC17">$0</span></div>
+    <div class="res-row"><span class="res-rl">Wire Mesh K16</span><span class="res-rv" id="rK16">$0</span></div>
+  </div>
+  <div class="res-block">
+    <div class="res-bh">Area Summary</div>
+    <div class="res-row"><span class="res-rl">Concrete SF</span><span class="res-rv" id="rConcSF">0 SF</span></div>
+    <div class="res-row"><span class="res-rl">Living SF</span><span class="res-rv" id="rLivSF">0 SF</span></div>
+    <div class="res-row"><span class="res-rl">2nd Floor SF</span><span class="res-rv" id="r2ndSF">0 SF</span></div>
+    <div class="res-row"><span class="res-rl">Garage SF</span><span class="res-rv" id="rGarSF">0 SF</span></div>
+    <div class="res-row"><span class="res-rl">Porch SF</span><span class="res-rv" id="rPorchSF">0 SF</span></div>
+  </div>
+  <div class="res-block">
+    <div class="res-bh">Quote Sheet</div>
+    <div class="res-row"><span class="res-rl">Shell Pkg N29</span><span class="res-rv" id="rN29">$0</span></div>
+    <div class="res-row"><span class="res-rl">Labor N30</span><span class="res-rv" id="rN30">$0</span></div>
+    <div class="res-row"><span class="res-rl">Materials N31</span><span class="res-rv" id="rN31">$0</span></div>
+    <div class="res-row"><span class="res-rl">Plan Mod N37</span><span class="res-rv" id="rN37">$0</span></div>
+    <div class="res-row"><span class="res-rl">Tax N40</span><span class="res-rv" id="rN40">$0</span></div>
+    <div class="res-row"><span class="res-rl">Shipping N41</span><span class="res-rv" id="rN41">$0</span></div>
+  </div>
+  <div class="res-grand">
+    <span class="res-grand-l">Total Estimate N42</span>
+    <span class="res-grand-v" id="rN42">$0</span>
+  </div>
+  <div class="res-bal">
+    <span class="res-rl" style="color:var(--success);font-weight:600;">Balance Due N44</span>
+    <span class="res-rv" style="color:var(--success);font-size:13px;font-weight:700;" id="rN44">$0</span>
+  </div>
+</div>
+</div>
+
+<script>
+const g  = id => parseFloat(document.getElementById(id)?.value) || 0;
+const fmt = n => '$' + Math.round(n).toLocaleString();
+const set = (id,v) => { const el=document.getElementById(id); if(el) el.textContent=v; };
+const sf  = (id,v) => set(id, v>0 ? Math.round(v).toLocaleString() : '—');
+const fmtS= (id,v) => set(id, v!==0 ? fmt(v) : '—');
+
+let foundType = 'slab';
+function setFound(t,btn){
+  foundType=t;
+  document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.fpanel').forEach(p=>p.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('fp-'+t).classList.add('on');
+  calc();
+}
+
+function calcJ6(){
+  const J5=parseFloat(document.getElementById('J5')?.value)||0;
+  const J7=parseFloat(document.getElementById('J7')?.value)||0;
+  const J6=J5-J7;
+  document.getElementById('J6disp').textContent = J6!==0 ? fmt(J6) : '$0';
+}
+
+function calc(){
+  // ── E = D*C, G = F*E for concreted spaces rows 22-33
+  const cRows=[22,23,24,25,26,27,28,29,30,31,32,33];
+  cRows.forEach(r=>{
+    const e=g('C'+r)*g('D'+r); const gv=g('F'+r)*e;
+    sf('E'+r,e); fmtS('G'+r,gv);
+  });
+  // ── E = D*C, G = F*E for non-concrete rows 36-48
+  const ncRows=[36,37,38,39,40,41,42,43,44,45,46,47,48];
+  ncRows.forEach(r=>{
+    const e=g('C'+r)*g('D'+r); const gv=g('F'+r)*e;
+    sf('E'+r,e); fmtS('G'+r,gv);
+  });
+  // ── Siding material F=E*D rows 52-62
+  [52,53,54,55,56,57,58,59,60,61,62].forEach(r=>fmtS('F'+r, g('E'+r)*g('D'+r)));
+  // ── Siding labor N=M*L rows 52-56
+  [52,53,54,55,56].forEach(r=>fmtS('N'+r, g('M'+r)*g('L'+r)));
+  // ── Bonus additions S59/S60
+  const O59=g('L59')*(g('M59')*g('N59')), P59=g('L59')*(g('N59')*3);
+  const O60=g('L60')*(g('M60')*g('N60')), P60=g('L60')*(g('N60')*3);
+  fmtS('O59',O59); fmtS('P59',P59); fmtS('O60',O60); fmtS('P60',P60);
+  // ── Simple adders F=E*D
+  [64,65,66,67,68,69,71,72,73,74,76,77,79,80,81,82,84,85,86,88,89,91,92,94,96,98,100]
+    .forEach(r=>fmtS('F'+r, g('E'+r)*g('D'+r)));
+  // ── Plan mod display
+  set('F100', fmt(g('E100')*g('D100')));
+
+  // ── FOUNDATION ──
+  // BASEMENT (rows 63-79)
+  const bH=g('bH'), bLF=g('bLF'), bSF=g('bSF');
+  const O65=84;
+  const M69=(bLF*bH)*22.5;
+  const M70=bSF*8;
+  const M71=bSF*3;
+  const L74=bLF*0.24;
+  const M74=L74*O65;
+  const L75=(bSF*0.333)/27;
+  const M75=L75*O65;
+  const M76=0; // crane pad not separate input
+  const L79=M69+M70+M71+M74+M75+M76;
+  const C15=M69+M70+M71+M74+M75; // C15=SUM(M69:M71,M74:M75)
+  document.getElementById('dM69').textContent=fmt(M69);
+  document.getElementById('dM70').textContent=fmt(M70);
+  document.getElementById('dM71').textContent=fmt(M71);
+  document.getElementById('dM74').textContent=fmt(M74);
+  document.getElementById('dM75').textContent=fmt(M75);
+  document.getElementById('dL79').textContent=fmt(L79);
+
+  // CRAWLSPACE (rows 84,88-90,92)
+  const N84=g('cLF')*g('cRate');
+  const L85=g('cLF'); // crawl LF = L85 proxy
+  const M88=L85*(-7.75); // concrete labor deduction (F9)
+  const M89=L85*8;  // floor system cost
+  const M90=L85*3;  // floor system labor
+  const L92=M89+M90;
+  const C16=N84+L92; // C16=SUM(N84,L92)
+
+  // BLOCK & FILL (rows 97-105)
+  const bkLF=g('blLF'), bkSF=g('blSF'), bkD=g('blD');
+  const M99=6*bkLF;
+  const L101=(bkD*12)/8;
+  const M100=(bkLF*12/16)*10;
+  const M101=M100*L101;
+  const L102=M101+M99;
+  const L103=(bkSF*bkD)/27;
+  const L105=L103*85;
+  const C17=L102+L105; // C17=SUM(L102,L105)
+
+  // Wire mesh K16=J16*I16 (crawlspace wire mesh SF — not a separate input, $0)
+  const K16=0;
+
+  // Which foundation costs apply to C4
+  const C16_c4 = foundType==='crawl'     ? C16 : 0;
+  const C17_c4 = foundType==='block'     ? C17 : 0;
+  const K16_c4 = foundType==='crawl'     ? K16 : 0;
+  const L79_c4 = foundType==='basement'  ? L79 : 0;
+  const F9_c4  = foundType==='crawl'     ? M88 : 0; // concrete labor deduct
+  const D9_bsmt= foundType==='basement'  ? (M69+M74+M75+N84+K16+L102+L105) : 0;
+
+  // ── LABOR (G9-G12) ──
+  const E22=g('C22')*g('D22'), E23=g('C23')*g('D23'), E24=g('C24')*g('D24');
+  const E25=g('C25')*g('D25'), E26=g('C26')*g('D26'), E27=g('C27')*g('D27');
+  const E28=g('C28')*g('D28'), E29=g('C29')*g('D29'), E30=g('C30')*g('D30');
+  const E31=g('C31')*g('D31'), E32=g('C32')*g('D32'), E33=g('C33')*g('D33');
+  const E36=g('C36')*g('D36'), E37=g('C37')*g('D37'), E38=g('C38')*g('D38');
+  const E39=g('C39')*g('D39'), E40=g('C40')*g('D40'), E41=g('C41')*g('D41');
+  const E42=g('C42')*g('D42'), E43=g('C43')*g('D43'), E44=g('C44')*g('D44');
+  const E45=g('C45')*g('D45'), E46=g('C46')*g('D46'), E47=g('C47')*g('D47');
+  const E48=g('C48')*g('D48');
+  // K cols = 0 (legend/standard plan not used in manual mode)
+
+  // C9 = SUM(E22,E24,E25,E26,E27,E28,E29,E30,E31,K22,K24..K31)*8
+  const C9=(E22+E24+E25+E26+E27+E28+E29+E30+E31)*8;
+  // D9 = SUM(M69,M74,M75,N84,K16,L102,L105)
+  const D9=M69+M74+M75+N84+K16+L102+L105;
+  const E9=C9+D9;
+  const F9=F9_c4; // M88 only when crawlspace
+  const G9=E9+F9;
+
+  // C10 = SUM(E22,E23,E24,E25,E27,E26,E28,E29,E30,E32,K cols,E46:E48,E36:E43,E45)*7
+  const C10=(E22+E23+E24+E25+E27+E26+E28+E29+E30+E32+E46+E47+E48+E36+E37+E38+E39+E40+E41+E42+E43+E45)*7;
+  // D10 = F62/2 + N56 + M71 + M90
+  const F62v=g('E62')*g('D62');
+  const N56_v=g('M56')*g('L56');
+  const D10=F62v/2+N56_v+M71+M90;
+  const G10=C10+D10; // F10=0
+
+  // C11 = SUM(E22,E23,E25,E24,E26,E27,E28,E29,E30,E36:E43,E46:E47)*5
+  const C11=(E22+E23+E25+E24+E26+E27+E28+E29+E30+E36+E37+E38+E39+E40+E41+E42+E43+E46+E47)*5;
+  // D11 = SUM(N52:N55)
+  const N52v=g('M52')*g('L52'), N53v=g('M53')*g('L53');
+  const N54v=g('M54')*g('L54'), N55v=g('M55')*g('L55');
+  const D11=N52v+N53v+N54v+N55v;
+  const G11=C11+D11; // F11=0
+
+  // G12 = C12+D12-F12
+  const G12=g('C12')+g('D12')-g('F12inp');
+  set('G12disp', G12!==0 ? fmt(G12) : '—');
+
+  // C5 = G9+G10+G11+G12+P59+P60
+  const C5=G9+G10+G11+G12+P59+P60;
+
+  // ── G SPACE TOTALS ──
+  const G22=g('F22')*E22, G23=g('F23')*E23, G24=g('F24')*E24;
+  const G25=g('F25')*E25, G26=g('F26')*E26, G27=g('F27')*E27;
+  const G28=g('F28')*E28, G29=g('F29')*E29, G30=g('F30')*E30;
+  const G31=g('F31')*E31, G32=g('F32')*E32, G33=g('F33')*E33;
+  const G36=g('F36')*E36, G37=g('F37')*E37, G38=g('F38')*E38;
+  const G39=g('F39')*E39, G40=g('F40')*E40, G41=g('F41')*E41;
+  const G42=g('F42')*E42, G43=g('F43')*E43, G44=g('F44')*E44;
+  const G45=g('F45')*E45, G46=g('F46')*E46, G47=g('F47')*E47, G48=g('F48')*E48;
+
+  // ── SIDING F52-F62, N52-N56 ──
+  const F52v=g('E52')*g('D52'), F53v=g('E53')*g('D53'), F54v=g('E54')*g('D54');
+  const F55v=g('E55')*g('D55'), F56v=g('E56')*g('D56');
+  const F57v=g('E57')*g('D57'), F58v=g('E58')*g('D58'), F59v=g('E59')*g('D59');
+  const F60v=g('E60')*g('D60'), F61v=g('E61')*g('D61');
+
+  // ── ADDERS ──
+  const F64=g('E64')*g('D64'), F65=g('E65')*g('D65'), F66=g('E66')*g('D66');
+  const F67=g('E67')*g('D67'), F68=g('E68')*g('D68'), F69=g('E69')*g('D69');
+  const F71=g('E71')*g('D71'), F72=g('E72')*g('D72'), F73=g('E73')*g('D73'), F74=g('E74')*g('D74');
+  const F76=g('E76')*g('D76'), F77=g('E77')*g('D77');
+  const F79=g('E79')*g('D79'), F80=g('E80')*g('D80'), F81=g('E81')*g('D81'), F82=g('E82')*g('D82');
+  const F84=g('E84')*g('D84'), F85=g('E85')*g('D85'), F86=g('E86')*g('D86');
+  const F88=g('E88')*g('D88'), F89=g('E89')*g('D89');
+  const F91=g('E91')*g('D91'), F92=g('E92')*g('D92');
+  const F94=g('E94')*g('D94'), F96=g('E96')*g('D96'), F98=g('E98')*g('D98');
+
+  // ── C4 = SUM(F9:F12,C16:C17,K16,G22:G33,M22:M33,G36:G48,M36:M48,N52:N56,F52:F62,L79,F64:F69,F71:F74,F76:F77,F79:F82,F84:F86,F88:F89,F91:F92,F94,F98,F96,G12,S59:S60) ──
+  const C4=
+    F9_c4+0+0+G12+        // F9:F12
+    C16_c4+C17_c4+         // C16:C17
+    K16_c4+                // K16
+    G22+G23+G24+G25+G26+G27+G28+G29+G30+G31+G32+G33+ // G22:G33
+    0+                     // M22:M33 legend = 0 manual mode
+    G36+G37+G38+G39+G40+G41+G42+G43+G44+G45+G46+G47+G48+ // G36:G48
+    0+                     // M36:M48 legend = 0
+    N52v+N53v+N54v+N55v+N56_v+ // N52:N56 siding labor
+    F52v+F53v+F54v+F55v+F56v+F57v+F58v+F59v+F60v+F61v+F62v+ // F52:F62 siding mat
+    L79_c4+                // L79 basement
+    F64+F65+F66+F67+F68+F69+ // F64:F69 doors
+    F71+F72+F73+F74+       // F71:F74 windows
+    F76+F77+               // F76:F77 accents
+    F79+F80+F81+F82+       // F79:F82 cupolas
+    F84+F85+F86+           // F84:F86 garage
+    F88+F89+               // F88:F89 fireplace
+    F91+F92+               // F91:F92 safe room
+    F94+F98+F96+           // gutters, crane, balusters
+    O59+O60;               // S59:S60 bonus additions cost
+
+  // ── QUOTE SHEET ──
+  // N29 = C4 + J5
+  const J5=g('J5'), J7=g('J7'), J6=J5-J7;
+  const N29=C4+J5;
+  // N30 = J6 + C5
+  const N30=J6+C5;
+  // N31 = (C4 - C5) + J7 — material only = shell minus labor, plus any kit materials
+  const N31=(C4-C5)+J7;
+  const N37=g('E100')*g('D100');
+  // N40 = N31*9.75% + N37*9.75%
+  const N40=(N31*0.0975)+(N37*0.0975);
+  const N41=g('sMiles')*g('sRate')*g('sLoads');
+  // N42 = SUM(N37:Q41) = N29+N37+N40+N41
+  const N42=N29+N37+N40+N41;
+  const N43=g('deposits');
+  const N44=N42-N43;
+
+  // ── AREA SUMMARIES ──
+  const concSF=E22+E24+E25+E26+E27+E28+E29+E30+E31+E32+E33;
+  const livSF=E22+E36;
+  const sf2nd=E23+E37;
+  const garSF=E24+E38;
+  const porchSF=E25+E26+E27+E28+E39+E40+E41+E42+E46;
+
+  // ── UPDATE RESULT PANEL ──
+  set('rC4', fmt(C4));
+  set('rG9', fmt(G9)); set('rG10', fmt(G10)); set('rG11', fmt(G11)); set('rG12', fmt(G12));
+  set('rBonusLab', fmt(P59+P60));
+  set('rC5', fmt(C5));
+  set('rC15', fmt(C15)); set('rC16', fmt(C16_c4)); set('rC17', fmt(C17_c4)); set('rK16', fmt(K16_c4));
+  set('rConcSF', Math.round(concSF).toLocaleString()+' SF');
+  set('rLivSF',  Math.round(livSF).toLocaleString()+' SF');
+  set('r2ndSF',  Math.round(sf2nd).toLocaleString()+' SF');
+  set('rGarSF',  Math.round(garSF).toLocaleString()+' SF');
+  set('rPorchSF',Math.round(porchSF).toLocaleString()+' SF');
+  set('rN29', fmt(N29)); set('rN30', fmt(N30)); set('rN31', fmt(N31)); set('rN37', fmt(N37)); set('rN40', fmt(N40)); set('rN41', fmt(N41));
+  set('rN42', fmt(N42)); set('rN44', fmt(N44));
+}
+
+// SAVE
+const GAS='https://script.google.com/macros/s/AKfycbzky71RVhsa93mB6ruplQiR6O2ui7kXgMDrgI7FNmH-z5iwqIWWAYAqO20bdB0t1Bcy/exec';
+async function saveQuote(){
+  const btn=document.getElementById('btnSave');
+  btn.textContent='Saving...'; btn.disabled=true;
+  try{
+    const fields={};
+    document.querySelectorAll('input').forEach(el=>{ if(el.id) fields[el.id]=el.value; });
+    const res=await fetch(GAS,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({
+      action:'saveBarndoQuote',token:'public',savedAt:new Date().toISOString(),
+      foundationType:foundType,
+      customer:{name:document.getElementById('custName')?.value,phone:document.getElementById('custPhone')?.value,email:document.getElementById('custEmail')?.value},
+      salesman:document.getElementById('salesman')?.value,
+      planName:document.getElementById('planName')?.value,
+      shellPackage:document.getElementById('rC4')?.textContent,
+      grandTotal:document.getElementById('rN42')?.textContent,
+      balance:document.getElementById('rN44')?.textContent,
+      fields
+    })});
+    const data=await res.json();
+    if(!data.success) throw new Error(data.error||'Save failed');
+    btn.textContent='✓ Saved — '+data.quoteId;
+    setTimeout(()=>{btn.textContent='💾 Save Quote';btn.disabled=false;},3000);
+  }catch(err){
+    alert('Save failed: '+err.message);
+    btn.textContent='💾 Save Quote'; btn.disabled=false;
+  }
+}
+
+calc();
+</script>
+</body>
+</html>
