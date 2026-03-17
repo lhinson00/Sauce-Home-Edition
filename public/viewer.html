@@ -697,8 +697,19 @@ function getWallMeasurements(){return{ext_wall_linear_ft:parseFloat(getWallTotal
 let scheduleData=null;
 
 async function readSchedules(){
+  // Warn if zoomed out too far — schedules need to be legible
+  if(currentZoom < 1.2 && pdfDoc){
+    const go = confirm('For best results, zoom in so the door/window schedule fills the screen before reading. Current zoom: '+Math.round(currentZoom*100)+'%.\n\nContinue anyway?');
+    if(!go) return;
+  }
+
+  // Capture canvas at 2× resolution for sharper text
   const canvas=document.getElementById('pdfCanvas');
-  const imageData=canvas.toDataURL('image/jpeg',0.95).split(',')[1];
+  const hiRes=document.createElement('canvas');
+  hiRes.width=canvas.width*2;hiRes.height=canvas.height*2;
+  const ctx=hiRes.getContext('2d');
+  ctx.scale(2,2);ctx.drawImage(canvas,0,0);
+  const imageData=hiRes.toDataURL('image/jpeg',0.95).split(',')[1];
   openRight();
   document.getElementById('schLoading').style.display='';
   document.getElementById('schContent').innerHTML='';
