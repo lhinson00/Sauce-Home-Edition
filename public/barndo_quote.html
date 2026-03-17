@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Barndominium Quote — Summertown Metals</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1a2332;--amber:#c8860a;--amber2:#e8a020;
+  --text:#1a2332;--muted:#6b7280;--border:#d1d9e0;--light:#f4f6f8;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{background:#e8edf2;font-family:'DM Sans',sans-serif;color:var(--text);}
+
+/* PRINT */
+@media print{
+  body{background:#fff;}
+  .no-print{display:none!important;}
+  .page{box-shadow:none;margin:0;border-radius:0;}
+  .print-btn{display:none;}
+}
+
+/* PRINT BAR */
+.print-bar{background:var(--navy);padding:12px 40px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;}
+.print-bar-title{font-size:12px;color:rgba(255,255,255,.6);letter-spacing:1px;text-transform:uppercase;flex:1;}
+.print-btn{background:var(--amber2);color:var(--navy);border:none;padding:8px 20px;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:.3px;}
+.print-btn:hover{background:#f5b540;}
+
+/* PAGE */
+.page{max-width:900px;margin:24px auto;background:#fff;border-radius:4px;box-shadow:0 4px 32px rgba(26,35,50,.12);overflow:hidden;}
+
+/* HEADER */
+.doc-header{background:var(--navy);padding:36px 48px;display:flex;justify-content:space-between;align-items:flex-start;}
+.doc-logo{display:flex;align-items:center;gap:14px;}
+.doc-logo-mark{width:48px;height:48px;background:var(--amber2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--navy);}
+.doc-logo-text{}
+.doc-company{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:#fff;line-height:1.2;}
+.doc-company-sub{font-size:10px;color:rgba(200,134,10,.8);letter-spacing:2px;text-transform:uppercase;margin-top:2px;}
+.doc-header-right{text-align:right;}
+.doc-quote-label{font-size:9px;font-weight:600;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;}
+.doc-quote-id{font-family:'DM Mono',monospace;font-size:18px;color:var(--amber2);font-weight:700;}
+.doc-date{font-size:11px;color:rgba(255,255,255,.5);margin-top:4px;}
+.doc-valid{font-size:10px;color:rgba(200,134,10,.7);margin-top:2px;}
+
+/* AMBER BAND */
+.amber-band{background:var(--amber);padding:10px 48px;display:flex;align-items:center;justify-content:space-between;}
+.amber-band-title{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:#fff;letter-spacing:.5px;}
+.amber-band-plan{font-size:11px;color:rgba(255,255,255,.8);font-style:italic;}
+
+/* BODY */
+.doc-body{padding:36px 48px;}
+
+/* TWO COL */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-bottom:28px;}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px;margin-bottom:28px;}
+
+/* SECTION */
+.doc-sec-title{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--amber);border-bottom:1px solid var(--amber);padding-bottom:4px;margin-bottom:12px;}
+.info-row{display:flex;flex-direction:column;margin-bottom:8px;}
+.info-label{font-size:9px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;}
+.info-val{font-size:13px;color:var(--text);font-weight:500;margin-top:1px;}
+.info-val.mono{font-family:'DM Mono',monospace;}
+
+/* AREA TABLE */
+.area-table{width:100%;border-collapse:collapse;margin-bottom:8px;}
+.area-table td{padding:5px 0;font-size:12px;border-bottom:1px solid #f0f2f5;}
+.area-table td:last-child{text-align:right;font-family:'DM Mono',monospace;font-weight:600;}
+.area-table tr:last-child td{border-bottom:none;}
+.area-table .area-lbl{color:var(--muted);}
+.area-table .area-val{color:var(--text);}
+
+/* SPECS */
+.spec-list{list-style:none;}
+.spec-list li{font-size:11px;color:var(--muted);padding:3px 0;border-bottom:1px solid #f4f6f8;display:flex;align-items:flex-start;gap:6px;}
+.spec-list li:last-child{border-bottom:none;}
+.spec-list li::before{content:'—';color:var(--amber);flex-shrink:0;margin-top:1px;}
+
+/* PRICING TABLE */
+.pricing-wrap{background:var(--light);border-radius:8px;overflow:hidden;margin-bottom:20px;}
+.pricing-table{width:100%;border-collapse:collapse;}
+.pricing-table tr{border-bottom:1px solid var(--border);}
+.pricing-table tr:last-child{border-bottom:none;}
+.pricing-table td{padding:10px 16px;font-size:13px;}
+.pricing-table .p-label{color:var(--muted);}
+.pricing-table .p-val{text-align:right;font-family:'DM Mono',monospace;font-weight:600;color:var(--text);}
+.pricing-table .p-val.amber{color:var(--amber);}
+.pricing-table .p-section td{background:rgba(200,134,10,.06);font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--amber);padding:7px 16px;}
+.pricing-table .p-total td{background:var(--navy);padding:14px 16px;}
+.pricing-table .p-total .p-label{color:rgba(255,255,255,.7);font-weight:600;font-size:13px;}
+.pricing-table .p-total .p-val{color:var(--amber2);font-size:20px;}
+.pricing-table .p-balance td{background:#f0faf4;padding:12px 16px;}
+.pricing-table .p-balance .p-label{color:#15803d;font-weight:600;}
+.pricing-table .p-balance .p-val{color:#15803d;font-size:16px;}
+
+/* FOUNDATION DETAILS */
+.found-box{background:var(--light);border-left:3px solid var(--amber);border-radius:0 6px 6px 0;padding:12px 16px;margin-bottom:20px;}
+.found-title{font-size:10px;font-weight:700;color:var(--amber);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+.found-items{display:flex;flex-direction:column;gap:3px;}
+.found-item{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;}
+.found-item::before{content:'✓';color:var(--amber);font-size:10px;}
+
+/* SELLER BOX */
+.seller-box{background:var(--navy);border-radius:8px;padding:20px 24px;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
+.seller-name{font-family:'Playfair Display',serif;font-size:16px;color:#fff;font-weight:600;}
+.seller-title{font-size:10px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1px;margin-top:2px;}
+.seller-contact{text-align:right;}
+.seller-contact a{display:block;font-size:12px;color:var(--amber2);text-decoration:none;margin-bottom:3px;}
+.seller-office{font-size:11px;color:rgba(255,255,255,.4);}
+
+/* FOOTER */
+.doc-footer{background:var(--light);border-top:1px solid var(--border);padding:16px 48px;display:flex;justify-content:space-between;align-items:center;}
+.footer-disclaimer{font-size:10px;color:var(--muted);font-style:italic;}
+.footer-valid{font-size:10px;color:var(--amber);font-weight:600;}
+
+/* NOTES */
+.notes-box{border:1px solid var(--border);border-radius:6px;padding:14px 16px;margin-bottom:20px;min-height:60px;}
+.notes-label{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+.notes-content{font-size:12px;color:var(--text);line-height:1.6;white-space:pre-wrap;}
+
+.divider{height:1px;background:var(--border);margin:24px 0;}
+</style>
+</head>
+<body>
+
+<div class="print-bar no-print">
+  <div class="print-bar-title">Customer Quote Preview</div>
+  <button class="print-btn" onclick="window.print()">🖨 Print / Save PDF</button>
+</div>
+
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="doc-header">
+    <div class="doc-logo">
+      <div class="doc-logo-mark">SE</div>
+      <div class="doc-logo-text">
+        <div class="doc-company">Summertown Metals</div>
+        <div class="doc-company-sub">Barndominium Division</div>
+      </div>
+    </div>
+    <div class="doc-header-right">
+      <div class="doc-quote-label">Quote Number</div>
+      <div class="doc-quote-id" id="qQuoteId">—</div>
+      <div class="doc-date" id="qDate">—</div>
+      <div class="doc-valid">Valid for 14 days from date above</div>
+    </div>
+  </div>
+
+  <!-- AMBER BAND -->
+  <div class="amber-band">
+    <div class="amber-band-title">Barndominium Building Proposal</div>
+    <div class="amber-band-plan" id="qPlanName">—</div>
+  </div>
+
+  <div class="doc-body">
+
+    <!-- CUSTOMER + SELLER -->
+    <div class="two-col">
+      <div>
+        <div class="doc-sec-title">Prepared For</div>
+        <div class="info-row"><span class="info-label">Name</span><span class="info-val" id="qCustName">—</span></div>
+        <div class="info-row"><span class="info-label">Phone</span><span class="info-val" id="qCustPhone">—</span></div>
+        <div class="info-row"><span class="info-label">Email</span><span class="info-val" id="qCustEmail">—</span></div>
+        <div class="info-row"><span class="info-label">Location</span><span class="info-val" id="qCustCity">—</span></div>
+      </div>
+      <div>
+        <div class="doc-sec-title">Prepared By</div>
+        <div class="info-row"><span class="info-label">Salesman</span><span class="info-val" id="qSalesman">—</span></div>
+        <div class="info-row"><span class="info-label">Company</span><span class="info-val">Summertown Metals - Main Office</span></div>
+        <div class="info-row"><span class="info-label">Address</span><span class="info-val">3864 Summertown Hwy, Summertown, TN 38483</span></div>
+        <div class="info-row"><span class="info-label">Phone</span><span class="info-val">(931) 796-1521</span></div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- AREA SUMMARY + SPECS -->
+    <div class="two-col">
+      <div>
+        <div class="doc-sec-title">Square Footage Summary</div>
+        <table class="area-table">
+          <tr><td class="area-lbl">Living Space</td><td class="area-val" id="qLivingSF">0 SF</td></tr>
+          <tr><td class="area-lbl">2nd Floor Living</td><td class="area-val" id="q2ndSF">0 SF</td></tr>
+          <tr><td class="area-lbl">Garage</td><td class="area-val" id="qGarageSF">0 SF</td></tr>
+          <tr><td class="area-lbl">Porch / Covered</td><td class="area-val" id="qPorchSF">0 SF</td></tr>
+          <tr><td class="area-lbl">Total Concrete</td><td class="area-val" id="qConcSF">0 SF</td></tr>
+        </table>
+      </div>
+      <div>
+        <div class="doc-sec-title">Standard Framing Specs</div>
+        <ul class="spec-list">
+          <li>2×6 exterior walls @ 16" o.c.</li>
+          <li>2×4 interior walls @ 16" o.c.</li>
+          <li>Pressure treated bottom plate on concrete</li>
+          <li>2×10 headers on all openings</li>
+          <li>Engineered wood roof trusses 2' o.c. per plan</li>
+          <li>OSB sheathed walls w/ housewrap</li>
+          <li>2×4 lathe roof 2' o.c. w/ underlayment</li>
+          <li>ZXL long life screws throughout</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- FOUNDATION + SIDING -->
+    <div class="two-col">
+      <div>
+        <div class="doc-sec-title">Foundation Details</div>
+        <div class="found-box">
+          <div class="found-title" id="qFoundType">Standard Monolithic Slab</div>
+          <div class="found-items">
+            <div class="found-item">4,000 psi with fiber</div>
+            <div class="found-item">Rebar in footings</div>
+            <div class="found-item">Vapor barrier throughout</div>
+            <div class="found-item">Expansion joints cut every 15' minimum</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="doc-sec-title">Siding &amp; Roof</div>
+        <ul class="spec-list">
+          <li>29ga lifetime warranty residential Tuff-Rib panel — roof &amp; walls</li>
+          <li id="qRoofColor">Color TBD before production</li>
+          <li>Double hung windows — Low-e w/ Argon, with screens, no grids</li>
+          <li id="qWindowSpec">Standard windows</li>
+          <li id="qGarageDoorSpec">Garage door — insulated, color TBD, jackshaft openers</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- PRICING -->
+    <div class="doc-sec-title">Investment Summary</div>
+    <div class="pricing-wrap">
+      <table class="pricing-table">
+        <tr class="p-section"><td colspan="2">Shell Package</td></tr>
+        <tr><td class="p-label">Exterior Shell Estimate (N38)</td><td class="p-val" id="qN38">$0</td></tr>
+        <tr><td class="p-label">Labor</td><td class="p-val" id="qN30">$0</td></tr>
+        <tr><td class="p-label">Material Only</td><td class="p-val" id="qN31">$0</td></tr>
+        <tr id="turnkeyRow" style="display:none;"><td class="p-label">Turnkey Estimate — Standard Finishes (N39)</td><td class="p-val amber" id="qN39">$0</td></tr>
+        <tr class="p-section"><td colspan="2">Fees &amp; Costs</td></tr>
+        <tr id="planModRow" style="display:none;"><td class="p-label">BP Plan &amp; Modification Fee</td><td class="p-val" id="qN37">$0</td></tr>
+        <tr><td class="p-label">Estimated Tax</td><td class="p-val" id="qN40">$0</td></tr>
+        <tr><td class="p-label">Estimated Shipping (<span id="qMileage">0</span> mi × $4.50 × min 4 loads)</td><td class="p-val" id="qN41">$0</td></tr>
+        <tr class="p-total">
+          <td class="p-label">Total Shell Package Estimate</td>
+          <td class="p-val" id="qN42">$0</td>
+        </tr>
+        <tr><td class="p-label" style="padding-top:8px;">Deposits / Payments Received</td><td class="p-val" id="qDeposits">$0</td></tr>
+        <tr class="p-balance">
+          <td class="p-label">Estimated Balance Due</td>
+          <td class="p-val" id="qN44">$0</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- NOTES -->
+    <div id="notesSection" style="display:none;">
+      <div class="doc-sec-title">Notes</div>
+      <div class="notes-box">
+        <div class="notes-content" id="qNotes"></div>
+      </div>
+    </div>
+
+    <!-- SELLER -->
+    <div class="seller-box">
+      <div>
+        <div class="seller-name" id="qSellerName">Lain Hinson</div>
+        <div class="seller-title">Sales Consultant — Summertown Metals</div>
+      </div>
+      <div class="seller-contact">
+        <a href="tel:9317961521">(931) 796-1521</a>
+        <a href="mailto:lain.hinson@summertownmetals.com">lain.hinson@summertownmetals.com</a>
+        <div class="seller-office">summertownmetals.com</div>
+      </div>
+    </div>
+
+  </div><!-- end doc-body -->
+
+  <!-- FOOTER -->
+  <div class="doc-footer">
+    <div class="footer-disclaimer">All estimates are subject to change based on final plan review and material availability.</div>
+    <div class="footer-valid">Valid 14 days from quote date</div>
+  </div>
+
+</div><!-- end page -->
+
+<script>
+// ── READ VALUES PASSED VIA URL PARAMS OR POSTMESSAGE ──
+// This page can be opened from barndo.html with params,
+// or receive data via postMessage from parent window.
+
+function fmt(n) {
+  const num = parseFloat(String(n).replace(/[$,]/g,'')) || 0;
+  return '$' + Math.round(num).toLocaleString();
+}
+function set(id, val) {
+  const el = document.getElementById(id);
+  if (el && val !== undefined && val !== null && val !== '') el.textContent = val;
+}
+
+function populate(d) {
+  // Header
+  set('qQuoteId', d.quoteId || ('BQ-' + Date.now().toString(36).toUpperCase()));
+  set('qDate', d.date || new Date().toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}));
+  set('qPlanName', d.planName || '—');
+
+  // Customer
+  set('qCustName',  d.custName  || '—');
+  set('qCustPhone', d.custPhone || '—');
+  set('qCustEmail', d.custEmail || '—');
+  set('qCustCity',  d.cityStZip || '—');
+  set('qSalesman',  d.salesman  || 'Lain Hinson');
+  set('qSellerName',d.salesman  || 'Lain Hinson');
+
+  // Areas
+  set('qLivingSF',  (parseInt(d.livingSF)||0).toLocaleString() + ' SF');
+  set('q2ndSF',     (parseInt(d.sf2nd)||0).toLocaleString()    + ' SF');
+  set('qGarageSF',  (parseInt(d.garageSF)||0).toLocaleString() + ' SF');
+  set('qPorchSF',   (parseInt(d.porchSF)||0).toLocaleString()  + ' SF');
+  set('qConcSF',    (parseInt(d.concSF)||0).toLocaleString()   + ' SF');
+
+  // Foundation
+  const foundMap = {
+    slab:     'Standard 4" Monolithic Slab Throughout Entire Footprint',
+    basement: 'Basement Foundation',
+    crawl:    'Crawlspace Foundation',
+    block:    'Block & Fill Foundation'
+  };
+  set('qFoundType', foundMap[d.foundationType] || foundMap.slab);
+
+  // Pricing
+  set('qN38', fmt(d.N29));  // Exterior Shell = N38 = N29
+  set('qN30', fmt(d.N30));
+  set('qN31', fmt(d.N31));
+  set('qN37', fmt(d.N37));
+  set('qN40', fmt(d.N40));
+  set('qN41', fmt(d.N41));
+  set('qN42', fmt(d.N42));
+  set('qDeposits', fmt(d.deposits || 0));
+  set('qN44', fmt(d.N44));
+  set('qMileage', d.mileage || '0');
+
+  // Turnkey — only show if > 0
+  const turnkeyVal = parseFloat(String(d.N39||'0').replace(/[$,]/g,'')) || 0;
+  if (turnkeyVal > 0) {
+    document.getElementById('turnkeyRow').style.display = '';
+    set('qN39', fmt(turnkeyVal));
+  }
+
+  // Plan mod — only show if > 0
+  const planModVal = parseFloat(String(d.N37||'0').replace(/[$,]/g,'')) || 0;
+  if (planModVal > 0) {
+    document.getElementById('planModRow').style.display = '';
+  }
+
+  // Notes
+  if (d.notes) {
+    document.getElementById('notesSection').style.display = '';
+    set('qNotes', d.notes);
+  }
+}
+
+// ── READ FROM URL PARAMS ──
+const params = new URLSearchParams(window.location.search);
+if (params.has('data')) {
+  try { populate(JSON.parse(decodeURIComponent(params.get('data')))); } catch(e) {}
+}
+
+// ── READ FROM POSTMESSAGE (when opened as popup from barndo.html) ──
+window.addEventListener('message', e => {
+  if (e.data?.type === 'BARNDO_QUOTE') populate(e.data.payload);
+});
+
+// ── ALSO READ FROM LOCALSTORAGE (fallback) ──
+try {
+  const saved = localStorage.getItem('barndo_quote_preview');
+  if (saved) populate(JSON.parse(saved));
+} catch(e) {}
+</script>
+</body>
+</html>
