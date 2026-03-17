@@ -8,7 +8,7 @@
 <style>
 :root{--navy:#4B4B4B;--navy2:#3a3a3a;--navy3:#333333;--amber:#FF8200;--amber2:#ff9933;--border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);--text:#dce6ef;--text2:#8fa8be;--muted:#4e6478;--card:#333333;--card2:#3d3d3d;--input:#1e1e1e;--success:#2ecc71;}
 *{box-sizing:border-box;margin:0;padding:0;}
-html,body{min-height:100%;background:var(--navy);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;}
+html,body{min-height:100%;background:var(--navy);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;overflow-x:hidden;}
 .hdr{background:#1e1e1e;border-bottom:1px solid var(--border2);height:56px;display:flex;align-items:center;padding:0 24px;gap:14px;position:sticky;top:0;z-index:200;}
 .hdr-logo{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--amber);letter-spacing:2px;}
 .hdr-pipe{width:1px;height:22px;background:var(--border2);}
@@ -25,8 +25,8 @@ body{background:#1a1a1a;}
 @media(max-width:768px){
   .mobile-total-bar{
     display:flex;align-items:center;justify-content:space-between;
-    position:sticky;top:56px;z-index:150;
-    background:var(--amber);padding:8px 14px;
+    position:sticky;top:48px;z-index:150;
+    background:var(--amber);padding:7px 14px;
     border-bottom:2px solid rgba(0,0,0,.1);
   }
   .mobile-total-lbl{font-size:10px;font-weight:700;color:rgba(0,0,0,.6);text-transform:uppercase;letter-spacing:.8px;}
@@ -42,9 +42,10 @@ body{background:#1a1a1a;}
 .sec-hdr::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(232,160,32,.3),transparent);}
 .sec-sub{font-size:10px;color:var(--muted);margin-bottom:8px;font-style:italic;}
 .card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:8px;}
+@media(max-width:768px){.card{overflow-x:auto;padding:10px 8px;}}
 .fg{display:grid;gap:7px;}.fg2{grid-template-columns:1fr 1fr;}.fg3{grid-template-columns:1fr 1fr 1fr;}
 @media(max-width:768px){
-  .fg2{grid-template-columns:1fr 1fr;}
+  .fg2{grid-template-columns:1fr;}
   .fg3{grid-template-columns:1fr 1fr;}
 }
 .field{display:flex;flex-direction:column;gap:3px;}
@@ -104,7 +105,7 @@ body{background:#1a1a1a;}
   <div class="hdr-logo">SE</div><div class="hdr-pipe"></div>
   <div class="hdr-title">Barndominium Shell Package</div>
   <div class="hdr-sp"></div>
-  <button class="btn-save" onclick="clearQuote()" style="background:transparent;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.6);margin-right:8px;">✕ Clear</button><button class="btn-save" onclick="previewQuote()" style="background:var(--navy3);border:1px solid rgba(255,255,255,.15);color:#fff;margin-right:8px;">🖨 Preview Quote</button><button class="btn-save" id="btnSave" onclick="saveQuote()">💾 Save Quote</button>
+  <button class="btn-hdr" onclick="clearQuote()" style="background:var(--amber)!important;border:none!important;color:#222!important;-webkit-appearance:none;">✕ Clear</button><button class="btn-hdr" onclick="previewQuote()" style="background:var(--amber)!important;border:none!important;color:#222!important;-webkit-appearance:none;">🖨 Preview</button><button class="btn-hdr primary" id="btnSave" onclick="saveQuote()" style="background:var(--amber)!important;border:1px solid var(--amber)!important;color:#222!important;-webkit-appearance:none;">💾 Save</button>
 </header>
 <div class="mobile-total-bar">
   <div class="mobile-total-lbl">Shell Package C4</div>
