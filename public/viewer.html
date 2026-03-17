@@ -743,6 +743,16 @@ async function readSchedules(){
 
 function renderSchPanel(data){
   document.getElementById('schLoading').style.display='none';
+
+  // Convert decimal feet to feet-inches display: 6.67 → 6'-8"
+  function ftIn(dec){
+    if(!dec && dec!==0) return '?';
+    const ft=Math.floor(dec);
+    const inches=Math.round((dec-ft)*12);
+    if(inches===12) return `${ft+1}'-0"`;
+    return `${ft}'-${inches}"`;
+  }
+
   let h='';
   h+=`<div class="sch-info-grid">
     <div class="sch-field"><label>Living SF</label><input id="sp_sf" type="number" value="${data.living_sf||''}"></div>
@@ -756,13 +766,13 @@ function renderSchPanel(data){
     const ext=data.doors.filter(d=>d.is_exterior).reduce((a,d)=>a+(d.count||1),0);
     const int=data.doors.filter(d=>!d.is_exterior).reduce((a,d)=>a+(d.count||1),0);
     h+=`<div class="sch-section"><div class="sch-sec-head"><span class="sch-sec-title">Doors</span><span class="sch-sec-count">${ext} ext · ${int} int</span></div><div class="sch-sec-body"><table class="sch-tbl"><thead><tr><th>Mark</th><th>Qty</th><th>W×H</th><th>Header</th><th></th></tr></thead><tbody>`;
-    data.doors.forEach((d,i)=>{h+=`<tr><td><strong>${d.mark||'—'}</strong></td><td><input type="number" value="${d.count||1}" min="0"></td><td style="color:var(--muted)">${d.rough_opening_width_ft||'?'}×${d.rough_opening_height_ft||'?'}'</td><td style="color:var(--muted);font-size:9px">${d.header||'—'}</td><td><span class="sch-badge ${d.is_exterior?'ext':'int'}">${d.is_exterior?'EXT':'INT'}</span></td></tr>`;});
+    data.doors.forEach((d,i)=>{h+=`<tr><td><strong>${d.mark||'—'}</strong></td><td><input type="number" value="${d.count||1}" min="0"></td><td style="color:var(--muted)">${ftIn(d.rough_opening_width_ft)} × ${ftIn(d.rough_opening_height_ft)}</td><td style="color:var(--muted);font-size:9px">${d.header||'—'}</td><td><span class="sch-badge ${d.is_exterior?'ext':'int'}">${d.is_exterior?'EXT':'INT'}</span></td></tr>`;});
     h+=`</tbody></table></div></div>`;
   }
   if(data.windows?.length){
     const tot=data.windows.reduce((a,w)=>a+(w.count||1),0);
     h+=`<div class="sch-section"><div class="sch-sec-head"><span class="sch-sec-title">Windows</span><span class="sch-sec-count">${tot} total</span></div><div class="sch-sec-body"><table class="sch-tbl"><thead><tr><th>Mark</th><th>Qty</th><th>W×H</th><th>Header</th></tr></thead><tbody>`;
-    data.windows.forEach((w,i)=>{h+=`<tr><td><strong>${w.mark||'—'}</strong></td><td><input type="number" value="${w.count||1}" min="0"></td><td style="color:var(--muted)">${w.rough_opening_width_ft||'?'}×${w.rough_opening_height_ft||'?'}'</td><td style="color:var(--muted);font-size:9px">${w.header||'—'}</td></tr>`;});
+    data.windows.forEach((w,i)=>{h+=`<tr><td><strong>${w.mark||'—'}</strong></td><td><input type="number" value="${w.count||1}" min="0"></td><td style="color:var(--muted)">${ftIn(w.rough_opening_width_ft)} × ${ftIn(w.rough_opening_height_ft)}</td><td style="color:var(--muted);font-size:9px">${w.header||'—'}</td></tr>`;});
     h+=`</tbody></table></div></div>`;
   }
   if(data.trusses?.length){
