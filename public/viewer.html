@@ -510,19 +510,31 @@ dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');ha
 
 async function handleFile(file){
   if(!file)return;filename=file.name;showLoading('Opening '+file.name+'...');
-  const reader=new FileReader();
-  reader.onload=async e=>{
-    try{
-      if(file.type==='application/pdf'){
-        // Store raw PDF base64 for native API sending
-        const bytes=new Uint8Array(e.target.result);
-        let binary='';bytes.forEach(b=>binary+=String.fromCharCode(b));
-        rawPDFBase64=btoa(binary);
-        await loadPDF(e.target.result);
-      }else await loadImage(e.target.result,file);
-    }catch(err){hideLoading();alert('Could not open: '+err.message);}
-  };
-  reader.readAsArrayBuffer(file);
+
+  if(file.type==='application/pdf'){
+    // Read as DataURL first for correct base64 (btoa corrupts binary PDFs)
+    const dataReader=new FileReader();
+    dataReader.onload=e=>{
+      rawPDFBase64=e.target.result.split(',')[1];
+    };
+    dataReader.readAsDataURL(file);
+
+    // Read as ArrayBuffer for PDF.js rendering
+    const arrayReader=new FileReader();
+    arrayReader.onload=async e=>{
+      try{await loadPDF(e.target.result);}
+      catch(err){hideLoading();alert('Could not open: '+err.message);}
+    };
+    arrayReader.readAsArrayBuffer(file);
+
+  }else{
+    const reader=new FileReader();
+    reader.onload=async e=>{
+      try{await loadImage(e.target.result,file);}
+      catch(err){hideLoading();alert('Could not open: '+err.message);}
+    };
+    reader.readAsArrayBuffer(file);
+  }
 }
 
 async function loadPDF(buf){
