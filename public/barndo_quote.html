@@ -7,8 +7,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root{
-  --navy:#1a2332;--amber:#c8860a;--amber2:#e8a020;
-  --text:#1a2332;--muted:#6b7280;--border:#d1d9e0;--light:#f4f6f8;
+  --navy:#4B4B4B;--amber:#FF8200;--amber2:#ff9933;
+  --text:#4B4B4B;--muted:#6b7280;--border:#d1d9e0;--light:#f4f6f8;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{background:#e8edf2;font-family:'DM Sans',sans-serif;color:var(--text);}
@@ -25,13 +25,13 @@ html,body{background:#e8edf2;font-family:'DM Sans',sans-serif;color:var(--text);
 .print-bar{background:var(--navy);padding:12px 40px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;}
 .print-bar-title{font-size:12px;color:rgba(255,255,255,.6);letter-spacing:1px;text-transform:uppercase;flex:1;}
 .print-btn{background:var(--amber2);color:var(--navy);border:none;padding:8px 20px;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;letter-spacing:.3px;}
-.print-btn:hover{background:#f5b540;}
+.print-btn:hover{background:#ff9933;}
 
 /* PAGE */
-.page{max-width:900px;margin:24px auto;background:#fff;border-radius:4px;box-shadow:0 4px 32px rgba(26,35,50,.12);overflow:hidden;}
+.page{max-width:760px;margin:24px auto;background:#fff;border-radius:4px;box-shadow:0 4px 32px rgba(26,35,50,.12);overflow:hidden;}
 
 /* HEADER */
-.doc-header{background:var(--navy);padding:36px 48px;display:flex;justify-content:space-between;align-items:flex-start;}
+.doc-header{background:var(--navy);padding:28px 36px;display:flex;justify-content:space-between;align-items:flex-start;}
 .doc-logo{display:flex;align-items:center;gap:14px;}
 .doc-logo-mark{width:48px;height:48px;background:var(--amber2);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--navy);}
 .doc-logo-text{}
@@ -44,12 +44,12 @@ html,body{background:#e8edf2;font-family:'DM Sans',sans-serif;color:var(--text);
 .doc-valid{font-size:10px;color:rgba(200,134,10,.7);margin-top:2px;}
 
 /* AMBER BAND */
-.amber-band{background:var(--amber);padding:10px 48px;display:flex;align-items:center;justify-content:space-between;}
+.amber-band{background:var(--amber);padding:8px 36px;display:flex;align-items:center;justify-content:space-between;}
 .amber-band-title{font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:#fff;letter-spacing:.5px;}
 .amber-band-plan{font-size:11px;color:rgba(255,255,255,.8);font-style:italic;}
 
 /* BODY */
-.doc-body{padding:36px 48px;}
+.doc-body{padding:28px 36px;}
 
 /* TWO COL */
 .two-col{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-bottom:28px;}
@@ -109,7 +109,7 @@ html,body{background:#e8edf2;font-family:'DM Sans',sans-serif;color:var(--text);
 .seller-office{font-size:11px;color:rgba(255,255,255,.4);}
 
 /* FOOTER */
-.doc-footer{background:var(--light);border-top:1px solid var(--border);padding:16px 48px;display:flex;justify-content:space-between;align-items:center;}
+.doc-footer{background:var(--light);border-top:1px solid var(--border);padding:12px 36px;display:flex;justify-content:space-between;align-items:center;}
 .footer-disclaimer{font-size:10px;color:var(--muted);font-style:italic;}
 .footer-valid{font-size:10px;color:var(--amber);font-weight:600;}
 
