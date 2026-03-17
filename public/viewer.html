@@ -466,6 +466,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/p
 
 // STATE
 let pdfDoc=null,currentPage=1,totalPages=1,currentZoom=1.0,baseScale=1.0,filename='';
+let rawPDFBase64=null; // Store raw PDF for native API sending
 
 function updateScaleForZoom(){const f=parseFloat(scroll.dataset.fracPerFoot);if(!f)return;scalePixelsPerFoot=document.getElementById('pdfCanvas').width*f;}
 
@@ -480,7 +481,17 @@ dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('over');ha
 async function handleFile(file){
   if(!file)return;filename=file.name;showLoading('Opening '+file.name+'...');
   const reader=new FileReader();
-  reader.onload=async e=>{try{if(file.type==='application/pdf')await loadPDF(e.target.result);else await loadImage(e.target.result,file);}catch(err){hideLoading();alert('Could not open: '+err.message);}};
+  reader.onload=async e=>{
+    try{
+      if(file.type==='application/pdf'){
+        // Store raw PDF base64 for native API sending
+        const bytes=new Uint8Array(e.target.result);
+        let binary='';bytes.forEach(b=>binary+=String.fromCharCode(b));
+        rawPDFBase64=btoa(binary);
+        await loadPDF(e.target.result);
+      }else await loadImage(e.target.result,file);
+    }catch(err){hideLoading();alert('Could not open: '+err.message);}
+  };
   reader.readAsArrayBuffer(file);
 }
 
@@ -697,27 +708,28 @@ function getWallMeasurements(){return{ext_wall_linear_ft:parseFloat(getWallTotal
 let scheduleData=null;
 
 async function readSchedules(){
-  // Warn if zoomed out too far — schedules need to be legible
-  if(currentZoom < 1.2 && pdfDoc){
-    const go = confirm('For best results, zoom in so the door/window schedule fills the screen before reading. Current zoom: '+Math.round(currentZoom*100)+'%.\n\nContinue anyway?');
-    if(!go) return;
-  }
-
-  // Capture canvas at 2× resolution for sharper text
-  const canvas=document.getElementById('pdfCanvas');
-  const hiRes=document.createElement('canvas');
-  hiRes.width=canvas.width*2;hiRes.height=canvas.height*2;
-  const ctx=hiRes.getContext('2d');
-  ctx.scale(2,2);ctx.drawImage(canvas,0,0);
-  const imageData=hiRes.toDataURL('image/jpeg',0.95).split(',')[1];
   openRight();
   document.getElementById('schLoading').style.display='';
   document.getElementById('schContent').innerHTML='';
   document.getElementById('drFooter').style.display='none';
   const btn=document.getElementById('readBtn');
   btn.classList.add('loading');btn.textContent='Reading...';
+
   try{
-    const res=await fetch('/api/read-schedules',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image:imageData})});
+    let body;
+    if(rawPDFBase64){
+      // Send the actual PDF — same as pasting it in this chat
+      body=JSON.stringify({pdf:rawPDFBase64, page:currentPage});
+    } else {
+      // Fallback for images — send canvas at 2x
+      const canvas=document.getElementById('pdfCanvas');
+      const hiRes=document.createElement('canvas');
+      hiRes.width=canvas.width*2;hiRes.height=canvas.height*2;
+      const ctx=hiRes.getContext('2d');ctx.scale(2,2);ctx.drawImage(canvas,0,0);
+      body=JSON.stringify({image:hiRes.toDataURL('image/jpeg',0.95).split(',')[1]});
+    }
+
+    const res=await fetch('/api/read-schedules',{method:'POST',headers:{'Content-Type':'application/json'},body});
     const data=await res.json();if(data.error)throw new Error(data.error);
     scheduleData=data;renderSchPanel(data);
   }catch(err){
