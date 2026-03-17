@@ -6,7 +6,7 @@
 <title>Sauce Estimator — Home Designer</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
-:root{--navy:#1a2332;--navy2:#212d3d;--navy3:#263044;--amber:#f5a623;--amber2:#f7b94a;--teal:#2dd4aa;--white:#fff;--off:#f7f8fa;--border:#e2e5ea;--border2:#d0d4da;--text:#1a2332;--muted:#6b7280;--muted2:#9ca3af;--success:#10b981;--warn:#f59e0b;--danger:#ef4444;}
+:root{--navy:#4B4B4B;--navy2:#3a3a3a;--navy3:#333333;--amber:#FF8200;--amber2:#ff9933;--teal:#2dd4aa;--white:#fff;--off:#f7f8fa;--border:#e2e5ea;--border2:#d0d4da;--text:#4B4B4B;--muted:#6b7280;--muted2:#9ca3af;--success:#10b981;--warn:#f59e0b;--danger:#ef4444;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Inter',sans-serif;background:var(--off);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden;}
 
@@ -478,7 +478,7 @@ function drawOpenings() {
     else{ox=sh.x+sh.w;oy=sh.y+o.pos;}
     const s=W2S(ox,oy);
     const isDoor=o.type==='door';
-    ctx.fillStyle=isDoor?'#f5a623':'#60a5fa';
+    ctx.fillStyle=isDoor?'#FF8200':'#60a5fa';
     ctx.strokeStyle=isDoor?'#c47a0a':'#2563eb';
     ctx.lineWidth=1;
     ctx.fillRect(s.x-6,s.y-6,12,12);
