@@ -6,10 +6,10 @@
 <title>Barndominium Shell Package — Summertown Metals</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{--navy:#0f1923;--navy2:#131f2d;--navy3:#1a2840;--amber:#e8a020;--amber2:#f5b540;--border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);--text:#dce6ef;--text2:#8fa8be;--muted:#4e6478;--card:#131f2d;--card2:#1a2840;--input:#0c1520;--success:#2ecc71;}
+:root{--navy:#4B4B4B;--navy2:#3a3a3a;--navy3:#333333;--amber:#FF8200;--amber2:#ff9933;--border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.13);--text:#dce6ef;--text2:#8fa8be;--muted:#4e6478;--card:#333333;--card2:#3d3d3d;--input:#1e1e1e;--success:#2ecc71;}
 *{box-sizing:border-box;margin:0;padding:0;}
 html,body{min-height:100%;background:var(--navy);color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px;}
-.hdr{background:#0c1520;border-bottom:1px solid var(--border2);height:56px;display:flex;align-items:center;padding:0 24px;gap:14px;position:sticky;top:0;z-index:200;}
+.hdr{background:#1e1e1e;border-bottom:1px solid var(--border2);height:56px;display:flex;align-items:center;padding:0 24px;gap:14px;position:sticky;top:0;z-index:200;}
 .hdr-logo{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--amber);letter-spacing:2px;}
 .hdr-pipe{width:1px;height:22px;background:var(--border2);}
 .hdr-title{font-size:10px;font-weight:500;color:var(--text2);letter-spacing:1.2px;text-transform:uppercase;}
@@ -17,7 +17,7 @@ html,body{min-height:100%;background:var(--navy);color:var(--text);font-family:'
 .btn-save{background:var(--amber);color:var(--navy);border:none;padding:7px 18px;border-radius:5px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;}
 .btn-save:hover{background:var(--amber2);}
 .btn-save:disabled{opacity:.5;cursor:not-allowed;}
-body{background:#0a1218;}
+body{background:#1a1a1a;}
 .page-wrap{max-width:1200px;margin:0 auto;}
 .page{display:grid;grid-template-columns:1fr 340px;min-height:calc(100vh - 56px);}
 .form-col{padding:20px;border-right:1px solid var(--border);}
@@ -76,7 +76,7 @@ body{background:#0a1218;}
   <div class="hdr-logo">SE</div><div class="hdr-pipe"></div>
   <div class="hdr-title">Barndominium Shell Package</div>
   <div class="hdr-sp"></div>
-  <button class="btn-save" onclick="previewQuote()" style="background:var(--navy3);border:1px solid rgba(255,255,255,.15);color:#fff;margin-right:8px;">🖨 Preview Quote</button><button class="btn-save" id="btnSave" onclick="saveQuote()">💾 Save Quote</button>
+  <button class="btn-save" onclick="clearQuote()" style="background:transparent;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.6);margin-right:8px;">✕ Clear</button><button class="btn-save" onclick="previewQuote()" style="background:var(--navy3);border:1px solid rgba(255,255,255,.15);color:#fff;margin-right:8px;">🖨 Preview Quote</button><button class="btn-save" id="btnSave" onclick="saveQuote()">💾 Save Quote</button>
 </header>
 <div class="page-wrap"><div class="page">
 <div class="form-col">
@@ -93,7 +93,7 @@ body{background:#0a1218;}
   <div class="field"><label>Address</label><input class="inp" id="addr" type="text" oninput="calc()"></div>
   <div class="field"><label>City / ST / ZIP</label><input class="inp" id="cityStZip" type="text" oninput="calc()"></div>
   <div class="field"><label>Plan Name</label><input class="inp" id="planName" type="text" oninput="calc()"></div>
-  <div class="field"><label>Shipping Mileage</label><input class="inp" id="shipMiles" type="number" value="60" min="0" oninput="calc()"></div>
+  <div class="field"><label>Shipping Mileage</label><input class="inp" id="shipMiles" type="number" value="0" min="0" oninput="calc()"></div>
 </div>
 </div>
 </div>
@@ -353,7 +353,7 @@ body{background:#0a1218;}
 <p class="sec-sub">F100=E100×D100 feeds Quote Sheet N37 (taxed at 9.75% separately). Punch labor G12=C12+D12-F12.</p>
 <div class="card">
 <table class="atbl"><thead><tr><th>Item</th><th class="r">Rate E</th><th class="r">Qty D</th><th class="r">Total</th></tr></thead><tbody>
-<tr><td class="lbl">Plan Modifications <span style="font-size:9px;color:var(--amber)">(→ N37, separate tax)</span></td><td><input class="ri" id="E100" type="number" value="1800" step="100" oninput="calc()"></td><td><input class="ni" id="D100" type="number" value="1" min="0" oninput="calc()"></td><td class="tot" id="F100">$1,800</td></tr>
+<tr><td class="lbl">Plan Modifications <span style="font-size:9px;color:var(--amber)">(→ N37, separate tax)</span></td><td><input class="ri" id="E100" type="number" value="1800" step="100" oninput="calc()"></td><td><input class="ni" id="D100" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="F100">$1,800</td></tr>
 <tr><td class="lbl">Punch Labor Base (C12)</td><td>—</td><td><input class="ni" id="C12" type="number" value="0" min="0" oninput="calc()"></td><td class="tot" id="G12disp">—</td></tr>
 <tr><td class="lbl">Punch Adder (D12)</td><td>—</td><td><input class="ni" id="D12" type="number" value="0" min="0" oninput="calc()"></td><td>—</td></tr>
 <tr><td class="lbl">Punch Special Add/Ded (F12)</td><td>—</td><td><input class="ni" id="F12inp" type="number" value="0" oninput="calc()"></td><td>—</td></tr>
@@ -846,6 +846,30 @@ function calcTurnkey() {
 
   // Store D101 globally for use in calc()
   window._D101 = D101;
+}
+
+// CLEAR QUOTE — resets all entered data, keeps rates
+function clearQuote() {
+  if (!confirm('Clear all entered data and start a new quote?')) return;
+  // Clear text inputs
+  ['custName','custPhone','custEmail','addr','cityStZip','planName','salesman'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = id === 'salesman' ? 'Lain Hinson' : '';
+  });
+  // Reset numeric inputs to 0 — everything except rate fields (F/B/M/E prefix = rates)
+  document.querySelectorAll('input[type=number]').forEach(el => {
+    if (!el.id) return;
+    // Keep rate fields as-is
+    const isRate = /^[FBME]\d+$/.test(el.id) || ['sRate','sLoads','cRate'].includes(el.id);
+    if (!isRate) el.value = 0;
+  });
+  // Reset foundation to slab
+  setFound('slab', document.querySelector('.ftab'));
+  // Reset J5/J7
+  ['J5','J7'].forEach(id => { const el=document.getElementById(id); if(el) el.value=0; });
+  calcJ6();
+  calcTurnkey();
+  calc();
 }
 
 // PREVIEW QUOTE — opens customer-facing quote sheet
