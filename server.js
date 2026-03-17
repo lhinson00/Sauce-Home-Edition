@@ -622,19 +622,27 @@ app.post('/api/read-schedules', async (req, res) => {
     const { image } = req.body;
     if (!image) return res.status(400).json({ error: 'No image provided' });
 
-    const prompt = `You are reading a residential construction plan. Your ONLY job is to read the schedules and labeled values on this page. Do not measure or estimate anything.
+    const prompt = `You are reading a residential construction plan. Read the schedules on this page exactly as written. Do not estimate or guess.
 
-Read and return ONLY what you can see explicitly written:
+DOOR SCHEDULE — find the table labeled "Door Schedule". For every row:
+- mark: the door ID (D01, D02, etc.)
+- count: the number in the Count or Qty column
+- rough_opening_width_ft: the width from the Size column (e.g. "3'-0" x 6'-8"" → 3.0)
+- rough_opening_height_ft: the height from the Size column (e.g. "3'-0" x 6'-8"" → 6.67)
+- description: the Description column text
+- header: the Header Size column (e.g. "(2) 2x12")
+- is_exterior: true if the description says "Ext" or "Exterior", false otherwise
 
-1. DOOR SCHEDULE — read every row exactly as written
-2. WINDOW SCHEDULE — read every row exactly as written  
-3. TRUSS/FRAMING SCHEDULE — read every row exactly as written
-4. SQFT SCHEDULE — read labeled SF values (living area, porch, etc.)
-5. ROOF PITCH — read from elevation or framing plan pitch triangle
-6. PLATE HEIGHT — read from elevation ("TOP OF WALL", "WALL HEIGHT", "PLATE HT")
-7. PORCH PITCH — read from porch framing or elevation
+WINDOW SCHEDULE — find the table labeled "Window Schedule". Same approach.
+- mark, count, rough_opening_width_ft, rough_opening_height_ft, description, header
 
-Return ONLY valid JSON, no markdown:
+SQFT SCHEDULE — find any table with area labels (Living Space, Porch, etc.) and read SF values.
+
+ROOF/PLATE — read plate height from "Top of Wall" elevation callout. Read pitch from elevation triangle labels.
+
+CRITICAL: Read the actual text in each column cell. If a size says "3'-0" x 6'-8"", that is 3.0 wide and 6.67 tall. Never return null for a field if the value is visible in the table.
+
+Return ONLY valid JSON, no markdown fences:
 {
   "living_sf": null,
   "porch_sf": null,
@@ -642,9 +650,9 @@ Return ONLY valid JSON, no markdown:
   "structural_roof_pitch": null,
   "porch_pitch": null,
   "eave_overhang_in": null,
-  "doors": [{"mark":"D01","count":1,"rough_opening_width_ft":3.0,"rough_opening_height_ft":6.83,"description":"","header":"(2) 2x12","is_exterior":true}],
-  "windows": [{"mark":"W01","count":1,"rough_opening_width_ft":3.0,"rough_opening_height_ft":5.5,"description":"","header":"(2) 2x10","area_sf":16.5}],
-  "trusses": [{"mark":"TR1","type":"flat bottom","count":12,"spacing_in":24,"description":""}],
+  "doors": [{"mark":"D01","count":1,"rough_opening_width_ft":3.0,"rough_opening_height_ft":6.67,"description":"Ext. Door W/ Sidelights","header":"(2) 2x12","is_exterior":true}],
+  "windows": [{"mark":"W01","count":3,"rough_opening_width_ft":3.0,"rough_opening_height_ft":5.5,"description":"S/H Window","header":"(2) 2x10"}],
+  "trusses": [],
   "notes": []
 }`;
 
